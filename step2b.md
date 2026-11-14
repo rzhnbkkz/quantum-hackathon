@@ -12,7 +12,6 @@
 
 | Step / Part | Device | Job ID | Shots | Status | Result |
 |---|---|---|---|---|---|
-| Step 1, Part 3 | IonQ simulator (aria-1 noise model) | ionq:ionq:sim:simulator-0ad7-qjob-6af7d48af15852ed27b7255b | 200 | Completed | QBER 0.002 |
 | Step 2, Part 5 (N=16) | IonQ simulator (forte-1 noise model) | ionq:ionq:sim:simulator-0ad7-qjob-6af7e25ef15852ed27b72a6b | 200 | Completed | 87/200 on key (44%) |
 | Step 2, Part 5 (N=4) | IonQ simulator (forte-1 noise model) | ionq:ionq:sim:simulator-0ad7-qjob-6af7e58ef15852ed27b72b26 | 200 | Completed | 200/200 on key (100%) |
 | Step 2, Part 5 (N=8) | IonQ simulator (forte-1 noise model) | ionq:ionq:sim:simulator-0ad7-qjob-6af86a41c8f5265fb3f1b033 | 200 | Completed | 158/200 on key (79%) |
