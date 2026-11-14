@@ -138,6 +138,8 @@ We designed a small made-up utility network. It has 2 control centers, 1 communi
 | DS3 to DS6 | 14 km | PQC |
 | Backup control to DS3 | not set | PQC (proposed backup route) |
 
+We also made an interactive map, `chattanooga_grid_map.html`. It shows public power lines and substations around Chattanooga for context, with our proposed links drawn on top. The site locations on it are placeholders, and it does not show real fiber routes. Open the file in a browser and click a link to see why we chose its protection.
+
 We put post-quantum cryptography (PQC) on every link. It works on the equipment and fiber the utility already has, so it is the cheapest way to cover all 6 substations. We would use ML-KEM (FIPS 203) for exchanging keys and ML-DSA (FIPS 204) for signatures.
 
 We only use QKD on one link, main control to hub, and only as an optional pilot. QKD works between two points, so every extra substation would need its own QKD equipment. That adds up fast for a utility on a tight budget.
