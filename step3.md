@@ -38,6 +38,10 @@ Things our design does not fix: if the fiber is cut, the link needs another path
 - PQC is cheap, but it depends on math problems that we believe are hard. QKD depends on physics, but it needs special hardware, spare fiber and trained staff.
 - QKD still needs normal authentication, so it does not replace PQC.
 
+Numbers from the EPB field test (Evans et al., 2021): the test network was about 22 km long and had three QKD links of 3.4 km, 10.2 km and 8.3 km. The fiber loss on those links was 1.3 dB, 3.1 dB and 2.9 dB. Two of the links made secret key at about 1,310 and 1,892 bits per second, with error rates of 3.9% and 1.4%. After the keys were relayed through the trusted nodes, the whole network produced 115 bits per second, which is about one 256-bit key every two seconds. The test ran for 28 hours.
+
+Our 8 km pilot link is in the same range as those links, but we have not measured its loss. A key rate like that is enough to keep refreshing encryption keys. It is not enough to encrypt all the traffic with QKD key directly.
+
 Source: Evans et al., "Trusted Node QKD at an Electrical Utility," IEEE Access, 2021. https://arxiv.org/abs/2103.09877
 
 ## Part 3: Working Prototype
@@ -68,7 +72,7 @@ This could help with the trusted node problem. In QKD, every stop in the middle 
 
 We recommend PQC on every link. It protects the whole network for the least money. The QKD pilot only adds protection to one link that PQC already covers, so it should wait until the fiber has been measured.
 
-These costs are our guesses. We do not have real price quotes.
+These costs are our guesses. We looked for public prices for QKD equipment and did not find any, because the vendors do not list them. A real comparison would need a quote.
 
 ## Stretch
 
