@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QKD Grid Optimizer · Secure the Grid (1280×720)</title>
+<style>
+:root{--blue:#1f6feb;--blue2:#3b82f6;--blueL:#e8f0ff;--ink:#0f1b3d;--muted:#5b6785;--line:#e3e9f5;--green:#22b35e;--greenL:#e7f8ee;--orange:#f59f00;--purple:#8b5cf6;--red:#e5484d;--bg:#f3f6fc}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.ic{vertical-align:-3px;flex:0 0 auto}
+/* header */
+header{position:relative;display:flex;align-items:center;gap:22px;padding:14px 26px;background:linear-gradient(180deg,#fbfcff,#eef3fd);border-bottom:1px solid var(--line);overflow:hidden;min-height:96px}
+.logo{display:flex;align-items:center;gap:16px;padding-right:22px;border-right:1px solid #d7e0f2}
+.logo h1{margin:0;font-size:30px;letter-spacing:-.02em;font-weight:800;color:#0b1f5c}
+.logo p{margin:2px 0 0;color:#334;font-size:14.5px}
+.tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:5px;box-shadow:0 2px 8px #1f6feb12;z-index:2}
+.tabs button{border:0;background:transparent;font:600 14px inherit;font-family:inherit;color:#334;padding:10px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.tabs button.on{background:var(--blue);color:#fff;box-shadow:0 4px 12px #1f6feb44}
+.hdr-art{position:absolute;right:0;bottom:0;height:100%;pointer-events:none;opacity:.95}
+.qb{margin-left:auto;z-index:2;font-size:12px;font-weight:700;color:var(--blue);background:#fff;border:1px solid #cfe0ff;border-radius:999px;padding:5px 12px;display:flex;align-items:center;gap:6px;margin-right:330px}
+@media (max-width:1300px){.qb{margin-right:0}.hdr-art{opacity:.25}}
+/* grid */
+.wrap{display:grid;grid-template-columns:330px 1fr 320px;gap:16px;padding:16px 18px}
+.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:0 18px 22px}
+@media (max-width:1200px){.wrap,.bottom{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px #0f1b3d0a}
+.sec{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:17px;font-weight:700}
+.num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:13.5px;font-weight:700}
+.sec .ic{color:var(--blue)}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.btn2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bigbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;border:1.5px solid #cdd8ee;background:#fff;color:#223;font:600 13.5px inherit;font-family:inherit;cursor:pointer}
+.bigbtn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 12px #1f6feb40}
+.bigbtn:hover{filter:brightness(1.03);transform:translateY(-1px)}
+.netcard{margin-top:12px;display:flex;align-items:center;gap:14px;padding:12px;border-radius:12px;background:#f7f9fe;border:1px solid var(--line);position:relative}
+.netcard b{display:block;font-size:15px}
+.netcard small{color:var(--muted);display:block}
+.netcard .ok{position:absolute;right:10px;top:10px}
+select,input[type=text],input[type=password],input[type=number],textarea{font:inherit;padding:7px 9px;border:1px solid #cdd8ee;border-radius:9px;background:#fff;color:var(--ink)}
+.prow{display:grid;grid-template-columns:22px 1fr 110px 56px;align-items:center;gap:8px;margin:11px 0}
+.prow label{font-size:13.5px;color:#223}
+.prow .ic{color:var(--blue)}
+.prow input[type=range]{width:100%;accent-color:var(--blue)}
+.prow .val{border:1px solid #cdd8ee;border-radius:9px;padding:5px 0;text-align:center;font-weight:700;font-size:13px}
+.srow{display:grid;grid-template-columns:22px 1fr 140px;align-items:center;gap:8px;margin:11px 0}
+.srow label{font-size:13.5px}
+.srow select{width:100%}
+.run{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:0;border-radius:12px;background:linear-gradient(90deg,#1f6feb,#2f80ff);color:#fff;font:700 15.5px inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 16px #1f6feb55}
+.run:active{transform:translateY(1px)}
+.note{font-size:12px;color:var(--muted)}
+/* map */
+.mapcard{position:relative;padding:0;overflow:hidden;background:#eaf1fb;display:flex;flex-direction:column;min-height:620px}
+#map{display:block;width:100%;flex:1;height:100%;min-height:560px;cursor:default;user-select:none}
+.legend{position:absolute;left:14px;top:14px;background:#ffffffee;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12.5px;box-shadow:0 2px 8px #0f1b3d14}
+.legend div{display:flex;align-items:center;gap:9px;margin:3px 0}
+.lg-dot{width:11px;height:11px;border-radius:50%;background:#3a4a6b}
+.lg-line{width:22px;height:3px;border-radius:2px;background:#b8c4dc}
+.lg-qkd{width:22px;height:4px;border-radius:2px;background:var(--blue)}
+.lg-hub{width:14px;height:14px;border-radius:50%;border:3px solid var(--green);background:#fff}
+.lg-cc{width:14px;height:14px;border-radius:4px;background:var(--blue)}
+.lg-bk{width:22px;height:0;border-top:2.5px dashed var(--green)}
+.compass{position:absolute;right:18px;top:14px;text-align:center;font-weight:800;color:#1b2b55;font-size:13px}
+.zoom{position:absolute;right:14px;bottom:56px;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px #0f1b3d14}
+.zoom button{border:0;background:#fff;width:38px;height:36px;font-size:22px;color:#1b2b55;cursor:pointer}
+.zoom button+button{border-top:1px solid var(--line)}
+.scalebar{position:absolute;left:18px;bottom:14px;font-size:11.5px;color:#334}
+.toolbar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;max-width:calc(100% - 300px);overflow-x:auto;display:flex;gap:6px;background:#ffffffee;border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:0 2px 8px #0f1b3d14}
+.toolbar button{white-space:nowrap;border:0;background:transparent;border-radius:8px;padding:6px 10px;font:600 12px inherit;font-family:inherit;color:#334;cursor:pointer;display:flex;gap:5px;align-items:center}
+.toolbar button.on{background:var(--blue);color:#fff}
+.toast{position:absolute;right:66px;top:14px;max-width:330px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--red);border-radius:12px;padding:10px 12px;font-size:12.5px;box-shadow:0 8px 24px #0f1b3d22;display:none}
+.toast.good{border-left-color:var(--green)}
+.toast b.t{display:block;font-size:13.5px;margin-bottom:2px}
+.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:6px;color:#fff;background:var(--red)}
+.pill.g{background:var(--green)}
+.pulse{animation:pulse 1.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(3)}}
+.flow{animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+/* results */
+.res-top{display:grid;grid-template-columns:1fr 1px 1fr;gap:12px;align-items:center}
+.vsep{background:var(--line);height:100%}
+.ring-big{display:grid;place-items:center}
+.stat{text-align:center}
+.stat .v{font-size:30px;font-weight:800;line-height:1.1}
+.stat .l{font-size:13px;color:#334}
+.mini2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.mcard{border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.mcard .v{font-size:26px;font-weight:800}
+.mcard .l{font-size:12.5px;color:#334}
+.opt{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.opt h4{margin:0 0 4px;display:flex;align-items:center;gap:8px;font-size:14px}
+.gain{margin-top:12px;display:flex;align-items:center;gap:12px;background:var(--greenL);border:1px solid #c6ecd5;border-radius:12px;padding:12px}
+.gain .v{font-size:19px;font-weight:800;color:#127a3e}
+.gain small{display:block;color:#3c5}
+.gain small{color:#3a6b4f}
+/* bottom */
+.rings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.rings .l{font-size:13px;font-weight:600;margin-top:4px}
+.path{display:flex;align-items:center;justify-content:space-between;gap:0;margin:16px 0 6px;padding:0 4px}
+.pnode{display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;font-size:13px;text-align:center;min-width:70px}
+.pcircle{width:62px;height:62px;border-radius:50%;background:var(--blueL);display:grid;place-items:center;color:#1b2b55}
+.pseg{flex:1;height:4px;background:var(--blue);position:relative;min-width:18px}
+.phop{width:20px;height:20px;border-radius:50%;border:3.5px solid var(--green);background:#fff;flex:0 0 auto;position:relative}
+.phop span{position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:var(--muted);font-weight:600}
+.phop.tn{border-color:var(--orange)}
+.checks{display:flex;flex-direction:column;gap:11px;margin-top:6px;position:relative;z-index:1;max-width:80%}
+.chk{display:flex;align-items:center;gap:10px;font-size:14px}
+.chk .b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--green);flex:0 0 auto}
+.chk.no .b{background:#c4cbd9}
+.fiberart{position:absolute;right:-10px;bottom:-6px;width:170px;opacity:.9;pointer-events:none}
+.bcard{position:relative;overflow:hidden}
+details summary{cursor:pointer;color:var(--muted);font-size:12.5px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+td,th{padding:3px;border-bottom:1px solid var(--line);text-align:left}
+/* modal */
+.modal{position:fixed;inset:0;background:#0f1b3d66;display:none;place-items:center;z-index:20}
+.modal .box{width:min(560px,92vw);background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 60px #0f1b3d55;max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.ex{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ex button{text-align:left;border:1px solid var(--line);background:#f7f9fe;border-radius:10px;padding:9px;cursor:pointer;font:inherit}
+.ex button b{display:block;font-size:13px}
+.ex button small{color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.btn{border:1px solid #cdd8ee;background:#fff;border-radius:9px;padding:7px 12px;font:600 13px inherit;font-family:inherit;cursor:pointer}
+.btn.b{background:var(--blue);border-color:var(--blue);color:#fff}
+textarea{width:100%;height:80px;font:12px ui-monospace,Menlo,monospace}
+
+/* ---- slide / embed mode: fixed 1920x1080 canvas scaled to the window (Faces.app, projector, iframes) ---- */
+body.fit{overflow:hidden;height:100vh;background:#dfe6f3}
+body.fit #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:var(--bg);overflow:hidden;box-shadow:0 0 0 1px #cfd8ea}
+body.fit header{height:104px;min-height:0}
+body.fit .hdr-art{opacity:.95!important}
+body.fit .qb{margin-right:0!important}
+body.fit .fitbtn{margin-right:330px}
+body.fit .wrap{grid-template-columns:400px 1fr 380px;height:702px;padding:14px 18px 10px}
+body.fit .wrap>.card{overflow:auto;min-height:0}
+body.fit .mapcard{min-height:0;height:100%}
+body.fit #map{min-height:0}
+body.fit .bottom{height:274px;padding:0 18px 16px}
+body.fit .bottom>.card{overflow:hidden}
+.fitbtn{z-index:3;border:1px solid #cfe0ff;background:#fff;color:var(--blue);border-radius:999px;padding:5px 12px;font:700 12px inherit;font-family:inherit;cursor:pointer;margin-left:8px}
+
+html,body{width:1280px!important;height:720px!important;margin:0!important;overflow:hidden!important;background:var(--bg)}
+#frame{position:relative;width:1280px;height:720px;overflow:hidden}
+body.fit #stage{position:absolute!important;left:0!important;top:0!important;transform:scale(0.6666667)!important;transform-origin:0 0}
+.fitbtn{display:none!important}
+</style>
+</head>
+<body>
+<div id="frame"><div id="stage">
+<header>
+  <div class="logo">
+    <svg width="72" height="72" viewBox="0 0 72 72"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e40af"/></linearGradient></defs>
+      <ellipse cx="36" cy="36" rx="33" ry="13" fill="none" stroke="#9cc0ff" stroke-width="2" transform="rotate(35 36 36)"/><ellipse cx="36" cy="36" rx="33" ry="13" fill="none" stroke="#9cc0ff" stroke-width="2" transform="rotate(-35 36 36)"/>
+      <path d="M36 8 L56 16 V34 C56 48 46 58 36 63 C26 58 16 48 16 34 V16 Z" fill="url(#lg1)" stroke="#dbe8ff" stroke-width="2.5"/>
+      <rect x="27" y="33" width="18" height="15" rx="3" fill="#fff"/><path d="M30 33 v-4 a6 6 0 0 1 12 0 v4" stroke="#fff" stroke-width="3" fill="none"/><circle cx="36" cy="40" r="2.3" fill="#1e40af"/></svg>
+    <div><h1>QKD Grid Optimizer</h1><p>Secure your grid. Optimize your quantum links.</p></div>
+  </div>
+  <div class="tabs"><button class="on" data-go="network" id="tabNet"></button><button data-go="params" id="tabPar"></button><button data-go="results" id="tabRes"></button></div>
+  <div class="qb" id="qbBadge"></div><button class="fitbtn" id="fitBtn" title="Fixed 16:9 canvas that scales to any window (for Faces.app slides, iframes and projectors)">⛶ Slide mode</button>
+  <svg class="hdr-art" viewBox="0 0 420 100" preserveAspectRatio="xMaxYMax meet" width="420" height="100">
+    <defs><linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9daf8"/><stop offset="1" stop-color="#e6eefc"/></linearGradient></defs>
+    <path d="M40 34 q12-14 28-6 q10-12 26-2 q16 2 12 12 h-66z" fill="#fff" opacity=".9"/>
+    <path d="M0 100 L0 78 Q60 58 120 72 T240 66 T420 58 V100Z" fill="url(#hl)"/>
+    <path d="M150 100 Q230 70 300 82 T420 76 V100Z" fill="#b9cdf1"/>
+    <g stroke="#3d5a95" stroke-width="1.6" fill="none" stroke-linecap="round">
+      <path d="M92 58 Q150 70 205 44 Q265 62 330 28 Q375 46 410 40" stroke="#6f8bc2" stroke-width="1"/>
+      <path d="M92 64 Q150 76 205 50 Q265 68 330 34 Q375 52 410 46" stroke="#6f8bc2" stroke-width="1"/>
+      <g transform="translate(92,58)"><path d="M0 0 L-6 30 M0 0 L6 30 M-8 5 H8 M-10 11 H10 M-4 20 L4 20 M-4 20 L3 11 M4 20 L-3 11"/></g>
+      <g transform="translate(205,44)"><path d="M0 0 L-9 44 M0 0 L9 44 M-12 7 H12 M-15 15 H15 M-6 28 L6 28 M-6 28 L5 15 M6 28 L-5 15"/></g>
+      <g transform="translate(330,28)"><path d="M0 0 L-12 62 M0 0 L12 62 M-16 9 H16 M-20 20 H20 M-8 38 L8 38 M-8 38 L7 20 M8 38 L-7 20 M-5 50 L5 50"/></g>
+      <g transform="translate(410,40)"><path d="M0 0 L-8 50 M0 0 L8 50 M-11 7 H11 M-14 15 H14"/></g>
+    </g>
+    <circle r="3.2" fill="#3b82f6"><animateMotion dur="3.4s" repeatCount="indefinite" path="M92 58 Q150 70 205 44 Q265 62 330 28 Q375 46 410 40"/></circle>
+  </svg>
+</header>
+
+<div class="wrap">
+  <!-- LEFT -->
+  <div class="card" id="network">
+    <div class="sec"><span class="num">1</span>Import Grid Network</div>
+    <div class="btn2"><button class="bigbtn primary" id="btnUpload"></button><button class="bigbtn" id="btnExample"></button></div>
+    <div class="netcard"><svg id="thumb" width="96" height="62" viewBox="0 0 96 62"></svg><div><b id="netName">–</b><small id="netNodes"></small><small id="netLinks"></small></div><span class="ok" id="netOk"></span></div>
+    <hr>
+    <div class="sec" id="params"><span class="num">2</span>Set Optimization Parameters</div>
+    <div class="srow"><span id="i-sector"></span><label>Sector</label><select id="sector"></select></div>
+    <div class="prow"><span id="i-K"></span><label>Max QKD links</label><input type="range" id="K" min="1" max="24" value="8"><span class="val" id="KV"></span></div>
+    <div class="prow"><span id="i-H"></span><label>Longest chain</label><input type="range" id="H" min="1" max="4" value="3"><span class="val" id="HV"></span></div>
+    <div class="prow"><span id="i-db"></span><label>Fiber loss (dB/km)</label><input type="range" id="db" min="15" max="60" value="35"><span class="val" id="dbV"></span></div>
+    <div class="prow"><span id="i-loss"></span><label>QKD loss limit (dB)</label><input type="range" id="loss" min="4" max="20" value="10"><span class="val" id="lossV"></span></div>
+    <div class="srow"><span id="i-sec"></span><label>Security level</label><select id="secLevel"><option value="6">Standard (6 trusted nodes)</option><option value="4" selected>High (4 trusted nodes)</option><option value="2">Strict (2 trusted nodes)</option><option value="0">Maximum (no trusted nodes)</option></select></div>
+    <div class="srow"><span id="i-goal"></span><label>Optimization goal</label><select id="goal"><option value="0">Max secrecy</option><option value="25" selected>Balanced</option><option value="100">Max tap detection</option></select></div>
+    <button class="run" id="run"></button>
+    <p class="note" id="solveNote"></p>
+    <p class="note" id="sectorNote"></p>
+  </div>
+
+  <!-- CENTER MAP -->
+  <div class="card mapcard">
+    <svg id="map" viewBox="0 0 1000 700"></svg>
+    <div class="legend">
+      <div><span class="lg-dot"></span><span id="lgNode">Grid node</span></div>
+      <div><span class="lg-line"></span><span id="lgLine">Power line (PQC)</span></div>
+      <div><span class="lg-qkd"></span>Selected QKD link</div>
+      <div><span class="lg-hub"></span>QKD hub (trusted node)</div>
+      <div><span class="lg-cc"></span><span id="lgCC">Control center</span></div>
+      <div><span class="lg-bk"></span>Backup route</div>
+    </div>
+    <div class="compass"><div>N</div><svg width="18" height="22" viewBox="0 0 18 22"><path d="M9 0 L17 22 L9 16 L1 22 Z" fill="#1b2b55"/></svg></div>
+    <div class="toast" id="toast"></div>
+    <div class="zoom"><button id="zin">+</button><button id="zout">−</button></div>
+    <div class="scalebar"><svg width="210" height="22"><path d="M2 14 H200 M2 8 V18 M68 10 V18 M134 10 V18 M200 8 V18" stroke="#334" stroke-width="1.4"/></svg><div id="scaleTxt" style="display:flex;justify-content:space-between;width:210px"></div></div>
+    <div class="toolbar" id="toolbar">
+      <button data-mode="tap" class="on">🕵️ Tap a link</button><button data-mode="move">Move</button><button data-mode="node" id="addNodeBtn">+ Node</button><button data-mode="link">+ Link</button><button data-mode="cc">Control center</button><button data-mode="del">Delete</button><button id="randTap">Random attack</button>
+    </div>
+  </div>
+
+  <!-- RIGHT RESULTS -->
+  <div class="card" id="results">
+    <div class="sec"><span class="num">3</span>Results</div>
+    <div class="res-top">
+      <div class="ring-big" id="ringCov"></div><div class="vsep"></div>
+      <div class="stat"><div id="shieldIc"></div><div class="v" id="gainV">–</div><div class="l">worst wiretap cut</div></div>
+    </div>
+    <div class="mini2">
+      <div class="mcard"><div id="ic-links"></div><div class="v" style="color:var(--blue)" id="mLinks">–</div><div class="l">QKD links</div></div>
+      <div class="mcard"><div id="ic-hubs"></div><div class="v" style="color:var(--orange)" id="mHubs">–</div><div class="l">Key hubs (trusted)</div></div>
+    </div>
+    <div class="opt"><h4><span id="optIc"></span>Optimized network</h4><svg id="optThumb" width="100%" height="90" viewBox="0 0 280 90"></svg></div>
+    <div class="gain"><span id="gainIc"></span><div><div class="v" id="gainBox">–</div><small id="gainSub"></small></div></div>
+    <details><summary>Run on qBraid · measured results</summary>
+      <p class="note">Download this design and run <code>3h_design_on_qbraid.ipynb</code>: BB84 on every QKD link in one circuit on qBraid's GPU simulator.</p>
+      <button class="btn" id="exportDesign">Download design JSON</button>
+      <table id="evidence"></table>
+    </details>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="card"><div class="sec"><span id="ic-metrics"></span>Network Metrics Overview</div><div class="rings" id="rings"></div></div>
+  <div class="card"><div class="sec"><span id="ic-path"></span>Quantum Link Path <span class="note" id="pathNote" style="font-weight:500"></span></div><div class="path" id="path"></div><p class="note" id="pathSub"></p></div>
+  <div class="card bcard"><div class="sec"><span id="ic-details"></span>Link Selection Details</div><div class="checks" id="checks"></div>
+    <svg class="fiberart" viewBox="0 0 200 150"><defs><linearGradient id="fb" x1="0" x2="1"><stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#3b82f6"/></linearGradient><filter id="fglow"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+      <path d="M200 30 L140 55 Q125 62 130 78 L200 110 Z" fill="url(#fb)"/><ellipse cx="135" cy="68" rx="9" ry="16" fill="#0b1f5c" transform="rotate(-20 135 68)"/>
+      <g stroke="#7cc4ff" stroke-width="1.6" stroke-linecap="round" fill="none" filter="url(#fglow)">
+        <path d="M134 60 Q100 40 70 30"/><path d="M134 64 Q95 55 60 52"/><path d="M134 68 Q95 70 55 74"/><path d="M134 72 Q100 88 66 100"/><path d="M134 76 Q110 104 82 122"/><path d="M134 62 Q105 30 92 12"/></g>
+      <g fill="#dff1ff"><circle cx="70" cy="30" r="2.6"/><circle cx="60" cy="52" r="2.6"/><circle cx="55" cy="74" r="2.6"/><circle cx="66" cy="100" r="2.6"/><circle cx="82" cy="122" r="2.6"/><circle cx="92" cy="12" r="2.6"/></g></svg>
+  </div>
+</div>
+
+</div><!-- /stage --></div><!-- /frame -->
+<!-- modals -->
+<div class="modal" id="mExample"><div class="box">
+  <h3 id="mExTitle"></h3><div class="ex" id="exList"></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Close</button></div></div></div>
+<div class="modal" id="mUpload"><div class="box">
+  <h3 id="mUpTitle"></h3>
+  <p class="note"><b>Grid file (JSON):</b> <code>{"nodes":[{"id":"A","mw":40}],"edges":[{"a":"A","b":"B","km":6.5}],"cc":["A"]}</code></p>
+  <div class="row"><input type="file" id="jsonFile" accept=".json,application/json"><button class="btn" id="newBlank">Start blank and draw</button></div>
+  <textarea id="jsonIn" placeholder="…or paste JSON here"></textarea>
+  <div class="row"><button class="btn b" id="jsonLoad">Load JSON</button></div>
+  <hr>
+  <p class="note"><b>Picture of a grid:</b> upload an image to trace it, or let <b>qBraid AI</b> read it (qBraid AI Gateway, your qBraid API key; sent only to api-v2.qbraid.com).</p>
+  <div class="row"><input type="file" id="imgFile" accept="image/*"></div>
+  <div class="row"><input type="password" id="qbKey" placeholder="qBraid API key" style="flex:1"><button class="btn" id="qbConnect">Load models</button><select id="qbModel"></select></div>
+  <div class="row"><button class="btn b" id="qbRead">Read image with qBraid AI</button><span class="note" id="qbMsg"></span></div>
+  <details><summary>Prompt sent to the model (also works in the qBraid Lab agent)</summary><textarea id="aiPrompt" readonly>Read this power-grid diagram. List every substation and every line between substations as JSON with exactly this shape:
+{"nodes":[{"id":"<name>","mw":<load MW, or 20 if unknown>,"kv":<voltage kV, or 115 if unknown>,"x":<pixel x>,"y":<pixel y>}],
+ "edges":[{"a":"<id>","b":"<id>","km":<length in km if shown, else estimate from the scale bar>}],
+ "cc":["<main control center id>","<backup control center id>"]}
+Use the substation's position in the image for x and y. Output only the JSON.</textarea></details>
+  <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Close</button></div></div></div>
+
+<script>
+const PRESETS = [{"key":"chattanooga_r1","title":"Chattanooga area (ACTIVSg70k)","cc":["CHATTANOOGA 3","CHATTANOOGA 11"],"nodes":[{"id":"RINGGOLD 3","mw":42.3,"kv":100.0,"x":677.3,"y":356.9},{"id":"RINGGOLD 4","mw":49.2,"kv":100.0,"x":727.2,"y":340.8},{"id":"RINGGOLD 5","mw":47.9,"kv":100.0,"x":654.7,"y":306.0},{"id":"CHATTANOOGA 9","mw":20.0,"kv":138.0,"x":648.2,"y":344.0},{"id":"DALTON 12","mw":0.0,"kv":765.0,"x":768.1,"y":500.5},{"id":"CHATTANOOGA 23","mw":36.5,"kv":138.0,"x":726.8,"y":319.5},{"id":"ROSSVILLE 1","mw":27.3,"kv":100.0,"x":551.1,"y":401.7},{"id":"CHATTANOOGA 10","mw":28.6,"kv":138.0,"x":675.4,"y":255.8},{"id":"CHATTANOOGA 20","mw":36.5,"kv":138.0,"x":619.9,"y":302.4},{"id":"ROSSVILLE 2","mw":83.0,"kv":345.0,"x":522.3,"y":425.9},{"id":"CHATTANOOGA 2","mw":45.6,"kv":138.0,"x":508.5,"y":373.9},{"id":"CHATTANOOGA 3","mw":30.3,"kv":345.0,"x":442.5,"y":332.0},{"id":"SODDY DAISY 3","mw":0.0,"kv":345.0,"x":514.0,"y":99.7},{"id":"CHATTANOOGA 8","mw":20.4,"kv":138.0,"x":656.8,"y":196.3},{"id":"LA FAYETTE 4","mw":21.2,"kv":100.0,"x":757.7,"y":110.6},{"id":"CHATTANOOGA 22","mw":50.4,"kv":345.0,"x":378.6,"y":569.3},{"id":"STEVENSON 4","mw":0.0,"kv":345.0,"x":40.0,"y":384.9},{"id":"CLEVELAND 16","mw":76.8,"kv":138.0,"x":809.8,"y":352.2},{"id":"OLD FORT 2","mw":11.8,"kv":138.0,"x":960.0,"y":660.0},{"id":"CHATTANOOGA 1","mw":27.5,"kv":138.0,"x":494.0,"y":327.6},{"id":"CHATTANOOGA 6","mw":61.9,"kv":138.0,"x":534.2,"y":287.1},{"id":"CHATTANOOGA 24","mw":0.0,"kv":138.0,"x":467.2,"y":319.4},{"id":"CHATTANOOGA 13","mw":47.4,"kv":138.0,"x":403.1,"y":233.4},{"id":"CHATTANOOGA 18","mw":8.5,"kv":138.0,"x":368.6,"y":371.1},{"id":"CHATTANOOGA 4","mw":21.5,"kv":138.0,"x":452.2,"y":226.6},{"id":"CHATTANOOGA 7","mw":30.8,"kv":138.0,"x":475.6,"y":239.6},{"id":"CHATTANOOGA 14","mw":20.8,"kv":138.0,"x":493.9,"y":231.8},{"id":"CHATTANOOGA 5","mw":17.2,"kv":138.0,"x":820.9,"y":181.7},{"id":"SIGNAL MOUNTAIN 1","mw":13.3,"kv":138.0,"x":865.9,"y":193.9},{"id":"JASPER 16","mw":9.8,"kv":138.0,"x":896.8,"y":111.4},{"id":"CHATTANOOGA 26","mw":0.0,"kv":138.0,"x":686.7,"y":224.5},{"id":"CHATTANOOGA 11","mw":37.0,"kv":138.0,"x":543.2,"y":263.8},{"id":"CHATTANOOGA 17","mw":16.8,"kv":138.0,"x":625.4,"y":188.1},{"id":"CHATTANOOGA 12","mw":48.3,"kv":138.0,"x":506.9,"y":245.9},{"id":"CHATTANOOGA 27","mw":0.0,"kv":138.0,"x":602.1,"y":256.4},{"id":"SIGNAL MOUNTAIN 2","mw":13.3,"kv":138.0,"x":335.7,"y":215.1},{"id":"CHATTANOOGA 16","mw":18.5,"kv":138.0,"x":493.2,"y":201.9},{"id":"CHATTANOOGA 15","mw":30.8,"kv":138.0,"x":481.6,"y":81.8},{"id":"HIXSON 2","mw":34.8,"kv":138.0,"x":493.6,"y":135.9},{"id":"OOLTEWAH 2","mw":35.1,"kv":138.0,"x":529.0,"y":40.0},{"id":"HIXSON 3","mw":34.8,"kv":138.0,"x":506.2,"y":146.6},{"id":"CHATTANOOGA 19","mw":32.2,"kv":138.0,"x":598.5,"y":142.5},{"id":"CHATTANOOGA 21","mw":64.4,"kv":138.0,"x":621.0,"y":241.7},{"id":"JASPER 18","mw":0.0,"kv":138.0,"x":332.6,"y":390.2},{"id":"HIXSON 1","mw":58.2,"kv":138.0,"x":536.1,"y":140.8},{"id":"OOLTEWAH 4","mw":28.1,"kv":138.0,"x":612.5,"y":103.9},{"id":"OOLTEWAH 1","mw":28.1,"kv":138.0,"x":671.3,"y":229.1},{"id":"CHATTANOOGA 25","mw":0.0,"kv":138.0,"x":598.2,"y":52.1},{"id":"OOLTEWAH 3","mw":39.4,"kv":138.0,"x":610.9,"y":75.7}],"edges":[{"a":"RINGGOLD 3","b":"RINGGOLD 4","km":8.18},{"a":"RINGGOLD 3","b":"RINGGOLD 5","km":7.5},{"a":"RINGGOLD 3","b":"CHATTANOOGA 9","km":4.82},{"a":"RINGGOLD 4","b":"DALTON 12","km":20.97},{"a":"RINGGOLD 4","b":"CHATTANOOGA 23","km":3.14},{"a":"RINGGOLD 5","b":"ROSSVILLE 1","km":14.28},{"a":"RINGGOLD 5","b":"CHATTANOOGA 10","km":6.6},{"a":"RINGGOLD 5","b":"CHATTANOOGA 20","km":5.83},{"a":"CHATTANOOGA 9","b":"OLD FORT 2","km":56.2},{"a":"CHATTANOOGA 9","b":"CHATTANOOGA 20","km":6.59},{"a":"CHATTANOOGA 9","b":"CHATTANOOGA 10","km":12.84},{"a":"DALTON 12","b":"CHATTANOOGA 22","km":40.79},{"a":"CHATTANOOGA 23","b":"CLEVELAND 16","km":11.69},{"a":"CHATTANOOGA 23","b":"CHATTANOOGA 21","km":13.57},{"a":"ROSSVILLE 1","b":"ROSSVILLE 2","km":5.28},{"a":"ROSSVILLE 1","b":"CHATTANOOGA 2","km":6.85},{"a":"CHATTANOOGA 10","b":"CHATTANOOGA 8","km":6.5},{"a":"CHATTANOOGA 20","b":"CHATTANOOGA 27","km":6.53},{"a":"ROSSVILLE 2","b":"CHATTANOOGA 3","km":14.01},{"a":"ROSSVILLE 2","b":"SODDY DAISY 3","km":46.15},{"a":"CHATTANOOGA 2","b":"CHATTANOOGA 1","km":6.69},{"a":"CHATTANOOGA 3","b":"STEVENSON 4","km":50.72},{"a":"CHATTANOOGA 3","b":"CHATTANOOGA 13","km":16.01},{"a":"CHATTANOOGA 3","b":"CHATTANOOGA 18","km":10.84},{"a":"CHATTANOOGA 3","b":"CHATTANOOGA 24","km":3.72},{"a":"CHATTANOOGA 3","b":"SODDY DAISY 3","km":41.47},{"a":"SODDY DAISY 3","b":"CHATTANOOGA 22","km":38.56},{"a":"SODDY DAISY 3","b":"HIXSON 1","km":6.82},{"a":"SODDY DAISY 3","b":"HIXSON 2","km":10.92},{"a":"SODDY DAISY 3","b":"HIXSON 3","km":8.74},{"a":"CHATTANOOGA 8","b":"LA FAYETTE 4","km":15.61},{"a":"CHATTANOOGA 8","b":"CHATTANOOGA 17","km":4.46},{"a":"CHATTANOOGA 22","b":"STEVENSON 4","km":83.12},{"a":"CHATTANOOGA 1","b":"CHATTANOOGA 6","km":7.07},{"a":"CHATTANOOGA 1","b":"CHATTANOOGA 24","km":3.68},{"a":"CHATTANOOGA 6","b":"CHATTANOOGA 11","km":3.4},{"a":"CHATTANOOGA 24","b":"CHATTANOOGA 12","km":10.0},{"a":"CHATTANOOGA 13","b":"CHATTANOOGA 4","km":6.4},{"a":"CHATTANOOGA 13","b":"SIGNAL MOUNTAIN 2","km":9.08},{"a":"CHATTANOOGA 18","b":"JASPER 18","km":5.73},{"a":"CHATTANOOGA 4","b":"CHATTANOOGA 7","km":7.44},{"a":"CHATTANOOGA 4","b":"CHATTANOOGA 14","km":4.72},{"a":"CHATTANOOGA 7","b":"CHATTANOOGA 14","km":3.13},{"a":"CHATTANOOGA 14","b":"CHATTANOOGA 12","km":2.52},{"a":"CHATTANOOGA 14","b":"CHATTANOOGA 16","km":4.07},{"a":"CHATTANOOGA 5","b":"SIGNAL MOUNTAIN 1","km":6.32},{"a":"CHATTANOOGA 5","b":"JASPER 16","km":12.77},{"a":"CHATTANOOGA 5","b":"CHATTANOOGA 26","km":15.65},{"a":"CHATTANOOGA 26","b":"OOLTEWAH 1","km":2.15},{"a":"CHATTANOOGA 11","b":"CHATTANOOGA 12","km":4.93},{"a":"CHATTANOOGA 11","b":"CHATTANOOGA 27","km":6.62},{"a":"CHATTANOOGA 17","b":"CHATTANOOGA 19","km":6.62},{"a":"CHATTANOOGA 17","b":"CHATTANOOGA 21","km":6.98},{"a":"CHATTANOOGA 27","b":"CHATTANOOGA 21","km":3.08},{"a":"CHATTANOOGA 16","b":"HIXSON 3","km":7.67},{"a":"CHATTANOOGA 15","b":"HIXSON 2","km":6.8},{"a":"CHATTANOOGA 15","b":"OOLTEWAH 2","km":7.24},{"a":"HIXSON 2","b":"HIXSON 3","km":2.27},{"a":"OOLTEWAH 2","b":"CHATTANOOGA 25","km":7.87},{"a":"HIXSON 3","b":"HIXSON 1","km":3.85},{"a":"CHATTANOOGA 19","b":"HIXSON 1","km":7.17},{"a":"CHATTANOOGA 19","b":"OOLTEWAH 4","km":5.31},{"a":"CHATTANOOGA 21","b":"OOLTEWAH 1","km":6.02},{"a":"OOLTEWAH 4","b":"OOLTEWAH 3","km":3.89},{"a":"CHATTANOOGA 25","b":"OOLTEWAH 3","km":3.67}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["CHATTANOOGA 11","CHATTANOOGA 12"],["CHATTANOOGA 11","CHATTANOOGA 27"],["CHATTANOOGA 12","CHATTANOOGA 24"],["CHATTANOOGA 13","CHATTANOOGA 3"],["CHATTANOOGA 21","CHATTANOOGA 23"],["CHATTANOOGA 21","CHATTANOOGA 27"],["CHATTANOOGA 24","CHATTANOOGA 3"],["CHATTANOOGA 3","ROSSVILLE 2"]],"trusted":["CHATTANOOGA 12","CHATTANOOGA 21","CHATTANOOGA 24","CHATTANOOGA 27"],"protected":["CHATTANOOGA 11","ROSSVILLE 2","CHATTANOOGA 23","CHATTANOOGA 13","CHATTANOOGA 21","CHATTANOOGA 12","CHATTANOOGA 24","CHATTANOOGA 27"]}},{"key":"knoxville_r1","title":"Knoxville area","cc":["KNOXVILLE 28","KNOXVILLE 30"],"nodes":[{"id":"KNOXVILLE 4","mw":45.4,"kv":138.0,"x":478.1,"y":270.0},{"id":"KNOXVILLE 5","mw":22.7,"kv":138.0,"x":436.0,"y":279.8},{"id":"CLINTON 32","mw":0.0,"kv":345.0,"x":497.9,"y":269.4},{"id":"KNOXVILLE 17","mw":38.9,"kv":138.0,"x":392.6,"y":294.8},{"id":"KNOXVILLE 34","mw":33.7,"kv":138.0,"x":605.2,"y":418.5},{"id":"OAK RIDGE 5","mw":25.8,"kv":138.0,"x":583.4,"y":411.2},{"id":"KNOXVILLE 35","mw":33.9,"kv":138.0,"x":556.5,"y":397.0},{"id":"OAK RIDGE 6","mw":25.8,"kv":138.0,"x":620.8,"y":422.6},{"id":"POWELL 1","mw":27.6,"kv":138.0,"x":408.9,"y":228.1},{"id":"KNOXVILLE 24","mw":24.6,"kv":138.0,"x":413.2,"y":217.6},{"id":"KNOXVILLE 6","mw":34.0,"kv":138.0,"x":284.1,"y":305.8},{"id":"KNOXVILLE 8","mw":53.0,"kv":138.0,"x":277.6,"y":302.7},{"id":"KNOXVILLE 11","mw":19.8,"kv":138.0,"x":299.8,"y":321.8},{"id":"KNOXVILLE 7","mw":38.4,"kv":138.0,"x":216.3,"y":601.9},{"id":"SEYMOUR 2","mw":23.3,"kv":138.0,"x":244.7,"y":560.0},{"id":"SEVIERVILLE 5","mw":18.2,"kv":138.0,"x":178.8,"y":660.0},{"id":"NEW MARKET 8","mw":13.0,"kv":138.0,"x":80.1,"y":239.6},{"id":"DANDRIDGE 4","mw":0.0,"kv":345.0,"x":949.2,"y":40.0},{"id":"KNOXVILLE 9","mw":92.6,"kv":345.0,"x":739.0,"y":78.9},{"id":"KNOXVILLE 22","mw":24.5,"kv":138.0,"x":391.6,"y":450.9},{"id":"LOUISVILLE 7","mw":32.9,"kv":138.0,"x":417.7,"y":466.6},{"id":"KNOXVILLE 37","mw":27.7,"kv":138.0,"x":432.7,"y":469.8},{"id":"KNOXVILLE 28","mw":76.1,"kv":345.0,"x":475.1,"y":395.5},{"id":"MARYVILLE 7","mw":55.7,"kv":345.0,"x":686.7,"y":561.4},{"id":"MARYVILLE 10","mw":23.3,"kv":138.0,"x":285.7,"y":502.8},{"id":"KNOXVILLE 16","mw":25.4,"kv":138.0,"x":301.6,"y":483.3},{"id":"KNOXVILLE 12","mw":17.1,"kv":138.0,"x":157.7,"y":371.4},{"id":"SEYMOUR 1","mw":28.9,"kv":138.0,"x":201.6,"y":363.0},{"id":"KNOXVILLE 13","mw":17.1,"kv":138.0,"x":265.3,"y":335.5},{"id":"STRAWBERRY PLAINS","mw":38.6,"kv":138.0,"x":173.4,"y":309.3},{"id":"KNOXVILLE 15","mw":34.0,"kv":138.0,"x":40.0,"y":353.4},{"id":"CORRYTON 2","mw":34.8,"kv":138.0,"x":168.7,"y":102.2},{"id":"KNOXVILLE 40","mw":31.1,"kv":138.0,"x":234.1,"y":192.4},{"id":"KNOXVILLE 41","mw":21.8,"kv":138.0,"x":257.5,"y":223.0},{"id":"CORRYTON 3","mw":14.8,"kv":138.0,"x":398.0,"y":139.2},{"id":"KNOXVILLE 39","mw":14.9,"kv":138.0,"x":365.3,"y":126.3},{"id":"KNOXVILLE 10","mw":18.0,"kv":138.0,"x":376.7,"y":311.7},{"id":"KNOXVILLE 21","mw":53.5,"kv":138.0,"x":359.5,"y":330.5},{"id":"KNOXVILLE 27","mw":24.6,"kv":138.0,"x":385.4,"y":349.2},{"id":"KNOXVILLE 20","mw":56.9,"kv":138.0,"x":291.8,"y":240.9},{"id":"KNOXVILLE 26","mw":73.0,"kv":138.0,"x":328.9,"y":325.5},{"id":"KODAK","mw":21.3,"kv":138.0,"x":86.7,"y":378.4},{"id":"KNOXVILLE 14","mw":26.8,"kv":138.0,"x":379.4,"y":428.8},{"id":"KNOXVILLE 30","mw":57.7,"kv":138.0,"x":395.1,"y":400.2},{"id":"KNOXVILLE 18","mw":89.4,"kv":138.0,"x":309.8,"y":145.1},{"id":"KNOXVILLE 19","mw":50.3,"kv":138.0,"x":294.9,"y":182.3},{"id":"KNOXVILLE 25","mw":58.7,"kv":138.0,"x":357.8,"y":349.0},{"id":"KNOXVILLE 23","mw":50.9,"kv":138.0,"x":386.0,"y":385.9},{"id":"KNOXVILLE 33","mw":41.9,"kv":138.0,"x":412.3,"y":346.3},{"id":"RUTLEDGE 3","mw":0.0,"kv":345.0,"x":960.0,"y":271.1},{"id":"KINGSTON 19","mw":0.0,"kv":345.0,"x":806.7,"y":340.1},{"id":"KNOXVILLE 31","mw":47.8,"kv":138.0,"x":510.1,"y":373.1},{"id":"KNOXVILLE 32","mw":23.9,"kv":138.0,"x":436.8,"y":409.2},{"id":"KNOXVILLE 29","mw":35.6,"kv":138.0,"x":489.4,"y":434.0},{"id":"KNOXVILLE 36","mw":37.8,"kv":138.0,"x":456.3,"y":430.0},{"id":"LENOIR CITY 5","mw":0.0,"kv":345.0,"x":594.5,"y":362.8},{"id":"KNOXVILLE 38","mw":21.0,"kv":138.0,"x":456.2,"y":519.0},{"id":"LENOIR CITY 1","mw":12.9,"kv":138.0,"x":506.1,"y":557.3},{"id":"LENOIR CITY 2","mw":12.9,"kv":138.0,"x":444.6,"y":569.2}],"edges":[{"a":"KNOXVILLE 4","b":"KNOXVILLE 5","km":5.61},{"a":"KNOXVILLE 4","b":"CLINTON 32","km":2.8},{"a":"KNOXVILLE 5","b":"KNOXVILLE 17","km":6.04},{"a":"CLINTON 32","b":"KNOXVILLE 9","km":43.32},{"a":"CLINTON 32","b":"KNOXVILLE 28","km":22.47},{"a":"CLINTON 32","b":"KINGSTON 19","km":42.95},{"a":"CLINTON 32","b":"LENOIR CITY 5","km":24.3},{"a":"KNOXVILLE 17","b":"POWELL 1","km":10.72},{"a":"KNOXVILLE 17","b":"KNOXVILLE 10","km":3.48},{"a":"KNOXVILLE 34","b":"OAK RIDGE 5","km":3.38},{"a":"KNOXVILLE 34","b":"OAK RIDGE 6","km":2.39},{"a":"OAK RIDGE 5","b":"KNOXVILLE 35","km":4.51},{"a":"KNOXVILLE 35","b":"KNOXVILLE 29","km":10.17},{"a":"KNOXVILLE 35","b":"KNOXVILLE 31","km":7.55},{"a":"KNOXVILLE 35","b":"LENOIR CITY 5","km":7.12},{"a":"POWELL 1","b":"KNOXVILLE 24","km":2.06},{"a":"KNOXVILLE 24","b":"CORRYTON 3","km":13.09},{"a":"KNOXVILLE 6","b":"KNOXVILLE 8","km":1.14},{"a":"KNOXVILLE 6","b":"KNOXVILLE 11","km":3.92},{"a":"KNOXVILLE 8","b":"NEW MARKET 8","km":25.08},{"a":"KNOXVILLE 11","b":"KNOXVILLE 13","km":4.66},{"a":"KNOXVILLE 11","b":"KNOXVILLE 20","km":11.56},{"a":"KNOXVILLE 11","b":"KNOXVILLE 26","km":3.85},{"a":"KNOXVILLE 7","b":"SEYMOUR 2","km":8.42},{"a":"KNOXVILLE 7","b":"SEVIERVILLE 5","km":11.69},{"a":"SEYMOUR 2","b":"MARYVILLE 10","km":11.0},{"a":"DANDRIDGE 4","b":"KNOXVILLE 9","km":28.59},{"a":"DANDRIDGE 4","b":"RUTLEDGE 3","km":36.86},{"a":"KNOXVILLE 22","b":"LOUISVILLE 7","km":4.25},{"a":"KNOXVILLE 22","b":"KNOXVILLE 14","km":4.11},{"a":"LOUISVILLE 7","b":"KNOXVILLE 37","km":2.17},{"a":"KNOXVILLE 37","b":"KNOXVILLE 36","km":7.12},{"a":"KNOXVILLE 37","b":"KNOXVILLE 38","km":8.57},{"a":"KNOXVILLE 28","b":"MARYVILLE 7","km":33.27},{"a":"KNOXVILLE 28","b":"RUTLEDGE 3","km":60.02},{"a":"KNOXVILLE 28","b":"KINGSTON 19","km":43.62},{"a":"KNOXVILLE 28","b":"KNOXVILLE 31","km":7.08},{"a":"KNOXVILLE 28","b":"KNOXVILLE 32","km":5.51},{"a":"MARYVILLE 10","b":"KNOXVILLE 16","km":4.13},{"a":"KNOXVILLE 16","b":"SEYMOUR 1","km":27.01},{"a":"KNOXVILLE 16","b":"KNOXVILLE 14","km":12.24},{"a":"KNOXVILLE 12","b":"SEYMOUR 1","km":6.01},{"a":"KNOXVILLE 12","b":"KODAK","km":9.48},{"a":"SEYMOUR 1","b":"KNOXVILLE 13","km":9.21},{"a":"KNOXVILLE 13","b":"STRAWBERRY PLAINS","km":12.01},{"a":"STRAWBERRY PLAINS","b":"KNOXVILLE 15","km":17.74},{"a":"KNOXVILLE 15","b":"KODAK","km":8.56},{"a":"CORRYTON 2","b":"KNOXVILLE 40","km":22.06},{"a":"CORRYTON 2","b":"KNOXVILLE 41","km":21.75},{"a":"KNOXVILLE 40","b":"KNOXVILLE 19","km":11.31},{"a":"KNOXVILLE 40","b":"KNOXVILLE 41","km":6.4},{"a":"KNOXVILLE 41","b":"KNOXVILLE 10","km":18.14},{"a":"CORRYTON 3","b":"KNOXVILLE 39","km":5.0},{"a":"KNOXVILLE 39","b":"KNOXVILLE 18","km":8.0},{"a":"KNOXVILLE 10","b":"KNOXVILLE 21","km":3.8},{"a":"KNOXVILLE 10","b":"KNOXVILLE 27","km":6.67},{"a":"KNOXVILLE 21","b":"KNOXVILLE 25","km":3.16},{"a":"KNOXVILLE 21","b":"KNOXVILLE 26","km":3.94},{"a":"KNOXVILLE 21","b":"KNOXVILLE 27","km":4.56},{"a":"KNOXVILLE 27","b":"KNOXVILLE 23","km":5.95},{"a":"KNOXVILLE 27","b":"KNOXVILLE 33","km":3.86},{"a":"KNOXVILLE 20","b":"KNOXVILLE 19","km":8.75},{"a":"KNOXVILLE 14","b":"KNOXVILLE 30","km":4.84},{"a":"KNOXVILLE 30","b":"KNOXVILLE 23","km":2.7},{"a":"KNOXVILLE 30","b":"KNOXVILLE 32","km":5.16},{"a":"KNOXVILLE 18","b":"KNOXVILLE 19","km":6.58},{"a":"KNOXVILLE 25","b":"KNOXVILLE 23","km":6.83},{"a":"KNOXVILLE 33","b":"KNOXVILLE 31","km":12.78},{"a":"KINGSTON 19","b":"LENOIR CITY 5","km":34.35},{"a":"KNOXVILLE 32","b":"KNOXVILLE 36","km":4.2},{"a":"KNOXVILLE 29","b":"KNOXVILLE 36","km":4.33},{"a":"KNOXVILLE 38","b":"LENOIR CITY 1","km":9.06},{"a":"KNOXVILLE 38","b":"LENOIR CITY 2","km":8.73}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["CLINTON 32","KNOXVILLE 28"],["CLINTON 32","KNOXVILLE 4"],["KNOXVILLE 21","KNOXVILLE 25"],["KNOXVILLE 23","KNOXVILLE 25"],["KNOXVILLE 23","KNOXVILLE 30"],["KNOXVILLE 28","KNOXVILLE 31"],["KNOXVILLE 28","KNOXVILLE 32"],["KNOXVILLE 30","KNOXVILLE 32"]],"trusted":["CLINTON 32","KNOXVILLE 23","KNOXVILLE 25","KNOXVILLE 32"],"protected":["KNOXVILLE 30","KNOXVILLE 4","KNOXVILLE 21","KNOXVILLE 25","KNOXVILLE 31","KNOXVILLE 23","KNOXVILLE 32","CLINTON 32"]}},{"key":"nashville_r1","title":"Nashville area","cc":["NASHVILLE 27","NASHVILLE 11"],"nodes":[{"id":"ASHLAND CITY 3","mw":33.5,"kv":138.0,"x":454.3,"y":353.4},{"id":"NASHVILLE 19","mw":66.1,"kv":138.0,"x":408.8,"y":332.9},{"id":"JOELTON","mw":17.1,"kv":138.0,"x":344.2,"y":396.7},{"id":"NASHVILLE 16","mw":15.3,"kv":138.0,"x":342.5,"y":370.7},{"id":"ANTIOCH 2","mw":70.7,"kv":138.0,"x":240.8,"y":312.2},{"id":"NASHVILLE 25","mw":52.0,"kv":138.0,"x":252.8,"y":301.0},{"id":"NASHVILLE 29","mw":25.8,"kv":138.0,"x":225.0,"y":330.8},{"id":"ANTIOCH 4","mw":82.5,"kv":345.0,"x":81.6,"y":362.7},{"id":"FRANKLIN 39","mw":63.6,"kv":345.0,"x":54.8,"y":434.2},{"id":"NASHVILLE 27","mw":25.2,"kv":345.0,"x":166.6,"y":313.8},{"id":"SMYRNA 15","mw":61.8,"kv":345.0,"x":189.9,"y":348.4},{"id":"ANTIOCH 5","mw":45.5,"kv":138.0,"x":176.7,"y":361.6},{"id":"BRENTWOOD 9","mw":34.1,"kv":138.0,"x":154.8,"y":381.6},{"id":"NASHVILLE 12","mw":22.4,"kv":138.0,"x":172.1,"y":382.3},{"id":"NASHVILLE 30","mw":25.8,"kv":138.0,"x":193.9,"y":333.5},{"id":"ANTIOCH 6","mw":45.5,"kv":138.0,"x":205.6,"y":328.4},{"id":"HERMITAGE 8","mw":50.0,"kv":138.0,"x":194.7,"y":299.9},{"id":"BRENTWOOD 10","mw":68.3,"kv":138.0,"x":247.3,"y":389.1},{"id":"NASHVILLE 24","mw":67.4,"kv":138.0,"x":250.1,"y":365.2},{"id":"BRENTWOOD 11","mw":75.3,"kv":138.0,"x":274.5,"y":367.3},{"id":"NASHVILLE 9","mw":74.3,"kv":138.0,"x":295.8,"y":340.6},{"id":"DICKSON 3","mw":23.5,"kv":345.0,"x":293.4,"y":660.0},{"id":"GOODLETTSVILLE 1","mw":26.3,"kv":345.0,"x":521.3,"y":458.2},{"id":"NASHVILLE 17","mw":30.9,"kv":345.0,"x":383.2,"y":336.0},{"id":"GOODLETTSVILLE 4","mw":41.8,"kv":138.0,"x":111.6,"y":231.2},{"id":"NASHVILLE 14","mw":30.4,"kv":138.0,"x":127.1,"y":246.9},{"id":"HERMITAGE 5","mw":30.6,"kv":138.0,"x":173.3,"y":309.9},{"id":"HERMITAGE 7","mw":75.7,"kv":138.0,"x":158.0,"y":311.7},{"id":"LA VERGNE 3","mw":27.4,"kv":138.0,"x":179.4,"y":326.3},{"id":"NASHVILLE 36","mw":0.0,"kv":138.0,"x":177.6,"y":297.4},{"id":"NASHVILLE 11","mw":24.8,"kv":138.0,"x":226.4,"y":283.5},{"id":"LA VERGNE 1","mw":27.4,"kv":138.0,"x":187.8,"y":330.9},{"id":"MADISON 31","mw":49.3,"kv":138.0,"x":228.1,"y":260.7},{"id":"NASHVILLE 15","mw":44.3,"kv":138.0,"x":229.1,"y":250.8},{"id":"MADISON 32","mw":57.7,"kv":138.0,"x":154.7,"y":273.0},{"id":"NASHVILLE 10","mw":44.1,"kv":138.0,"x":146.3,"y":265.3},{"id":"MADISON 33","mw":78.3,"kv":138.0,"x":230.5,"y":218.4},{"id":"MOUNT JULIET 3","mw":51.6,"kv":138.0,"x":130.7,"y":320.7},{"id":"NASHVILLE 7","mw":20.9,"kv":138.0,"x":306.9,"y":324.5},{"id":"NASHVILLE 13","mw":32.8,"kv":138.0,"x":337.2,"y":358.1},{"id":"NASHVILLE 18","mw":69.4,"kv":138.0,"x":325.6,"y":315.3},{"id":"NASHVILLE 38","mw":0.0,"kv":138.0,"x":286.6,"y":319.8},{"id":"NASHVILLE 28","mw":57.0,"kv":138.0,"x":262.1,"y":302.4},{"id":"NASHVILLE 8","mw":73.3,"kv":138.0,"x":279.3,"y":310.1},{"id":"NASHVILLE 23","mw":130.7,"kv":138.0,"x":279.7,"y":330.0},{"id":"NASHVILLE 37","mw":0.0,"kv":138.0,"x":143.5,"y":262.7},{"id":"NASHVILLE 20","mw":41.9,"kv":138.0,"x":247.7,"y":293.9},{"id":"NASHVILLE 31","mw":56.1,"kv":138.0,"x":366.6,"y":335.2},{"id":"HENDERSONVILLE 10","mw":41.2,"kv":138.0,"x":364.4,"y":385.4},{"id":"MURRAY 1","mw":32.8,"kv":345.0,"x":960.0,"y":40.0},{"id":"NASHVILLE 32","mw":50.3,"kv":138.0,"x":346.0,"y":289.5},{"id":"NASHVILLE 34","mw":31.9,"kv":138.0,"x":445.2,"y":273.2},{"id":"NASHVILLE 21","mw":53.4,"kv":138.0,"x":266.2,"y":336.7},{"id":"NASHVILLE 22","mw":52.0,"kv":138.0,"x":242.6,"y":342.3},{"id":"NASHVILLE 26","mw":17.5,"kv":138.0,"x":359.3,"y":276.6},{"id":"NASHVILLE 35","mw":31.9,"kv":138.0,"x":375.6,"y":265.0},{"id":"GALLATIN 6","mw":0.0,"kv":345.0,"x":40.0,"y":305.7},{"id":"NASHVILLE 33","mw":31.9,"kv":138.0,"x":431.6,"y":263.0},{"id":"FRANKLIN 46","mw":16.4,"kv":138.0,"x":396.2,"y":257.7}],"edges":[{"a":"ASHLAND CITY 3","b":"NASHVILLE 19","km":11.32},{"a":"NASHVILLE 19","b":"NASHVILLE 17","km":5.75},{"a":"NASHVILLE 19","b":"NASHVILLE 34","km":15.08},{"a":"JOELTON","b":"NASHVILLE 16","km":6.26},{"a":"NASHVILLE 16","b":"NASHVILLE 13","km":3.4},{"a":"NASHVILLE 16","b":"HENDERSONVILLE 10","km":6.19},{"a":"ANTIOCH 2","b":"NASHVILLE 25","km":3.73},{"a":"ANTIOCH 2","b":"NASHVILLE 29","km":5.58},{"a":"NASHVILLE 25","b":"NASHVILLE 20","km":2.14},{"a":"NASHVILLE 25","b":"NASHVILLE 28","km":2.08},{"a":"NASHVILLE 29","b":"ANTIOCH 6","km":4.04},{"a":"NASHVILLE 29","b":"NASHVILLE 22","km":4.4},{"a":"ANTIOCH 4","b":"FRANKLIN 39","km":31.93},{"a":"ANTIOCH 4","b":"NASHVILLE 27","km":21.95},{"a":"ANTIOCH 4","b":"SMYRNA 15","km":23.03},{"a":"FRANKLIN 39","b":"NASHVILLE 27","km":35.02},{"a":"FRANKLIN 39","b":"DICKSON 3","km":60.63},{"a":"NASHVILLE 27","b":"HERMITAGE 7","km":2.4},{"a":"NASHVILLE 27","b":"HERMITAGE 8","km":7.05},{"a":"NASHVILLE 27","b":"LA VERGNE 3","km":4.34},{"a":"NASHVILLE 27","b":"MOUNT JULIET 3","km":7.78},{"a":"NASHVILLE 27","b":"GALLATIN 6","km":26.57},{"a":"NASHVILLE 27","b":"NASHVILLE 36","km":4.06},{"a":"SMYRNA 15","b":"LA VERGNE 1","km":6.59},{"a":"SMYRNA 15","b":"NASHVILLE 30","km":4.24},{"a":"ANTIOCH 5","b":"BRENTWOOD 9","km":6.97},{"a":"ANTIOCH 5","b":"NASHVILLE 12","km":5.55},{"a":"ANTIOCH 5","b":"NASHVILLE 30","km":6.94},{"a":"BRENTWOOD 9","b":"NASHVILLE 12","km":4.89},{"a":"NASHVILLE 30","b":"ANTIOCH 6","km":2.78},{"a":"NASHVILLE 30","b":"LA VERGNE 1","km":1.59},{"a":"ANTIOCH 6","b":"HERMITAGE 8","km":6.4},{"a":"HERMITAGE 8","b":"NASHVILLE 11","km":7.11},{"a":"HERMITAGE 8","b":"NASHVILLE 36","km":3.63},{"a":"BRENTWOOD 10","b":"NASHVILLE 24","km":5.84},{"a":"NASHVILLE 24","b":"BRENTWOOD 11","km":5.2},{"a":"NASHVILLE 24","b":"NASHVILLE 22","km":5.62},{"a":"BRENTWOOD 11","b":"NASHVILLE 9","km":7.54},{"a":"NASHVILLE 9","b":"NASHVILLE 7","km":4.94},{"a":"NASHVILLE 9","b":"NASHVILLE 23","km":4.67},{"a":"DICKSON 3","b":"NASHVILLE 17","km":73.97},{"a":"GOODLETTSVILLE 1","b":"NASHVILLE 17","km":41.27},{"a":"NASHVILLE 17","b":"MURRAY 1","km":153.21},{"a":"NASHVILLE 17","b":"NASHVILLE 31","km":3.78},{"a":"GOODLETTSVILLE 4","b":"NASHVILLE 14","km":5.59},{"a":"NASHVILLE 14","b":"NASHVILLE 37","km":5.68},{"a":"HERMITAGE 5","b":"HERMITAGE 7","km":3.64},{"a":"HERMITAGE 5","b":"LA VERGNE 3","km":4.47},{"a":"HERMITAGE 5","b":"NASHVILLE 36","km":4.31},{"a":"LA VERGNE 3","b":"LA VERGNE 1","km":2.23},{"a":"NASHVILLE 36","b":"MADISON 32","km":7.54},{"a":"NASHVILLE 11","b":"MADISON 31","km":5.49},{"a":"NASHVILLE 11","b":"NASHVILLE 20","km":5.01},{"a":"MADISON 31","b":"NASHVILLE 15","km":2.64},{"a":"NASHVILLE 15","b":"MADISON 33","km":8.13},{"a":"MADISON 32","b":"NASHVILLE 10","km":2.89},{"a":"NASHVILLE 10","b":"NASHVILLE 37","km":0.99},{"a":"NASHVILLE 7","b":"NASHVILLE 13","km":9.32},{"a":"NASHVILLE 7","b":"NASHVILLE 18","km":4.5},{"a":"NASHVILLE 7","b":"NASHVILLE 38","km":4.26},{"a":"NASHVILLE 13","b":"NASHVILLE 31","km":9.49},{"a":"NASHVILLE 18","b":"NASHVILLE 31","km":9.54},{"a":"NASHVILLE 18","b":"NASHVILLE 32","km":7.18},{"a":"NASHVILLE 38","b":"NASHVILLE 8","km":2.86},{"a":"NASHVILLE 38","b":"NASHVILLE 23","km":2.88},{"a":"NASHVILLE 28","b":"NASHVILLE 8","km":4.01},{"a":"NASHVILLE 23","b":"NASHVILLE 21","km":3.3},{"a":"NASHVILLE 32","b":"NASHVILLE 26","km":4.38},{"a":"NASHVILLE 34","b":"NASHVILLE 33","km":4.15},{"a":"NASHVILLE 21","b":"NASHVILLE 22","km":4.93},{"a":"NASHVILLE 26","b":"NASHVILLE 35","km":4.69},{"a":"NASHVILLE 35","b":"FRANKLIN 46","km":4.98},{"a":"NASHVILLE 33","b":"FRANKLIN 46","km":7.75}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["ANTIOCH 4","NASHVILLE 27"],["ANTIOCH 4","SMYRNA 15"],["HERMITAGE 8","NASHVILLE 11"],["HERMITAGE 8","NASHVILLE 27"],["MADISON 31","NASHVILLE 11"],["MADISON 31","NASHVILLE 15"],["MADISON 33","NASHVILLE 15"],["NASHVILLE 11","NASHVILLE 20"]],"trusted":["ANTIOCH 4","HERMITAGE 8","MADISON 31","NASHVILLE 15"],"protected":["NASHVILLE 11","ANTIOCH 4","MADISON 33","SMYRNA 15","NASHVILLE 15","HERMITAGE 8","MADISON 31","NASHVILLE 20"]}},{"key":"huntsville_r1","title":"Huntsville area","cc":["HUNTSVILLE 19","HUNTSVILLE 9"],"nodes":[{"id":"ARAB 1","mw":29.7,"kv":100.0,"x":40.0,"y":312.8},{"id":"HUNTSVILLE 8","mw":25.0,"kv":100.0,"x":104.1,"y":351.3},{"id":"ATHENS 25","mw":20.2,"kv":100.0,"x":528.3,"y":437.0},{"id":"HUNTSVILLE 14","mw":55.6,"kv":100.0,"x":486.3,"y":439.0},{"id":"HUNTSVILLE 19","mw":30.1,"kv":345.0,"x":434.5,"y":497.5},{"id":"HARVEST 1","mw":37.3,"kv":100.0,"x":515.0,"y":486.8},{"id":"HARVEST 2","mw":40.4,"kv":100.0,"x":495.3,"y":464.2},{"id":"TONEY 1","mw":17.1,"kv":100.0,"x":513.3,"y":510.7},{"id":"HUNTSVILLE 15","mw":18.6,"kv":100.0,"x":433.8,"y":409.3},{"id":"MADISON 22","mw":16.9,"kv":100.0,"x":449.7,"y":380.2},{"id":"HUNTSVILLE 18","mw":53.4,"kv":100.0,"x":409.9,"y":473.8},{"id":"MADISON 23","mw":16.8,"kv":100.0,"x":391.1,"y":451.1},{"id":"MADISON 24","mw":42.0,"kv":100.0,"x":409.3,"y":435.1},{"id":"MADISON 27","mw":96.8,"kv":100.0,"x":350.0,"y":441.5},{"id":"HAZEL GREEN 3","mw":16.8,"kv":100.0,"x":432.4,"y":612.2},{"id":"HUNTSVILLE 16","mw":38.5,"kv":100.0,"x":403.4,"y":553.1},{"id":"HUNTSVILLE 1","mw":62.5,"kv":100.0,"x":287.0,"y":517.6},{"id":"HUNTSVILLE 3","mw":21.1,"kv":100.0,"x":305.1,"y":487.4},{"id":"HUNTSVILLE 20","mw":25.5,"kv":100.0,"x":262.6,"y":495.9},{"id":"HUNTSVILLE 23","mw":23.4,"kv":100.0,"x":314.2,"y":552.5},{"id":"HUNTSVILLE 2","mw":58.7,"kv":100.0,"x":309.2,"y":451.1},{"id":"HUNTSVILLE 4","mw":21.1,"kv":100.0,"x":274.9,"y":450.3},{"id":"HUNTSVILLE 11","mw":64.2,"kv":100.0,"x":279.8,"y":421.3},{"id":"NEW MARKET 6","mw":17.2,"kv":100.0,"x":235.3,"y":558.9},{"id":"HUNTSVILLE 5","mw":20.9,"kv":100.0,"x":231.6,"y":462.9},{"id":"HUNTSVILLE 21","mw":37.6,"kv":100.0,"x":232.3,"y":486.6},{"id":"OWENS CROSS ROADS","mw":37.2,"kv":345.0,"x":196.6,"y":417.9},{"id":"HUNTSVILLE 6","mw":20.9,"kv":100.0,"x":260.9,"y":411.4},{"id":"HUNTSVILLE 12","mw":22.1,"kv":100.0,"x":225.9,"y":401.9},{"id":"HUNTSVILLE 7","mw":25.0,"kv":100.0,"x":243.3,"y":392.1},{"id":"HUNTSVILLE 10","mw":25.0,"kv":100.0,"x":148.9,"y":390.1},{"id":"HUNTSVILLE 9","mw":43.6,"kv":100.0,"x":180.3,"y":415.3},{"id":"NEW HOPE 4","mw":13.3,"kv":100.0,"x":97.8,"y":444.1},{"id":"HUNTSVILLE 13","mw":24.6,"kv":100.0,"x":358.4,"y":425.9},{"id":"MADISON 25","mw":57.1,"kv":100.0,"x":392.8,"y":403.4},{"id":"MADISON 26","mw":41.1,"kv":100.0,"x":415.7,"y":403.6},{"id":"HARTSELLE 1","mw":23.8,"kv":100.0,"x":501.7,"y":297.0},{"id":"HUNTSVILLE 17","mw":30.1,"kv":100.0,"x":427.2,"y":524.0},{"id":"TUSCUMBIA 4","mw":0.0,"kv":345.0,"x":960.0,"y":40.0},{"id":"DECATUR 17","mw":0.0,"kv":345.0,"x":594.1,"y":660.0},{"id":"WINCHESTER 17","mw":0.0,"kv":345.0,"x":841.7,"y":566.1},{"id":"HUNTSVILLE 22","mw":25.5,"kv":100.0,"x":277.5,"y":598.1},{"id":"NEW MARKET 7","mw":15.2,"kv":100.0,"x":304.0,"y":575.5}],"edges":[{"a":"ARAB 1","b":"HUNTSVILLE 8","km":13.89},{"a":"HUNTSVILLE 8","b":"HUNTSVILLE 10","km":11.09},{"a":"ATHENS 25","b":"HUNTSVILLE 14","km":8.42},{"a":"ATHENS 25","b":"HUNTSVILLE 19","km":15.2},{"a":"HUNTSVILLE 14","b":"HARVEST 2","km":5.34},{"a":"HUNTSVILLE 14","b":"MADISON 26","km":10.35},{"a":"HUNTSVILLE 19","b":"HARVEST 1","km":13.79},{"a":"HUNTSVILLE 19","b":"HARVEST 2","km":12.3},{"a":"HUNTSVILLE 19","b":"TONEY 1","km":13.3},{"a":"HUNTSVILLE 19","b":"HUNTSVILLE 17","km":5.46},{"a":"HUNTSVILLE 19","b":"HUNTSVILLE 18","km":6.35},{"a":"HUNTSVILLE 19","b":"OWENS CROSS ROADS","km":33.89},{"a":"HUNTSVILLE 19","b":"TUSCUMBIA 4","km":119.75},{"a":"HUNTSVILLE 19","b":"DECATUR 17","km":39.97},{"a":"HUNTSVILLE 19","b":"WINCHESTER 17","km":64.97},{"a":"HARVEST 1","b":"HARVEST 2","km":6.16},{"a":"HARVEST 1","b":"TONEY 1","km":5.66},{"a":"HUNTSVILLE 15","b":"MADISON 22","km":6.19},{"a":"HUNTSVILLE 15","b":"MADISON 24","km":5.91},{"a":"HUNTSVILLE 15","b":"MADISON 26","km":3.98},{"a":"HUNTSVILLE 15","b":"HARTSELLE 1","km":23.72},{"a":"HUNTSVILLE 18","b":"MADISON 23","km":5.36},{"a":"MADISON 23","b":"MADISON 24","km":4.26},{"a":"MADISON 23","b":"MADISON 27","km":6.36},{"a":"MADISON 27","b":"HUNTSVILLE 2","km":6.22},{"a":"MADISON 27","b":"HUNTSVILLE 13","km":3.53},{"a":"HAZEL GREEN 3","b":"HUNTSVILLE 16","km":12.6},{"a":"HUNTSVILLE 16","b":"HUNTSVILLE 17","km":6.84},{"a":"HUNTSVILLE 16","b":"HUNTSVILLE 23","km":12.2},{"a":"HUNTSVILLE 1","b":"HUNTSVILLE 3","km":7.2},{"a":"HUNTSVILLE 1","b":"HUNTSVILLE 20","km":6.18},{"a":"HUNTSVILLE 1","b":"HUNTSVILLE 23","km":7.85},{"a":"HUNTSVILLE 3","b":"HUNTSVILLE 2","km":6.86},{"a":"HUNTSVILLE 3","b":"NEW MARKET 6","km":13.87},{"a":"HUNTSVILLE 20","b":"HUNTSVILLE 2","km":10.74},{"a":"HUNTSVILLE 20","b":"HUNTSVILLE 21","km":5.14},{"a":"HUNTSVILLE 23","b":"NEW MARKET 7","km":5.1},{"a":"HUNTSVILLE 2","b":"HUNTSVILLE 4","km":6.28},{"a":"HUNTSVILLE 2","b":"HUNTSVILLE 11","km":6.89},{"a":"HUNTSVILLE 4","b":"HUNTSVILLE 5","km":6.97},{"a":"HUNTSVILLE 4","b":"HUNTSVILLE 11","km":8.28},{"a":"HUNTSVILLE 11","b":"HUNTSVILLE 6","km":4.07},{"a":"HUNTSVILLE 11","b":"HUNTSVILLE 7","km":7.65},{"a":"NEW MARKET 6","b":"HUNTSVILLE 22","km":10.73},{"a":"HUNTSVILLE 5","b":"HUNTSVILLE 21","km":5.04},{"a":"HUNTSVILLE 5","b":"OWENS CROSS ROADS","km":10.69},{"a":"OWENS CROSS ROADS","b":"HUNTSVILLE 9","km":2.8},{"a":"OWENS CROSS ROADS","b":"HUNTSVILLE 12","km":5.76},{"a":"HUNTSVILLE 6","b":"HUNTSVILLE 12","km":5.85},{"a":"HUNTSVILLE 12","b":"HUNTSVILLE 7","km":3.8},{"a":"HUNTSVILLE 10","b":"HUNTSVILLE 9","km":7.31},{"a":"HUNTSVILLE 9","b":"NEW HOPE 4","km":13.57},{"a":"HUNTSVILLE 13","b":"MADISON 25","km":6.62},{"a":"MADISON 25","b":"MADISON 26","km":3.73},{"a":"HUNTSVILLE 22","b":"NEW MARKET 7","km":6.55}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["HARVEST 1","HUNTSVILLE 19"],["HARVEST 2","HUNTSVILLE 14"],["HARVEST 2","HUNTSVILLE 19"],["HUNTSVILLE 14","MADISON 26"],["HUNTSVILLE 18","HUNTSVILLE 19"],["HUNTSVILLE 18","MADISON 23"],["MADISON 23","MADISON 24"],["MADISON 23","MADISON 27"]],"trusted":["HARVEST 2","HUNTSVILLE 14","HUNTSVILLE 18","MADISON 23"],"protected":["MADISON 27","MADISON 26","HUNTSVILLE 14","MADISON 24","HARVEST 1","HARVEST 2","HUNTSVILLE 18","MADISON 23"]}},{"key":"memphis_r1","title":"Memphis area","cc":["MEMPHIS 9","MEMPHIS 22"],"nodes":[{"id":"HORN LAKE 1","mw":24.6,"kv":100.0,"x":405.9,"y":401.4},{"id":"SOUTHAVEN 3","mw":33.8,"kv":100.0,"x":450.1,"y":391.3},{"id":"MEMPHIS 2","mw":58.7,"kv":138.0,"x":421.2,"y":417.7},{"id":"MEMPHIS 15","mw":22.4,"kv":138.0,"x":391.6,"y":398.2},{"id":"HORN LAKE 3","mw":41.4,"kv":345.0,"x":489.3,"y":583.7},{"id":"OLIVE BRANCH 3","mw":34.7,"kv":345.0,"x":725.3,"y":472.0},{"id":"MEMPHIS 9","mw":32.4,"kv":345.0,"x":424.3,"y":511.0},{"id":"OLIVE BRANCH 2","mw":34.7,"kv":100.0,"x":718.8,"y":452.5},{"id":"MEMPHIS 34","mw":31.4,"kv":138.0,"x":693.3,"y":450.4},{"id":"WEST MEMPHIS 3","mw":23.3,"kv":115.0,"x":420.7,"y":460.0},{"id":"MEMPHIS 36","mw":71.9,"kv":345.0,"x":786.1,"y":543.1},{"id":"MEMPHIS 50","mw":89.9,"kv":345.0,"x":423.5,"y":660.0},{"id":"MEMPHIS 22","mw":35.1,"kv":138.0,"x":460.4,"y":404.5},{"id":"SOUTHAVEN 1","mw":33.8,"kv":100.0,"x":483.6,"y":357.6},{"id":"MEMPHIS 23","mw":35.1,"kv":138.0,"x":510.2,"y":357.9},{"id":"SOUTHAVEN 6","mw":0.0,"kv":100.0,"x":469.9,"y":379.0},{"id":"SOUTHAVEN 4","mw":67.3,"kv":100.0,"x":501.4,"y":334.5},{"id":"SOUTHAVEN 5","mw":14.2,"kv":100.0,"x":549.9,"y":293.4},{"id":"WALLS","mw":7.8,"kv":100.0,"x":423.4,"y":522.2},{"id":"MARION 46","mw":14.1,"kv":115.0,"x":371.8,"y":460.4},{"id":"ARLINGTON 25","mw":45.7,"kv":138.0,"x":111.1,"y":531.2},{"id":"BRIGHTON 6","mw":46.7,"kv":345.0,"x":103.8,"y":553.9},{"id":"MEMPHIS 46","mw":18.2,"kv":138.0,"x":135.0,"y":503.6},{"id":"COLLIERVILLE 2","mw":47.9,"kv":138.0,"x":645.1,"y":487.9},{"id":"MEMPHIS 35","mw":31.4,"kv":138.0,"x":596.5,"y":447.8},{"id":"MOSCOW 4","mw":11.6,"kv":138.0,"x":960.0,"y":417.4},{"id":"WEST MEMPHIS 1","mw":37.4,"kv":345.0,"x":337.9,"y":455.7},{"id":"CORDOVA 4","mw":37.5,"kv":138.0,"x":114.3,"y":373.5},{"id":"MEMPHIS 13","mw":36.3,"kv":138.0,"x":159.0,"y":393.7},{"id":"MEMPHIS 47","mw":50.2,"kv":138.0,"x":88.1,"y":366.7},{"id":"CORDOVA 5","mw":37.5,"kv":138.0,"x":59.8,"y":341.8},{"id":"CORDOVA 6","mw":74.0,"kv":138.0,"x":85.4,"y":377.0},{"id":"MEMPHIS 48","mw":36.6,"kv":138.0,"x":159.3,"y":359.6},{"id":"MEMPHIS 49","mw":36.5,"kv":138.0,"x":66.6,"y":405.1},{"id":"CORDOVA 8","mw":30.5,"kv":138.0,"x":86.7,"y":479.2},{"id":"MEMPHIS 51","mw":26.7,"kv":138.0,"x":154.9,"y":471.1},{"id":"CORDOVA 11","mw":30.5,"kv":138.0,"x":40.0,"y":364.9},{"id":"GERMANTOWN 10","mw":20.9,"kv":138.0,"x":614.1,"y":418.2},{"id":"MEMPHIS 18","mw":48.0,"kv":138.0,"x":585.1,"y":429.5},{"id":"GERMANTOWN 11","mw":40.4,"kv":138.0,"x":641.7,"y":436.6},{"id":"MEMPHIS 1","mw":14.1,"kv":138.0,"x":303.4,"y":392.6},{"id":"MEMPHIS 7","mw":15.4,"kv":138.0,"x":293.4,"y":418.6},{"id":"EARLE 1","mw":6.7,"kv":115.0,"x":319.8,"y":356.2},{"id":"MARION 47","mw":17.9,"kv":115.0,"x":274.4,"y":344.7},{"id":"MEMPHIS 40","mw":31.5,"kv":138.0,"x":315.9,"y":336.2},{"id":"MEMPHIS 16","mw":31.9,"kv":138.0,"x":369.8,"y":419.5},{"id":"MEMPHIS 21","mw":73.0,"kv":138.0,"x":435.3,"y":439.6},{"id":"MEMPHIS 3","mw":35.8,"kv":138.0,"x":325.7,"y":404.2},{"id":"MEMPHIS 4","mw":23.7,"kv":138.0,"x":294.9,"y":408.3},{"id":"MEMPHIS 41","mw":54.9,"kv":138.0,"x":358.7,"y":407.2},{"id":"MEMPHIS 42","mw":68.2,"kv":138.0,"x":225.7,"y":420.7},{"id":"MEMPHIS 5","mw":23.7,"kv":138.0,"x":289.6,"y":439.9},{"id":"MEMPHIS 33","mw":60.1,"kv":138.0,"x":240.9,"y":407.8},{"id":"MEMPHIS 6","mw":62.3,"kv":138.0,"x":337.0,"y":415.1},{"id":"WEST MEMPHIS 4","mw":23.3,"kv":115.0,"x":298.0,"y":432.0},{"id":"MEMPHIS 8","mw":32.4,"kv":138.0,"x":461.8,"y":474.9},{"id":"MEMPHIS 10","mw":64.9,"kv":138.0,"x":409.2,"y":486.2},{"id":"MEMPHIS 11","mw":32.4,"kv":138.0,"x":432.2,"y":466.0},{"id":"MEMPHIS 52","mw":0.0,"kv":138.0,"x":396.1,"y":464.0},{"id":"MEMPHIS 53","mw":0.0,"kv":138.0,"x":403.0,"y":487.1},{"id":"MEMPHIS 54","mw":0.0,"kv":138.0,"x":405.1,"y":474.2},{"id":"FORREST CITY 2","mw":20.5,"kv":345.0,"x":884.2,"y":40.0},{"id":"HUGHES","mw":9.3,"kv":115.0,"x":485.1,"y":494.1},{"id":"MEMPHIS 12","mw":93.0,"kv":138.0,"x":275.7,"y":380.2},{"id":"MEMPHIS 20","mw":34.0,"kv":138.0,"x":258.9,"y":363.8},{"id":"MEMPHIS 30","mw":118.6,"kv":138.0,"x":352.3,"y":380.4},{"id":"MEMPHIS 43","mw":66.7,"kv":138.0,"x":215.7,"y":407.2},{"id":"MEMPHIS 39","mw":47.8,"kv":138.0,"x":177.2,"y":398.1},{"id":"MEMPHIS 14","mw":54.4,"kv":138.0,"x":106.9,"y":426.4},{"id":"MEMPHIS 44","mw":54.2,"kv":138.0,"x":206.7,"y":435.1},{"id":"MEMPHIS 24","mw":35.1,"kv":138.0,"x":435.1,"y":404.5},{"id":"MEMPHIS 17","mw":23.4,"kv":138.0,"x":539.1,"y":352.9},{"id":"MEMPHIS 27","mw":70.1,"kv":138.0,"x":575.5,"y":355.1},{"id":"MEMPHIS 28","mw":36.1,"kv":138.0,"x":556.9,"y":335.1},{"id":"MEMPHIS 37","mw":54.2,"kv":138.0,"x":542.6,"y":419.2},{"id":"MEMPHIS 19","mw":70.0,"kv":138.0,"x":514.5,"y":418.2},{"id":"MEMPHIS 31","mw":19.4,"kv":138.0,"x":500.4,"y":397.5},{"id":"MEMPHIS 25","mw":82.5,"kv":138.0,"x":241.2,"y":355.5},{"id":"MEMPHIS 26","mw":36.1,"kv":138.0,"x":519.3,"y":385.0},{"id":"MEMPHIS 32","mw":42.9,"kv":138.0,"x":190.0,"y":366.9},{"id":"MEMPHIS 29","mw":55.6,"kv":138.0,"x":601.7,"y":381.4},{"id":"MEMPHIS 38","mw":64.1,"kv":138.0,"x":219.8,"y":458.3},{"id":"MILLINGTON 3","mw":24.3,"kv":138.0,"x":293.3,"y":286.2},{"id":"MEMPHIS 45","mw":78.1,"kv":138.0,"x":187.3,"y":445.3}],"edges":[{"a":"HORN LAKE 1","b":"SOUTHAVEN 3","km":6.34},{"a":"HORN LAKE 1","b":"MEMPHIS 2","km":4.46},{"a":"HORN LAKE 1","b":"MEMPHIS 15","km":2.24},{"a":"SOUTHAVEN 3","b":"SOUTHAVEN 6","km":4.23},{"a":"SOUTHAVEN 3","b":"MEMPHIS 22","km":3.26},{"a":"MEMPHIS 2","b":"MEMPHIS 22","km":4.7},{"a":"MEMPHIS 2","b":"MEMPHIS 15","km":6.47},{"a":"MEMPHIS 2","b":"MEMPHIS 16","km":5.64},{"a":"MEMPHIS 2","b":"MEMPHIS 21","km":5.39},{"a":"MEMPHIS 15","b":"MEMPHIS 24","km":4.17},{"a":"MEMPHIS 15","b":"MEMPHIS 30","km":5.29},{"a":"MEMPHIS 15","b":"MEMPHIS 41","km":4.31},{"a":"HORN LAKE 3","b":"OLIVE BRANCH 3","km":39.55},{"a":"HORN LAKE 3","b":"MEMPHIS 9","km":17.62},{"a":"OLIVE BRANCH 3","b":"OLIVE BRANCH 2","km":4.99},{"a":"OLIVE BRANCH 3","b":"MEMPHIS 36","km":15.99},{"a":"OLIVE BRANCH 3","b":"MEMPHIS 50","km":35.08},{"a":"OLIVE BRANCH 3","b":"MEMPHIS 34","km":5.88},{"a":"MEMPHIS 9","b":"WALLS","km":2.71},{"a":"MEMPHIS 9","b":"MEMPHIS 8","km":7.84},{"a":"MEMPHIS 9","b":"WEST MEMPHIS 1","km":23.7},{"a":"MEMPHIS 9","b":"FORREST CITY 2","km":83.6},{"a":"MEMPHIS 9","b":"MEMPHIS 53","km":6.13},{"a":"OLIVE BRANCH 2","b":"MEMPHIS 34","km":3.17},{"a":"OLIVE BRANCH 2","b":"WEST MEMPHIS 3","km":46.78},{"a":"MEMPHIS 34","b":"MOSCOW 4","km":29.92},{"a":"MEMPHIS 34","b":"GERMANTOWN 11","km":6.45},{"a":"WEST MEMPHIS 3","b":"MEMPHIS 11","km":2.32},{"a":"WEST MEMPHIS 3","b":"MEMPHIS 54","km":5.57},{"a":"WEST MEMPHIS 3","b":"MARION 46","km":5.12},{"a":"MEMPHIS 36","b":"MEMPHIS 50","km":32.66},{"a":"MEMPHIS 50","b":"BRIGHTON 6","km":27.99},{"a":"MEMPHIS 22","b":"SOUTHAVEN 1","km":8.99},{"a":"MEMPHIS 22","b":"SOUTHAVEN 6","km":5.09},{"a":"MEMPHIS 22","b":"MEMPHIS 21","km":7.15},{"a":"MEMPHIS 22","b":"MEMPHIS 24","km":6.16},{"a":"MEMPHIS 22","b":"MEMPHIS 31","km":5.06},{"a":"SOUTHAVEN 1","b":"MEMPHIS 23","km":3.62},{"a":"MEMPHIS 23","b":"SOUTHAVEN 4","km":4.94},{"a":"MEMPHIS 23","b":"SOUTHAVEN 5","km":13.58},{"a":"MEMPHIS 23","b":"SOUTHAVEN 6","km":5.72},{"a":"MEMPHIS 23","b":"MEMPHIS 17","km":3.35},{"a":"MEMPHIS 23","b":"MEMPHIS 26","km":6.81},{"a":"MEMPHIS 23","b":"MEMPHIS 28","km":8.91},{"a":"WALLS","b":"MARION 46","km":22.5},{"a":"MARION 46","b":"MEMPHIS 52","km":3.52},{"a":"MARION 46","b":"WEST MEMPHIS 4","km":10.7},{"a":"MARION 46","b":"WEST MEMPHIS 1","km":4.46},{"a":"ARLINGTON 25","b":"BRIGHTON 6","km":5.33},{"a":"ARLINGTON 25","b":"MEMPHIS 46","km":6.61},{"a":"BRIGHTON 6","b":"WEST MEMPHIS 1","km":68.01},{"a":"MEMPHIS 46","b":"MEMPHIS 51","km":6.99},{"a":"COLLIERVILLE 2","b":"MEMPHIS 35","km":9.29},{"a":"MEMPHIS 35","b":"MEMPHIS 18","km":4.34},{"a":"WEST MEMPHIS 1","b":"MEMPHIS 1","km":8.4},{"a":"CORDOVA 4","b":"MEMPHIS 13","km":6.15},{"a":"CORDOVA 4","b":"MEMPHIS 47","km":3.38},{"a":"MEMPHIS 13","b":"MEMPHIS 39","km":2.31},{"a":"MEMPHIS 47","b":"CORDOVA 5","km":6.2},{"a":"MEMPHIS 47","b":"CORDOVA 6","km":2.74},{"a":"MEMPHIS 47","b":"CORDOVA 11","km":5.25},{"a":"CORDOVA 6","b":"MEMPHIS 48","km":7.02},{"a":"CORDOVA 6","b":"MEMPHIS 49","km":6.35},{"a":"MEMPHIS 48","b":"MEMPHIS 32","km":3.65},{"a":"MEMPHIS 49","b":"MEMPHIS 14","km":6.05},{"a":"CORDOVA 8","b":"MEMPHIS 51","km":7.49},{"a":"MEMPHIS 51","b":"MEMPHIS 45","km":6.0},{"a":"GERMANTOWN 10","b":"MEMPHIS 18","km":4.19},{"a":"MEMPHIS 18","b":"GERMANTOWN 11","km":5.88},{"a":"MEMPHIS 18","b":"MEMPHIS 37","km":4.71},{"a":"MEMPHIS 1","b":"MEMPHIS 7","km":4.65},{"a":"MEMPHIS 1","b":"EARLE 1","km":7.19},{"a":"MEMPHIS 1","b":"MARION 47","km":8.49},{"a":"MEMPHIS 1","b":"MEMPHIS 40","km":8.34},{"a":"MEMPHIS 7","b":"MEMPHIS 4","km":3.87},{"a":"MEMPHIS 7","b":"WEST MEMPHIS 4","km":3.06},{"a":"MEMPHIS 40","b":"MILLINGTON 3","km":9.59},{"a":"MEMPHIS 16","b":"MEMPHIS 5","km":7.34},{"a":"MEMPHIS 16","b":"MEMPHIS 41","km":3.3},{"a":"MEMPHIS 21","b":"MEMPHIS 8","km":7.73},{"a":"MEMPHIS 21","b":"MEMPHIS 11","km":6.03},{"a":"MEMPHIS 21","b":"MEMPHIS 52","km":5.9},{"a":"MEMPHIS 21","b":"MEMPHIS 53","km":10.77},{"a":"MEMPHIS 21","b":"MEMPHIS 54","km":9.12},{"a":"MEMPHIS 3","b":"MEMPHIS 4","km":3.3},{"a":"MEMPHIS 3","b":"MEMPHIS 41","km":3.78},{"a":"MEMPHIS 4","b":"MEMPHIS 42","km":6.92},{"a":"MEMPHIS 41","b":"MEMPHIS 6","km":3.31},{"a":"MEMPHIS 42","b":"MEMPHIS 5","km":7.54},{"a":"MEMPHIS 42","b":"MEMPHIS 43","km":3.07},{"a":"MEMPHIS 42","b":"MEMPHIS 44","km":3.86},{"a":"MEMPHIS 33","b":"MEMPHIS 6","km":7.88},{"a":"MEMPHIS 33","b":"MEMPHIS 32","km":7.78},{"a":"MEMPHIS 33","b":"MEMPHIS 44","km":6.58},{"a":"MEMPHIS 8","b":"MEMPHIS 10","km":9.16},{"a":"MEMPHIS 8","b":"MEMPHIS 11","km":8.06},{"a":"MEMPHIS 8","b":"MEMPHIS 52","km":11.56},{"a":"MEMPHIS 8","b":"MEMPHIS 53","km":9.09},{"a":"MEMPHIS 8","b":"MEMPHIS 54","km":6.8},{"a":"MEMPHIS 10","b":"MEMPHIS 11","km":5.26},{"a":"MEMPHIS 10","b":"MEMPHIS 53","km":0.81},{"a":"MEMPHIS 10","b":"MEMPHIS 54","km":3.04},{"a":"MEMPHIS 11","b":"HUGHES","km":7.84},{"a":"MEMPHIS 11","b":"MEMPHIS 54","km":3.68},{"a":"MEMPHIS 52","b":"MEMPHIS 38","km":18.09},{"a":"MEMPHIS 52","b":"MEMPHIS 54","km":2.48},{"a":"MEMPHIS 53","b":"MEMPHIS 54","km":3.05},{"a":"MEMPHIS 12","b":"MEMPHIS 20","km":3.98},{"a":"MEMPHIS 12","b":"MEMPHIS 30","km":6.09},{"a":"MEMPHIS 12","b":"MEMPHIS 43","km":6.6},{"a":"MEMPHIS 20","b":"MEMPHIS 25","km":2.76},{"a":"MEMPHIS 43","b":"MEMPHIS 39","km":4.51},{"a":"MEMPHIS 14","b":"MEMPHIS 44","km":9.98},{"a":"MEMPHIS 44","b":"MEMPHIS 38","km":5.25},{"a":"MEMPHIS 44","b":"MEMPHIS 45","km":3.14},{"a":"MEMPHIS 24","b":"MEMPHIS 19","km":6.38},{"a":"MEMPHIS 17","b":"MEMPHIS 27","km":3.96},{"a":"MEMPHIS 17","b":"MEMPHIS 28","km":4.37},{"a":"MEMPHIS 27","b":"MEMPHIS 29","km":7.76},{"a":"MEMPHIS 37","b":"MEMPHIS 19","km":2.89},{"a":"MEMPHIS 37","b":"MEMPHIS 29","km":8.43},{"a":"MEMPHIS 19","b":"MEMPHIS 31","km":9.65},{"a":"MEMPHIS 31","b":"MEMPHIS 26","km":3.48},{"a":"MEMPHIS 25","b":"MEMPHIS 32","km":6.3}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["HORN LAKE 3","MEMPHIS 9"],["MEMPHIS 15","MEMPHIS 24"],["MEMPHIS 15","MEMPHIS 30"],["MEMPHIS 19","MEMPHIS 24"],["MEMPHIS 21","MEMPHIS 22"],["MEMPHIS 21","MEMPHIS 8"],["MEMPHIS 22","MEMPHIS 24"],["MEMPHIS 8","MEMPHIS 9"]],"trusted":["MEMPHIS 15","MEMPHIS 21","MEMPHIS 24","MEMPHIS 8"],"protected":["MEMPHIS 22","MEMPHIS 30","MEMPHIS 19","HORN LAKE 3","MEMPHIS 21","MEMPHIS 8","MEMPHIS 15","MEMPHIS 24"]}},{"key":"atlanta_r1","title":"Atlanta area","cc":["ATLANTA 23","ATLANTA 24"],"nodes":[{"id":"ATLANTA 1","mw":102.1,"kv":100.0,"x":841.2,"y":460.2},{"id":"FAYETTEVILLE 37","mw":43.0,"kv":100.0,"x":879.8,"y":531.9},{"id":"ATLANTA 35","mw":40.5,"kv":100.0,"x":799.8,"y":437.8},{"id":"ATLANTA 2","mw":42.5,"kv":100.0,"x":782.3,"y":585.4},{"id":"FAIRBURN 1","mw":23.1,"kv":100.0,"x":867.7,"y":581.7},{"id":"FAIRBURN 2","mw":39.6,"kv":345.0,"x":715.0,"y":552.0},{"id":"FAIRBURN 3","mw":55.6,"kv":100.0,"x":771.9,"y":660.0},{"id":"ATLANTA 3","mw":54.5,"kv":100.0,"x":906.4,"y":496.6},{"id":"UNION CITY 9","mw":33.0,"kv":100.0,"x":960.0,"y":560.0},{"id":"ATLANTA 4","mw":63.6,"kv":100.0,"x":685.5,"y":460.4},{"id":"DOUGLASVILLE 6","mw":59.9,"kv":100.0,"x":581.2,"y":468.7},{"id":"ATLANTA 26","mw":31.2,"kv":100.0,"x":663.3,"y":422.7},{"id":"ATLANTA 30","mw":110.8,"kv":100.0,"x":697.6,"y":411.3},{"id":"ATLANTA 5","mw":58.0,"kv":100.0,"x":712.4,"y":68.5},{"id":"FOREST PARK 2","mw":63.0,"kv":100.0,"x":726.6,"y":40.0},{"id":"CONLEY","mw":0.0,"kv":100.0,"x":689.0,"y":137.3},{"id":"ATLANTA 17","mw":53.0,"kv":100.0,"x":814.9,"y":173.0},{"id":"ELLENWOOD 1","mw":65.4,"kv":100.0,"x":909.4,"y":170.6},{"id":"STOCKBRIDGE 2","mw":104.1,"kv":100.0,"x":852.1,"y":129.0},{"id":"ATLANTA 25","mw":79.4,"kv":100.0,"x":541.5,"y":396.5},{"id":"AUSTELL 2","mw":35.0,"kv":100.0,"x":515.1,"y":429.9},{"id":"MABLETON 2","mw":49.5,"kv":100.0,"x":474.4,"y":375.8},{"id":"SMYRNA 10","mw":0.0,"kv":100.0,"x":488.9,"y":350.1},{"id":"MARIETTA 5","mw":138.2,"kv":100.0,"x":282.8,"y":412.9},{"id":"MARIETTA 9","mw":73.5,"kv":100.0,"x":173.5,"y":397.4},{"id":"SMYRNA 6","mw":31.3,"kv":100.0,"x":346.1,"y":378.7},{"id":"ATLANTA 6","mw":27.3,"kv":100.0,"x":285.5,"y":373.8},{"id":"ATLANTA 7","mw":26.4,"kv":100.0,"x":170.5,"y":359.1},{"id":"ATLANTA 21","mw":59.9,"kv":100.0,"x":370.0,"y":345.1},{"id":"SMYRNA 5","mw":92.1,"kv":100.0,"x":385.1,"y":338.4},{"id":"ATLANTA 41","mw":0.0,"kv":100.0,"x":397.1,"y":353.3},{"id":"ATLANTA 45","mw":0.0,"kv":100.0,"x":240.7,"y":334.9},{"id":"ATLANTA 10","mw":105.5,"kv":100.0,"x":131.7,"y":326.2},{"id":"ROSWELL 6","mw":33.5,"kv":100.0,"x":106.4,"y":381.3},{"id":"ATLANTA 13","mw":134.3,"kv":100.0,"x":182.4,"y":285.4},{"id":"ATLANTA 8","mw":149.2,"kv":100.0,"x":263.3,"y":308.7},{"id":"ATLANTA 20","mw":149.1,"kv":100.0,"x":339.1,"y":304.0},{"id":"ATLANTA 12","mw":72.6,"kv":100.0,"x":152.1,"y":267.5},{"id":"ATLANTA 9","mw":61.2,"kv":100.0,"x":86.9,"y":248.8},{"id":"TUCKER 1","mw":74.3,"kv":100.0,"x":45.7,"y":229.8},{"id":"NORCROSS 2","mw":65.2,"kv":100.0,"x":62.9,"y":205.4},{"id":"NORCROSS 3","mw":85.0,"kv":100.0,"x":40.0,"y":264.1},{"id":"ATLANTA 11","mw":84.5,"kv":100.0,"x":429.2,"y":271.8},{"id":"ATLANTA 37","mw":23.0,"kv":100.0,"x":499.8,"y":279.4},{"id":"ATLANTA 38","mw":0.0,"kv":100.0,"x":473.0,"y":268.3},{"id":"ATLANTA 14","mw":60.6,"kv":100.0,"x":721.3,"y":203.4},{"id":"ATLANTA 18","mw":52.1,"kv":100.0,"x":659.9,"y":238.9},{"id":"DECATUR 7","mw":114.5,"kv":100.0,"x":778.4,"y":186.5},{"id":"ATLANTA 28","mw":36.7,"kv":100.0,"x":681.4,"y":195.2},{"id":"ATLANTA 15","mw":131.7,"kv":100.0,"x":477.0,"y":305.6},{"id":"ATLANTA 16","mw":75.5,"kv":100.0,"x":492.6,"y":160.8},{"id":"STONE MOUNTAIN 5","mw":67.1,"kv":100.0,"x":479.5,"y":127.9},{"id":"DECATUR 9","mw":0.0,"kv":100.0,"x":492.8,"y":165.5},{"id":"DECATUR 1","mw":77.2,"kv":100.0,"x":562.7,"y":225.6},{"id":"ATLANTA 34","mw":54.2,"kv":100.0,"x":650.5,"y":221.4},{"id":"ATLANTA 19","mw":95.8,"kv":100.0,"x":533.6,"y":271.7},{"id":"ATLANTA 40","mw":0.0,"kv":100.0,"x":538.2,"y":276.4},{"id":"DECATUR 2","mw":59.1,"kv":100.0,"x":524.8,"y":197.1},{"id":"ATLANTA 43","mw":0.0,"kv":100.0,"x":563.9,"y":243.9},{"id":"ATLANTA 22","mw":38.7,"kv":100.0,"x":465.4,"y":214.2},{"id":"ATLANTA 31","mw":79.0,"kv":100.0,"x":576.9,"y":429.1},{"id":"DECATUR 10","mw":0.0,"kv":100.0,"x":448.9,"y":182.6},{"id":"ATLANTA 23","mw":62.5,"kv":100.0,"x":582.1,"y":351.3},{"id":"ATLANTA 24","mw":61.5,"kv":100.0,"x":654.1,"y":390.0},{"id":"ATLANTA 27","mw":77.9,"kv":100.0,"x":577.7,"y":319.6},{"id":"ATLANTA 33","mw":34.0,"kv":100.0,"x":559.2,"y":372.2},{"id":"SMYRNA 9","mw":0.0,"kv":100.0,"x":536.5,"y":355.5},{"id":"ATLANTA 32","mw":34.0,"kv":100.0,"x":581.0,"y":390.1},{"id":"ATLANTA 36","mw":31.1,"kv":100.0,"x":548.3,"y":293.4},{"id":"ATLANTA 39","mw":0.0,"kv":100.0,"x":643.0,"y":221.6},{"id":"ATLANTA 29","mw":80.2,"kv":100.0,"x":749.1,"y":419.5},{"id":"ATLANTA 44","mw":0.0,"kv":100.0,"x":618.3,"y":224.1},{"id":"ATLANTA 42","mw":0.0,"kv":100.0,"x":594.6,"y":240.2}],"edges":[{"a":"ATLANTA 1","b":"FAYETTEVILLE 37","km":9.26},{"a":"ATLANTA 1","b":"ATLANTA 35","km":4.89},{"a":"FAYETTEVILLE 37","b":"ATLANTA 3","km":5.87},{"a":"FAYETTEVILLE 37","b":"FAIRBURN 1","km":6.53},{"a":"ATLANTA 35","b":"ATLANTA 3","km":10.74},{"a":"ATLANTA 35","b":"ATLANTA 29","km":4.75},{"a":"ATLANTA 2","b":"FAIRBURN 1","km":6.32},{"a":"ATLANTA 2","b":"FAIRBURN 2","km":6.58},{"a":"ATLANTA 2","b":"FAIRBURN 3","km":9.54},{"a":"FAIRBURN 1","b":"FAIRBURN 3","km":16.92},{"a":"FAIRBURN 1","b":"UNION CITY 9","km":8.46},{"a":"FAIRBURN 2","b":"ATLANTA 4","km":11.06},{"a":"ATLANTA 3","b":"UNION CITY 9","km":9.13},{"a":"ATLANTA 4","b":"DOUGLASVILLE 6","km":9.25},{"a":"ATLANTA 4","b":"ATLANTA 26","km":6.04},{"a":"ATLANTA 4","b":"ATLANTA 30","km":5.46},{"a":"DOUGLASVILLE 6","b":"ATLANTA 31","km":5.06},{"a":"ATLANTA 26","b":"ATLANTA 24","km":4.47},{"a":"ATLANTA 26","b":"ATLANTA 30","km":4.74},{"a":"ATLANTA 30","b":"ATLANTA 24","km":4.17},{"a":"ATLANTA 30","b":"ATLANTA 29","km":4.29},{"a":"ATLANTA 5","b":"FOREST PARK 2","km":4.12},{"a":"ATLANTA 5","b":"CONLEY","km":8.77},{"a":"CONLEY","b":"ATLANTA 28","km":6.97},{"a":"ATLANTA 17","b":"ELLENWOOD 1","km":7.34},{"a":"ATLANTA 17","b":"STOCKBRIDGE 2","km":6.3},{"a":"ATLANTA 17","b":"DECATUR 7","km":3.49},{"a":"ATLANTA 25","b":"AUSTELL 2","km":4.64},{"a":"ATLANTA 25","b":"MABLETON 2","km":6.83},{"a":"ATLANTA 25","b":"ATLANTA 32","km":4.09},{"a":"ATLANTA 25","b":"ATLANTA 33","km":3.69},{"a":"MABLETON 2","b":"SMYRNA 10","km":3.91},{"a":"SMYRNA 10","b":"ATLANTA 15","km":6.18},{"a":"SMYRNA 10","b":"SMYRNA 9","km":3.5},{"a":"SMYRNA 10","b":"ATLANTA 41","km":6.49},{"a":"MARIETTA 5","b":"MARIETTA 9","km":8.78},{"a":"MARIETTA 5","b":"SMYRNA 6","km":6.79},{"a":"MARIETTA 5","b":"ATLANTA 6","km":6.27},{"a":"MARIETTA 9","b":"ATLANTA 7","km":4.9},{"a":"SMYRNA 6","b":"ATLANTA 6","km":4.81},{"a":"SMYRNA 6","b":"ATLANTA 21","km":6.76},{"a":"SMYRNA 6","b":"ATLANTA 41","km":4.89},{"a":"ATLANTA 6","b":"ATLANTA 45","km":5.94},{"a":"ATLANTA 7","b":"ATLANTA 10","km":5.38},{"a":"ATLANTA 7","b":"ROSWELL 6","km":5.55},{"a":"ATLANTA 7","b":"ATLANTA 45","km":5.87},{"a":"ATLANTA 21","b":"SMYRNA 5","km":1.92},{"a":"ATLANTA 21","b":"ATLANTA 20","km":5.25},{"a":"ATLANTA 21","b":"ATLANTA 41","km":2.45},{"a":"SMYRNA 5","b":"ATLANTA 41","km":2.6},{"a":"ATLANTA 41","b":"ATLANTA 15","km":9.47},{"a":"ATLANTA 45","b":"ATLANTA 8","km":3.65},{"a":"ATLANTA 10","b":"ATLANTA 13","km":5.99},{"a":"ATLANTA 13","b":"ATLANTA 8","km":6.59},{"a":"ATLANTA 13","b":"ATLANTA 12","km":3.36},{"a":"ATLANTA 8","b":"ATLANTA 20","km":5.41},{"a":"ATLANTA 20","b":"ATLANTA 11","km":7.56},{"a":"ATLANTA 12","b":"ATLANTA 9","km":5.42},{"a":"ATLANTA 9","b":"TUCKER 1","km":4.41},{"a":"ATLANTA 9","b":"NORCROSS 2","km":5.57},{"a":"ATLANTA 9","b":"NORCROSS 3","km":3.99},{"a":"TUCKER 1","b":"NORCROSS 2","km":4.75},{"a":"ATLANTA 11","b":"ATLANTA 37","km":4.99},{"a":"ATLANTA 11","b":"ATLANTA 38","km":4.31},{"a":"ATLANTA 37","b":"ATLANTA 15","km":4.32},{"a":"ATLANTA 37","b":"ATLANTA 19","km":3.45},{"a":"ATLANTA 37","b":"ATLANTA 36","km":4.04},{"a":"ATLANTA 37","b":"ATLANTA 38","km":2.69},{"a":"ATLANTA 37","b":"ATLANTA 40","km":2.9},{"a":"ATLANTA 38","b":"ATLANTA 15","km":5.38},{"a":"ATLANTA 38","b":"ATLANTA 22","km":6.53},{"a":"ATLANTA 14","b":"ATLANTA 18","km":5.86},{"a":"ATLANTA 14","b":"DECATUR 7","km":5.13},{"a":"ATLANTA 14","b":"ATLANTA 28","km":4.08},{"a":"ATLANTA 18","b":"DECATUR 1","km":5.21},{"a":"ATLANTA 18","b":"ATLANTA 34","km":4.62},{"a":"ATLANTA 28","b":"ATLANTA 34","km":4.31},{"a":"ATLANTA 28","b":"ATLANTA 39","km":5.35},{"a":"ATLANTA 16","b":"STONE MOUNTAIN 5","km":4.5},{"a":"ATLANTA 16","b":"DECATUR 9","km":0.68},{"a":"DECATUR 9","b":"DECATUR 2","km":4.75},{"a":"DECATUR 9","b":"DECATUR 10","km":4.06},{"a":"DECATUR 1","b":"DECATUR 2","km":4.46},{"a":"DECATUR 1","b":"ATLANTA 43","km":2.42},{"a":"ATLANTA 34","b":"SMYRNA 9","km":14.7},{"a":"ATLANTA 34","b":"ATLANTA 39","km":0.65},{"a":"ATLANTA 19","b":"ATLANTA 40","km":0.83},{"a":"ATLANTA 40","b":"ATLANTA 36","km":2.63},{"a":"ATLANTA 40","b":"ATLANTA 43","km":4.29},{"a":"DECATUR 2","b":"ATLANTA 22","km":4.94},{"a":"ATLANTA 43","b":"ATLANTA 42","km":2.67},{"a":"ATLANTA 22","b":"DECATUR 10","km":4.24},{"a":"ATLANTA 31","b":"ATLANTA 32","km":4.78},{"a":"ATLANTA 23","b":"ATLANTA 24","km":6.65},{"a":"ATLANTA 23","b":"ATLANTA 27","km":4.16},{"a":"ATLANTA 23","b":"ATLANTA 33","km":3.76},{"a":"ATLANTA 23","b":"SMYRNA 9","km":3.81},{"a":"ATLANTA 24","b":"ATLANTA 32","km":6.51},{"a":"ATLANTA 27","b":"ATLANTA 36","km":3.9},{"a":"ATLANTA 33","b":"ATLANTA 32","km":2.96},{"a":"ATLANTA 33","b":"SMYRNA 9","km":3.04},{"a":"ATLANTA 39","b":"ATLANTA 44","km":2.27},{"a":"ATLANTA 44","b":"ATLANTA 42","km":3.04}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["ATLANTA 15","SMYRNA 10"],["ATLANTA 18","ATLANTA 34"],["ATLANTA 23","ATLANTA 24"],["ATLANTA 23","SMYRNA 9"],["ATLANTA 28","ATLANTA 34"],["ATLANTA 34","SMYRNA 9"],["MABLETON 2","SMYRNA 10"],["SMYRNA 10","SMYRNA 9"]],"trusted":["ATLANTA 34","SMYRNA 10","SMYRNA 9"],"protected":["ATLANTA 24","ATLANTA 15","ATLANTA 18","ATLANTA 34","ATLANTA 28","MABLETON 2","SMYRNA 10","SMYRNA 9"]}},{"key":"ieee_30","title":"IEEE 30-bus test case","cc":["S6","S10"],"nodes":[{"id":"S1","mw":0.0,"kv":135.0,"x":484.3,"y":606.4},{"id":"S2","mw":21.7,"kv":135.0,"x":453.3,"y":604.8},{"id":"S3","mw":2.4,"kv":135.0,"x":393.5,"y":516.8},{"id":"S4","mw":7.6,"kv":135.0,"x":375.8,"y":529.2},{"id":"S5","mw":0.0,"kv":135.0,"x":380.6,"y":660.0},{"id":"S6","mw":0.0,"kv":135.0,"x":373.5,"y":549.6},{"id":"S7","mw":22.8,"kv":135.0,"x":363.6,"y":594.9},{"id":"S8","mw":30.0,"kv":135.0,"x":352.4,"y":552.4},{"id":"S9","mw":0.0,"kv":135.0,"x":332.9,"y":423.1},{"id":"S10","mw":5.8,"kv":135.0,"x":305.9,"y":363.5},{"id":"S11","mw":0.0,"kv":135.0,"x":216.3,"y":493.4},{"id":"S12","mw":11.2,"kv":135.0,"x":188.6,"y":546.7},{"id":"S13","mw":0.0,"kv":135.0,"x":156.8,"y":622.6},{"id":"S14","mw":6.2,"kv":135.0,"x":40.0,"y":564.2},{"id":"S15","mw":8.2,"kv":135.0,"x":121.6,"y":496.8},{"id":"S16","mw":3.5,"kv":135.0,"x":182.9,"y":434.9},{"id":"S17","mw":9.0,"kv":135.0,"x":264.6,"y":366.3},{"id":"S18","mw":3.2,"kv":135.0,"x":76.6,"y":340.0},{"id":"S19","mw":9.5,"kv":135.0,"x":139.9,"y":290.7},{"id":"S20","mw":2.2,"kv":135.0,"x":179.5,"y":289.1},{"id":"S21","mw":17.5,"kv":135.0,"x":326.3,"y":331.3},{"id":"S22","mw":0.0,"kv":135.0,"x":331.5,"y":322.3},{"id":"S23","mw":3.2,"kv":135.0,"x":109.3,"y":385.8},{"id":"S24","mw":8.7,"kv":135.0,"x":327.5,"y":237.6},{"id":"S25","mw":0.0,"kv":135.0,"x":562.1,"y":248.8},{"id":"S26","mw":3.5,"kv":135.0,"x":644.4,"y":40.0},{"id":"S27","mw":0.0,"kv":135.0,"x":612.9,"y":372.6},{"id":"S28","mw":0.0,"kv":135.0,"x":408.3,"y":550.6},{"id":"S29","mw":2.4,"kv":135.0,"x":852.7,"y":364.5},{"id":"S30","mw":10.6,"kv":135.0,"x":960.0,"y":528.5}],"edges":[{"a":"S1","b":"S2","km":24.3},{"a":"S1","b":"S3","km":76.95},{"a":"S2","b":"S4","km":68.85},{"a":"S2","b":"S5","km":81.0},{"a":"S2","b":"S6","km":72.9},{"a":"S3","b":"S4","km":16.2},{"a":"S4","b":"S6","km":16.2},{"a":"S4","b":"S12","km":105.3},{"a":"S5","b":"S7","km":48.6},{"a":"S6","b":"S7","km":32.4},{"a":"S6","b":"S8","km":16.2},{"a":"S6","b":"S9","km":85.05},{"a":"S6","b":"S10","km":226.8},{"a":"S6","b":"S28","km":24.3},{"a":"S8","b":"S28","km":81.0},{"a":"S9","b":"S11","km":85.05},{"a":"S9","b":"S10","km":44.55},{"a":"S10","b":"S20","km":85.05},{"a":"S10","b":"S17","km":32.4},{"a":"S10","b":"S21","km":28.35},{"a":"S10","b":"S22","km":60.75},{"a":"S12","b":"S13","km":56.7},{"a":"S12","b":"S14","km":105.3},{"a":"S12","b":"S15","km":52.65},{"a":"S12","b":"S16","km":81.0},{"a":"S14","b":"S15","km":81.0},{"a":"S15","b":"S18","km":89.1},{"a":"S15","b":"S23","km":81.0},{"a":"S16","b":"S17","km":76.95},{"a":"S18","b":"S19","km":52.65},{"a":"S19","b":"S20","km":28.35},{"a":"S21","b":"S22","km":8.1},{"a":"S22","b":"S24","km":72.9},{"a":"S23","b":"S24","km":109.35},{"a":"S24","b":"S25","km":133.65},{"a":"S25","b":"S26","km":153.9},{"a":"S25","b":"S27","km":85.05},{"a":"S27","b":"S28","km":162.0},{"a":"S27","b":"S29","km":170.1},{"a":"S27","b":"S30","km":243.0},{"a":"S29","b":"S30","km":182.25}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["S10","S21"],["S19","S20"],["S21","S22"],["S28","S6"],["S3","S4"],["S4","S6"],["S6","S8"]],"trusted":["S21","S4"],"protected":["S21","S8","S4","S3","S22","S28"]}},{"key":"ieee_118","title":"IEEE 118-bus test case","cc":["S116","S77"],"nodes":[{"id":"S1","mw":51.0,"kv":138.0,"x":892.0,"y":543.1},{"id":"S2","mw":20.0,"kv":138.0,"x":865.2,"y":513.0},{"id":"S3","mw":39.0,"kv":138.0,"x":900.5,"y":534.6},{"id":"S4","mw":39.0,"kv":138.0,"x":833.1,"y":533.0},{"id":"S5","mw":28.0,"kv":345.0,"x":835.4,"y":531.3},{"id":"S6","mw":52.0,"kv":138.0,"x":811.1,"y":523.7},{"id":"S7","mw":19.0,"kv":138.0,"x":812.9,"y":518.4},{"id":"S9","mw":0.0,"kv":345.0,"x":861.0,"y":602.7},{"id":"S10","mw":0.0,"kv":345.0,"x":960.0,"y":660.0},{"id":"S11","mw":70.0,"kv":138.0,"x":833.5,"y":511.7},{"id":"S12","mw":47.0,"kv":138.0,"x":823.3,"y":510.7},{"id":"S13","mw":34.0,"kv":138.0,"x":848.8,"y":493.3},{"id":"S14","mw":14.0,"kv":138.0,"x":780.5,"y":505.0},{"id":"S15","mw":90.0,"kv":138.0,"x":719.4,"y":459.4},{"id":"S16","mw":25.0,"kv":138.0,"x":808.6,"y":488.3},{"id":"S17","mw":11.0,"kv":345.0,"x":737.6,"y":450.1},{"id":"S18","mw":60.0,"kv":138.0,"x":710.8,"y":448.3},{"id":"S19","mw":45.0,"kv":138.0,"x":697.0,"y":458.8},{"id":"S20","mw":18.0,"kv":138.0,"x":669.3,"y":431.3},{"id":"S21","mw":14.0,"kv":138.0,"x":673.5,"y":408.7},{"id":"S22","mw":10.0,"kv":138.0,"x":676.8,"y":382.5},{"id":"S23","mw":7.0,"kv":138.0,"x":723.6,"y":348.0},{"id":"S24","mw":13.0,"kv":138.0,"x":701.7,"y":339.1},{"id":"S25","mw":0.0,"kv":345.0,"x":763.7,"y":333.2},{"id":"S27","mw":71.0,"kv":138.0,"x":825.6,"y":370.8},{"id":"S28","mw":17.0,"kv":138.0,"x":848.0,"y":388.9},{"id":"S29","mw":24.0,"kv":138.0,"x":800.5,"y":405.0},{"id":"S31","mw":43.0,"kv":138.0,"x":781.5,"y":404.7},{"id":"S32","mw":59.0,"kv":138.0,"x":772.0,"y":377.4},{"id":"S33","mw":23.0,"kv":138.0,"x":630.6,"y":473.1},{"id":"S34","mw":59.0,"kv":138.0,"x":536.2,"y":473.7},{"id":"S35","mw":33.0,"kv":138.0,"x":532.2,"y":482.8},{"id":"S36","mw":31.0,"kv":138.0,"x":533.5,"y":480.3},{"id":"S37","mw":0.0,"kv":345.0,"x":536.7,"y":471.3},{"id":"S39","mw":27.0,"kv":138.0,"x":469.4,"y":466.7},{"id":"S40","mw":66.0,"kv":138.0,"x":436.3,"y":459.3},{"id":"S41","mw":37.0,"kv":138.0,"x":413.5,"y":451.1},{"id":"S42","mw":96.0,"kv":138.0,"x":360.2,"y":418.8},{"id":"S43","mw":18.0,"kv":138.0,"x":470.7,"y":436.2},{"id":"S44","mw":16.0,"kv":138.0,"x":347.0,"y":388.4},{"id":"S45","mw":53.0,"kv":138.0,"x":337.3,"y":364.7},{"id":"S46","mw":28.0,"kv":138.0,"x":292.2,"y":355.2},{"id":"S47","mw":34.0,"kv":138.0,"x":306.8,"y":320.9},{"id":"S48","mw":20.0,"kv":138.0,"x":278.6,"y":323.2},{"id":"S49","mw":87.0,"kv":138.0,"x":278.8,"y":312.5},{"id":"S50","mw":17.0,"kv":138.0,"x":236.6,"y":315.7},{"id":"S51","mw":17.0,"kv":138.0,"x":199.3,"y":339.5},{"id":"S52","mw":18.0,"kv":138.0,"x":193.5,"y":355.1},{"id":"S53","mw":23.0,"kv":138.0,"x":76.9,"y":368.4},{"id":"S54","mw":113.0,"kv":138.0,"x":100.2,"y":341.5},{"id":"S55","mw":63.0,"kv":138.0,"x":89.7,"y":338.0},{"id":"S56","mw":84.0,"kv":138.0,"x":97.7,"y":339.4},{"id":"S57","mw":12.0,"kv":138.0,"x":142.8,"y":323.0},{"id":"S58","mw":12.0,"kv":138.0,"x":155.3,"y":342.8},{"id":"S59","mw":277.0,"kv":345.0,"x":40.0,"y":287.6},{"id":"S60","mw":78.0,"kv":138.0,"x":122.2,"y":270.0},{"id":"S61","mw":0.0,"kv":345.0,"x":129.7,"y":270.3},{"id":"S62","mw":77.0,"kv":138.0,"x":151.6,"y":270.6},{"id":"S66","mw":39.0,"kv":345.0,"x":297.4,"y":286.5},{"id":"S67","mw":28.0,"kv":138.0,"x":233.1,"y":275.9},{"id":"S116","mw":184.0,"kv":345.0,"x":374.2,"y":257.7},{"id":"S70","mw":66.0,"kv":138.0,"x":468.3,"y":279.8},{"id":"S71","mw":0.0,"kv":138.0,"x":488.0,"y":282.6},{"id":"S72","mw":12.0,"kv":138.0,"x":603.4,"y":301.0},{"id":"S73","mw":6.0,"kv":138.0,"x":512.4,"y":280.0},{"id":"S74","mw":68.0,"kv":138.0,"x":428.6,"y":272.1},{"id":"S75","mw":47.0,"kv":138.0,"x":430.1,"y":262.2},{"id":"S76","mw":68.0,"kv":138.0,"x":458.7,"y":239.6},{"id":"S77","mw":61.0,"kv":138.0,"x":381.0,"y":224.6},{"id":"S78","mw":71.0,"kv":138.0,"x":376.3,"y":226.7},{"id":"S79","mw":39.0,"kv":138.0,"x":364.1,"y":228.1},{"id":"S80","mw":130.0,"kv":345.0,"x":404.2,"y":220.2},{"id":"S82","mw":54.0,"kv":138.0,"x":360.0,"y":199.9},{"id":"S83","mw":20.0,"kv":138.0,"x":338.3,"y":199.0},{"id":"S84","mw":11.0,"kv":138.0,"x":261.8,"y":188.7},{"id":"S85","mw":24.0,"kv":138.0,"x":250.1,"y":175.4},{"id":"S87","mw":21.0,"kv":161.0,"x":170.2,"y":170.0},{"id":"S88","mw":48.0,"kv":138.0,"x":246.5,"y":147.2},{"id":"S89","mw":0.0,"kv":138.0,"x":272.2,"y":131.5},{"id":"S90","mw":163.0,"kv":138.0,"x":226.9,"y":109.8},{"id":"S91","mw":10.0,"kv":138.0,"x":259.9,"y":97.8},{"id":"S92","mw":65.0,"kv":138.0,"x":303.1,"y":131.8},{"id":"S93","mw":12.0,"kv":138.0,"x":349.1,"y":147.7},{"id":"S94","mw":30.0,"kv":138.0,"x":389.6,"y":160.2},{"id":"S95","mw":42.0,"kv":138.0,"x":384.8,"y":171.4},{"id":"S96","mw":38.0,"kv":138.0,"x":376.1,"y":185.8},{"id":"S97","mw":15.0,"kv":138.0,"x":414.4,"y":198.2},{"id":"S98","mw":34.0,"kv":138.0,"x":461.4,"y":199.1},{"id":"S99","mw":42.0,"kv":138.0,"x":459.7,"y":163.1},{"id":"S100","mw":37.0,"kv":138.0,"x":420.9,"y":150.0},{"id":"S101","mw":22.0,"kv":138.0,"x":375.5,"y":120.1},{"id":"S102","mw":5.0,"kv":138.0,"x":314.0,"y":118.1},{"id":"S103","mw":23.0,"kv":138.0,"x":443.7,"y":139.3},{"id":"S104","mw":38.0,"kv":138.0,"x":471.3,"y":102.5},{"id":"S105","mw":31.0,"kv":138.0,"x":475.3,"y":93.5},{"id":"S106","mw":43.0,"kv":138.0,"x":450.1,"y":85.4},{"id":"S107","mw":50.0,"kv":138.0,"x":460.4,"y":40.0},{"id":"S108","mw":2.0,"kv":138.0,"x":512.6,"y":84.5},{"id":"S109","mw":8.0,"kv":138.0,"x":528.8,"y":84.3},{"id":"S110","mw":39.0,"kv":138.0,"x":547.6,"y":105.2},{"id":"S111","mw":0.0,"kv":138.0,"x":593.3,"y":108.5},{"id":"S112","mw":68.0,"kv":138.0,"x":576.9,"y":93.9},{"id":"S113","mw":6.0,"kv":138.0,"x":746.7,"y":443.5},{"id":"S114","mw":8.0,"kv":138.0,"x":793.9,"y":366.6},{"id":"S115","mw":22.0,"kv":138.0,"x":798.4,"y":365.0},{"id":"S117","mw":20.0,"kv":138.0,"x":925.8,"y":501.1},{"id":"S118","mw":33.0,"kv":138.0,"x":450.3,"y":253.4}],"edges":[{"a":"S1","b":"S2","km":42.28},{"a":"S1","b":"S3","km":17.94},{"a":"S2","b":"S12","km":26.07},{"a":"S3","b":"S5","km":45.71},{"a":"S3","b":"S12","km":67.71},{"a":"S4","b":"S5","km":3.38},{"a":"S4","b":"S11","km":29.12},{"a":"S5","b":"S6","km":22.85},{"a":"S5","b":"S9","km":110.01},{"a":"S5","b":"S11","km":28.86},{"a":"S5","b":"S17","km":181.78},{"a":"S6","b":"S7","km":8.8},{"a":"S7","b":"S12","km":14.39},{"a":"S9","b":"S10","km":116.14},{"a":"S11","b":"S12","km":8.29},{"a":"S11","b":"S13","km":30.94},{"a":"S12","b":"S14","km":29.92},{"a":"S12","b":"S16","km":35.29},{"a":"S12","b":"S117","km":59.25},{"a":"S13","b":"S15","km":103.43},{"a":"S14","b":"S15","km":82.52},{"a":"S15","b":"S17","km":18.49},{"a":"S15","b":"S19","km":16.67},{"a":"S15","b":"S33","km":52.65},{"a":"S16","b":"S17","km":76.22},{"a":"S17","b":"S18","km":21.37},{"a":"S17","b":"S25","km":310.19},{"a":"S17","b":"S31","km":66.15},{"a":"S17","b":"S37","km":194.77},{"a":"S17","b":"S113","km":12.74},{"a":"S18","b":"S19","km":20.86},{"a":"S19","b":"S20","km":49.51},{"a":"S19","b":"S34","km":104.53},{"a":"S20","b":"S21","km":35.93},{"a":"S21","b":"S22","km":41.05},{"a":"S22","b":"S23","km":67.29},{"a":"S23","b":"S24","km":20.82},{"a":"S23","b":"S25","km":33.86},{"a":"S23","b":"S32","km":48.79},{"a":"S24","b":"S70","km":174.15},{"a":"S24","b":"S72","km":82.95},{"a":"S25","b":"S27","km":68.98},{"a":"S27","b":"S28","km":36.18},{"a":"S27","b":"S32","km":31.95},{"a":"S27","b":"S115","km":31.36},{"a":"S28","b":"S29","km":39.91},{"a":"S29","b":"S31","km":14.01},{"a":"S31","b":"S32","km":41.69},{"a":"S32","b":"S113","km":85.91},{"a":"S32","b":"S114","km":25.9},{"a":"S33","b":"S37","km":60.09},{"a":"S34","b":"S36","km":11.34},{"a":"S34","b":"S37","km":3.98},{"a":"S34","b":"S43","km":71.14},{"a":"S35","b":"S36","km":4.32},{"a":"S35","b":"S37","km":21.03},{"a":"S37","b":"S39","km":44.86},{"a":"S37","b":"S40","km":71.1},{"a":"S37","b":"S66","km":355.63},{"a":"S39","b":"S40","km":25.6},{"a":"S40","b":"S41","km":20.61},{"a":"S40","b":"S42","km":77.45},{"a":"S41","b":"S42","km":57.13},{"a":"S42","b":"S49","km":136.69},{"a":"S43","b":"S44","km":103.85},{"a":"S44","b":"S45","km":38.13},{"a":"S45","b":"S46","km":57.39},{"a":"S45","b":"S49","km":78.72},{"a":"S46","b":"S47","km":53.75},{"a":"S46","b":"S48","km":79.98},{"a":"S47","b":"S49","km":26.45},{"a":"S47","b":"S116","km":117.56},{"a":"S48","b":"S49","km":21.37},{"a":"S49","b":"S50","km":31.82},{"a":"S49","b":"S51","km":57.98},{"a":"S49","b":"S54","km":122.3},{"a":"S49","b":"S66","km":38.89},{"a":"S49","b":"S116","km":137.12},{"a":"S50","b":"S57","km":56.71},{"a":"S51","b":"S52","km":24.88},{"a":"S51","b":"S58","km":30.43},{"a":"S52","b":"S53","km":69.19},{"a":"S53","b":"S54","km":51.63},{"a":"S54","b":"S55","km":29.92},{"a":"S54","b":"S56","km":4.04},{"a":"S54","b":"S59","km":97.04},{"a":"S55","b":"S56","km":6.39},{"a":"S55","b":"S59","km":91.33},{"a":"S56","b":"S57","km":40.88},{"a":"S56","b":"S58","km":40.88},{"a":"S56","b":"S59","km":101.14},{"a":"S59","b":"S60","km":61.36},{"a":"S59","b":"S61","km":63.48},{"a":"S60","b":"S61","km":5.71},{"a":"S60","b":"S62","km":23.74},{"a":"S61","b":"S62","km":15.91},{"a":"S61","b":"S66","km":108.93},{"a":"S62","b":"S66","km":92.26},{"a":"S62","b":"S67","km":49.51},{"a":"S66","b":"S67","km":42.95},{"a":"S66","b":"S116","km":57.71},{"a":"S116","b":"S70","km":53.75},{"a":"S116","b":"S75","km":51.63},{"a":"S116","b":"S77","km":42.74},{"a":"S116","b":"S80","km":72.86},{"a":"S70","b":"S71","km":15.02},{"a":"S70","b":"S74","km":55.99},{"a":"S70","b":"S75","km":59.67},{"a":"S71","b":"S72","km":76.18},{"a":"S71","b":"S73","km":19.21},{"a":"S74","b":"S75","km":17.18},{"a":"S75","b":"S77","km":84.6},{"a":"S75","b":"S118","km":20.36},{"a":"S76","b":"S77","km":62.63},{"a":"S76","b":"S118","km":23.02},{"a":"S77","b":"S78","km":5.25},{"a":"S77","b":"S80","km":20.53},{"a":"S77","b":"S82","km":36.1},{"a":"S78","b":"S79","km":10.33},{"a":"S79","b":"S80","km":29.79},{"a":"S80","b":"S96","km":77.02},{"a":"S80","b":"S97","km":39.53},{"a":"S80","b":"S98","km":45.71},{"a":"S80","b":"S99","km":87.18},{"a":"S82","b":"S83","km":15.51},{"a":"S82","b":"S96","km":22.43},{"a":"S83","b":"S84","km":55.86},{"a":"S83","b":"S85","km":62.63},{"a":"S84","b":"S85","km":27.13},{"a":"S85","b":"S87","km":52.05},{"a":"S85","b":"S88","km":43.17},{"a":"S85","b":"S89","km":73.21},{"a":"S88","b":"S89","km":30.13},{"a":"S89","b":"S90","km":42.19},{"a":"S89","b":"S92","km":21.37},{"a":"S90","b":"S91","km":35.38},{"a":"S91","b":"S92","km":53.83},{"a":"S92","b":"S93","km":35.89},{"a":"S92","b":"S94","km":66.87},{"a":"S92","b":"S100","km":124.84},{"a":"S92","b":"S102","km":23.66},{"a":"S93","b":"S94","km":30.98},{"a":"S94","b":"S95","km":18.37},{"a":"S94","b":"S96","km":36.78},{"a":"S94","b":"S100","km":24.55},{"a":"S95","b":"S96","km":23.15},{"a":"S96","b":"S97","km":37.45},{"a":"S98","b":"S100","km":75.75},{"a":"S99","b":"S100","km":34.41},{"a":"S100","b":"S101","km":53.41},{"a":"S100","b":"S103","km":22.22},{"a":"S100","b":"S104","km":86.33},{"a":"S100","b":"S106","km":96.91},{"a":"S101","b":"S102","km":47.4},{"a":"S103","b":"S104","km":67.03},{"a":"S103","b":"S105","km":68.77},{"a":"S103","b":"S110","km":76.73},{"a":"S104","b":"S105","km":16.0},{"a":"S105","b":"S106","km":23.15},{"a":"S105","b":"S107","km":77.45},{"a":"S105","b":"S108","km":29.75},{"a":"S106","b":"S107","km":77.45},{"a":"S108","b":"S109","km":12.19},{"a":"S109","b":"S110","km":32.25},{"a":"S110","b":"S111","km":31.95},{"a":"S110","b":"S112","km":27.08},{"a":"S114","b":"S115","km":4.4}],"exact":{"K":8,"T":4,"H":3,"mu":0.25,"db":0.35,"loss":10,"links":[["S100","S94"],["S113","S17"],["S23","S24"],["S61","S62"],["S77","S78"],["S77","S80"],["S78","S79"],["S82","S96"]],"trusted":["S78"],"protected":["S80","S79","S78"]}}];
+const EVIDENCE = [{"device": "IonQ Forte 1 (QPU)", "attack": "none (Step 1)", "result": "0.004", "job": "openquantum:ionq:qpu:forte-1-b095-qjob-6af88c54c8f5265fb3f1bdde"}, {"device": "IonQ sim (noise)", "attack": "none", "result": "0.000", "job": "ionq:ionq:sim:simulator-91f5-qjob-6af8fcf6c8f5265fb3f21bf1"}, {"device": "IonQ sim (noise)", "attack": "tap 3/12 rounds", "result": "0.117", "job": "ionq:ionq:sim:simulator-91f5-qjob-6af8fd17c8f5265fb3f21c04"}, {"device": "IonQ sim (noise)", "attack": "tap every round", "result": "0.242", "job": "ionq:ionq:sim:simulator-91f5-qjob-6af8fd07c8f5265fb3f21bfc"}, {"device": "IonQ sim (noise)", "attack": "detector blinding", "result": "0.000 (yield 50%)", "job": "same as tap"}, {"device": "IonQ sim (noise)", "attack": "scrambling (DoS)", "result": "0.874", "job": "ionq:ionq:sim:simulator-91f5-qjob-6af8fd27c8f5265fb3f21c10"}, {"device": "Quantinuum H2 emulator", "attack": "none", "result": "0.001", "job": "quantinuum:quantinuum:sim:h2-emulator-91f5-qjob-6af8fd37c8f5265fb3f21c17"}, {"device": "Quantinuum H2 emulator", "attack": "tap 3/12 rounds", "result": "0.125", "job": "quantinuum:quantinuum:sim:h2-emulator-91f5-qjob-6af8fe7ec8f5265fb3f21cad"}, {"device": "Quantinuum H2 emulator", "attack": "tap every round", "result": "0.259", "job": "quantinuum:quantinuum:sim:h2-emulator-91f5-qjob-6af8fd66c8f5265fb3f21c32"}, {"device": "Quantinuum H2 emulator", "attack": "scrambling (DoS)", "result": "0.875", "job": "quantinuum:quantinuum:sim:h2-emulator-91f5-qjob-6af8febcc8f5265fb3f21cc9"}];
+const IC = {
+ net:'<circle cx="12" cy="5" r="2.3"/><circle cx="5" cy="18" r="2.3"/><circle cx="19" cy="18" r="2.3"/><path d="M11 7l-5 9M13 7l5 9M7.5 18h9"/>',
+ sliders:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h12"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+ chart:'<path d="M5 20V11M11 20V5M17 20v-6"/>',
+ cloud:'<path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9H7z"/><path d="M12 11v6M9.5 13.5L12 11l2.5 2.5"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>',
+ chain:'<circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M11 7l-5 9M13 7l5 9"/>',
+ wave:'<path d="M2 12h4l2-5 3 10 3-12 2 7h6"/>',
+ gauge:'<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/>',
+ shield:'<path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/>',
+ trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/>',
+ play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" stroke="none"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ hub:'<circle cx="12" cy="5.5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M11 7.5l-5 8.5M13 7.5l5 8.5M7.4 18h9.2"/>',
+ tower:'<path d="M12 2L7 22M12 2l5 20M8 8h8M6.5 13h11M9 18h6M9 18l5-5M15 18l-5-5"/>',
+ atom:'<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/>',
+ building:'<rect x="5" y="4" width="14" height="17" rx="1"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M11 21v-4h2v4"/>',
+ drop:'<path d="M12 3c4 5 6.5 8 6.5 11a6.5 6.5 0 0 1-13 0C5.5 11 8 8 12 3z"/>',
+ valve:'<circle cx="12" cy="12" r="6"/><path d="M12 6v12M6 12h12M2 12h4M18 12h4"/>',
+ cross:'<path d="M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z"/>',
+ bank:'<path d="M3 9l9-6 9 6z"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8M3 21h18"/>'
+};
+const ico=(k,sz=18,col="currentColor",sw=1.9)=>`<svg class="ic" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${IC[k]||""}</svg>`;
+const SECTORS = {
+  power:   {name:"Electric utility", unit:"MW", what:"load", site:"substation", hub:"control center", line:"power line", traffic:"control traffic", icon:"tower", p:{K:8,T:4,H:3,db:35,loss:10,mu:25}, why:"0.35 dB/km is EPB's measured fiber; 3 hops is EPB's tested route."},
+  water:   {name:"Water utility", unit:"k people", what:"people served", site:"pump site", hub:"SCADA center", line:"pipe-run fiber", traffic:"SCADA traffic", icon:"drop", p:{K:6,T:2,H:3,db:25,loss:10,mu:100}, why:"Smaller budgets, unstaffed pump sites, buried fiber; command tampering is the main fear, so the goal is tap detection."},
+  pipeline:{name:"Oil & gas pipeline", unit:"k bbl/day", what:"throughput", site:"valve station", hub:"control room", line:"right-of-way fiber", traffic:"control traffic", icon:"valve", p:{K:8,T:4,H:4,db:22,loss:10,mu:100}, why:"Long linear routes need 4-hop chains; remote right-of-way is easy to reach, so the goal is tap detection."},
+  health:  {name:"Hospital network", unit:"beds", what:"beds served", site:"hospital", hub:"data center", line:"metro fiber", traffic:"patient-record traffic", icon:"cross", p:{K:6,T:2,H:2,db:30,loss:10,mu:0}, why:"Keys may only sit in secured buildings; records must stay secret for decades, so the goal is max secrecy."},
+  finance: {name:"Bank / exchange", unit:"$M/day", what:"transactions", site:"data center", hub:"primary data center", line:"dark fiber", traffic:"transaction traffic", icon:"bank", p:{K:12,T:2,H:2,db:25,loss:10,mu:0}, why:"Bigger budgets, strict key custody, one metro; long-lived secrets make harvest-now-decrypt-later the threat."}};
+let SEC=SECTORS.power;
+const S = {nodes:new Map(), edges:[], cc:[], design:null, mode:"tap", bg:null, bgOp:0.5, sel:null, linkStart:null, presetKey:null, tapped:null, zoom:1, cx:500, cy:350};
+const $ = id => document.getElementById(id);
+const P = () => ({K:+$("K").value, T:+$("secLevel").value, H:+$("H").value, db:+$("db").value/100, loss:+$("loss").value, mu:+$("goal").value/100});
+const ek = (a,b) => a < b ? a + "\u0001" + b : b + "\u0001" + a;
+const fmt = (x,d=0) => (+x).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+// ---------------------------------------------------------------- graph helpers
+function adj(){ const A=new Map(); for(const n of S.nodes.keys()) A.set(n,[]); S.edges.forEach((e,i)=>{ if(A.has(e.a)&&A.has(e.b)){A.get(e.a).push([e.b,e.km,i]);A.get(e.b).push([e.a,e.km,i]);} }); return A; }
+function dijkstra(A, src){ const d=new Map([[src,0]]), prev=new Map(), done=new Set(); const Q=[[0,src]];
+  while(Q.length){ Q.sort((x,y)=>x[0]-y[0]); const [du,u]=Q.shift(); if(done.has(u)) continue; done.add(u);
+    for(const [v,w,i] of A.get(u)){ const nd=du+w; if(!d.has(v)||nd<d.get(v)-1e-12){ d.set(v,nd); prev.set(v,[u,i]); Q.push([nd,v]); } } }
+  return {d,prev}; }
+function pathEdges(prev, s){ const E=[]; let u=s; while(prev.has(u)){ const [p,i]=prev.get(u); E.push(i); u=p; } return E; }
+function autoCC(){ const A=adj(); const ids=[...S.nodes.keys()]; if(!ids.length) return [];
+  let best=null; for(const s of ids){ const {d}=dijkstra(A,s); if(d.size<ids.length*0.6) continue; let sum=0; for(const v of d.values()) sum+=v;
+    const sc=(S.nodes.get(s).kv||0)*1e6 - sum; if(!best||sc>best[0]) best=[sc,s]; }
+  const c1=best?best[1]:ids[0]; const H=P().H;
+  // backup: closest-to-center node within H hops (BFS) other than c1
+  const hop=new Map([[c1,0]]), q=[c1]; while(q.length){const u=q.shift(); for(const [v] of A.get(u)) if(!hop.has(v)){hop.set(v,hop.get(u)+1); if(hop.get(v)<=H) q.push(v);} }
+  let b2=null; for(const [s,h] of hop){ if(s===c1||h>H) continue; const {d}=dijkstra(A,s); let sum=0; for(const v of d.values()) sum+=v; if(!b2||sum<b2[0]) b2=[sum,s]; }
+  return b2? [c1,b2[1]] : [c1]; }
+
+// ---------------------------------------------------------------- model (mirrors network_design/v11.py)
+function buildModel(p){
+  const A=adj(); const cc=S.cc.filter(c=>S.nodes.has(c)); if(cc.length===0) return null;
+  const feasible=new Set(); S.edges.forEach((e,i)=>{ if(e.km*p.db<=p.loss+1e-9) feasible.add(i); });
+  const dist=new Map(); for(const c of cc){ const {d}=dijkstra(A,c); for(const [s,v] of d) dist.set(s, Math.min(dist.get(s)??Infinity, v)); }
+  const value=new Map(); for(const [s,n] of S.nodes) if(!cc.includes(s) && dist.has(s)) value.set(s, n.mw*dist.get(s));
+  // feasible adjacency
+  const F=new Map(); for(const n of S.nodes.keys()) F.set(n,[]); for(const i of feasible){ const e=S.edges[i]; F.get(e.a).push([e.b,i]); F.get(e.b).push([e.a,i]); }
+  const paths=new Map(); const cc2=cc[1];
+  const targets=[...value.keys()]; if(cc2) targets.push(cc2);
+  // DFS from each control center up to H hops
+  const reach=new Map(); // target -> list of {E:[edge idx], R:[relays]}
+  for(const c of cc){ const stack=[[c,[c],[]]]; let count=0;
+    while(stack.length && count<200000){ const [u,nodes,E]=stack.pop(); count++;
+      if(E.length>0){ const t=u; if((!cc.includes(t) && value.has(t)) || (t===cc2 && c===cc[0])){ if(!reach.has(t)) reach.set(t,[]); const L=reach.get(t); if(L.length<80) L.push({E:E.slice(), R:nodes.slice(1,-1).filter(n=>!cc.includes(n))}); } }
+      if(E.length>=p.H) continue;
+      for(const [v,i] of F.get(u)){ if(nodes.includes(v)) continue; stack.push([v,[...nodes,v],[...E,i]]); } } }
+  for(const t of targets) if(reach.has(t)) paths.set(t, reach.get(t));
+  const ccReach = !!(cc2 && paths.has(cc2));
+  let maxValue=0; for(const [s,v] of value) if(paths.has(s)) maxValue+=v;
+  // traffic per feasible edge (PQC baseline: shortest route from nearest control center)
+  const traffic=new Float64Array(S.edges.length); const routes0=baseRoutes(A,cc);
+  for(const [s,E] of routes0) if(!cc.includes(s)) for(const i of E) traffic[i]+=S.nodes.get(s).mw;   // objective: substations only (as in v11.traffic)
+  const through0=new Float64Array(S.edges.length); for(const [s,E] of routes0) for(const i of E) through0[i]+=S.nodes.get(s).mw;   // attacks: incl. backup control center
+  let tot=0; for(const i of feasible) tot+=traffic[i]*S.edges[i].km; const scale= tot>0 ? maxValue/tot : 0;
+  return {A,cc,feasible,value,paths,ccReach,maxValue,traffic,through0,scale,routes0,p};
+}
+function baseRoutes(A,cc){ const R=new Map(); const runs=cc.map(c=>dijkstra(A,c));
+  for(const s of S.nodes.keys()){ if(cc.includes(s) && s!==cc[1]) continue; let best=null;
+    runs.forEach((r,k)=>{ if(cc[k]===s) return; if(r.d.has(s) && (!best || r.d.get(s)<best[0])) best=[r.d.get(s), pathEdges(r.prev,s)]; });
+    if(best) R.set(s,best[1]); }
+  return R; }
+function evaluate(M, Y, T){ // Y: Set of edge idx
+  const used=new Set(), prot=[], chosen=new Map(); let val=0;
+  const order=(M.ccReach?[M.cc[1]]:[]).concat([...M.paths.keys()].filter(s=>s!==M.cc[1]).sort((a,b)=>M.value.get(b)-M.value.get(a)));
+  for(const s of order){ let best=null;
+    for(const pth of M.paths.get(s)){ if(!pth.E.every(i=>Y.has(i))) continue; const nw=pth.R.filter(n=>!used.has(n));
+      if(used.size+nw.length<=T && (!best || nw.length<best.nw.length)) best={nw,pth}; }
+    if(best){ best.nw.forEach(n=>used.add(n)); prot.push(s); chosen.set(s,best.pth); val+=M.value.get(s)||0; } }
+  const ccOK = !M.ccReach || prot.includes(M.cc[1]);
+  return {val: ccOK? val : -1, used, prot, chosen, ccOK}; }
+function objective(M,Y,T){ const ev=evaluate(M,Y,T); if(ev.val<0) return {...ev, obj:-1e18+ev.val};
+  let det=0; for(const i of Y) det+=M.traffic[i]*S.edges[i].km; return {...ev, obj: ev.val + M.p.mu*M.scale*det}; }
+
+function solve(M){
+  const {K,T}=M.p; const feas=[...M.feasible]; const t0=performance.now();
+  const greedy=(start)=>{ let Y=new Set(start); let cur=objective(M,Y,T).obj;
+    for(let it=0; it<200 && Y.size<K; it++){ let best=null;
+      const cands=[]; for(const [s,L] of M.paths) for(const pth of L){ const nw=pth.E.filter(i=>!Y.has(i)); if(nw.length && Y.size+nw.length<=K) cands.push(nw); }
+      for(const i of feas) if(!Y.has(i)) cands.push([i]);
+      for(const nw of cands){ const Y2=new Set([...Y,...nw]); const o=objective(M,Y2,T).obj; const g=(o-cur)/nw.length; if(o>cur+1e-9 && (!best||g>best[0])) best=[g,Y2,o]; }
+      if(!best) break; Y=best[1]; cur=best[2]; }
+    return Y; };
+  const local=(Y)=>{ let cur=objective(M,Y,T).obj; let improved=true, rounds=0;
+    while(improved && rounds<20){ improved=false; rounds++;
+      for(const out of [...Y]){ for(const inn of feas){ if(Y.has(inn)) continue; const Y2=new Set(Y); Y2.delete(out); Y2.add(inn); const o=objective(M,Y2,T).obj; if(o>cur+1e-9){ Y=Y2; cur=o; improved=true; break; } } if(improved) break; }
+      if(!improved && Y.size<K){ for(const inn of feas){ if(Y.has(inn)) continue; const Y2=new Set([...Y,inn]); const o=objective(M,Y2,T).obj; if(o>cur+1e-9){ Y=Y2; cur=o; improved=true; break; } } } }
+    return Y; };
+  // start: cheapest control-center chain that fits
+  let start=[]; if(M.ccReach){ const L=[...M.paths.get(M.cc[1])].filter(p=>p.E.length<=K && p.R.length<=T).sort((a,b)=>a.E.length-b.E.length || a.R.length-b.R.length); if(L.length) start=L[0].E; }
+  // several starting points: control-center chain, busiest fiber first, empty
+  const busy=[...feas].sort((a,b)=>M.traffic[b]*S.edges[b].km-M.traffic[a]*S.edges[a].km).slice(0,Math.max(1,Math.floor(K/2)));
+  let best=null, bestO=-Infinity; const consider=Y=>{ const o=objective(M,Y,T).obj; if(o>bestO+1e-9){ best=Y; bestO=o; } };
+  for(const st of [start, [...new Set([...start,...busy])].slice(0,K), []]) consider(local(greedy(st)));
+  let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const budgetMs = 400;
+  for(let r=0; r<60 && performance.now()-t0<budgetMs; r++){ const Y=[...best]; const drop=1+Math.floor(rnd()*Math.min(4,Y.length||1));
+    for(let k=0;k<drop && Y.length;k++) Y.splice(Math.floor(rnd()*Y.length),1);
+    if(rnd()<0.5){ const add=feas[Math.floor(rnd()*feas.length)]; if(!Y.includes(add) && Y.length<K) Y.push(add); }
+    consider(local(greedy(Y))); }
+  return {Y:best, ms:performance.now()-t0}; }
+
+// ---------------------------------------------------------------- attacks and resilience
+function analyze(M, Y){
+  const T=M.p.T; const ev=evaluate(M,Y,T);
+  // routes: QKD path if protected, else shortest route
+  const R=new Map(); for(const [s,E] of M.routes0) R.set(s,{E, q:false, R:[]});
+  for(const [s,pth] of ev.chosen) R.set(s,{E:pth.E, q:true, R:pth.R});
+  const through=new Float64Array(S.edges.length); for(const [s,r] of R) for(const i of r.E) through[i]+=S.nodes.get(s).mw;
+  let worstPQC=0, worstPQCe=-1; const thr0=M.through0; for(let i=0;i<S.edges.length;i++) if(thr0[i]>worstPQC){worstPQC=thr0[i]; worstPQCe=i;}
+  let worst=0, worstE=-1; for(let i=0;i<S.edges.length;i++){ if(Y.has(i)) continue; if(through[i]>worst){worst=through[i]; worstE=i;} }
+  let kmAll=0, kmQ=0; S.edges.forEach((e,i)=>{ kmAll+=e.km; if(Y.has(i)) kmQ+=e.km; });
+  let mwProt=0; for(const s of ev.prot) mwProt+=S.nodes.get(s).mw;
+  let mwAll=0; for(const n of S.nodes.values()) mwAll+=n.mw;
+  let worstTN=0, worstTNn=null; for(const n of ev.used){ let m=0; for(const [s,r] of R) if(r.q && r.R.includes(n)) m+=S.nodes.get(s).mw; if(m>worstTN){worstTN=m; worstTNn=n;} }
+  const cut=cutAnalysis(M.cc);
+  return {ev, R, through, worst, worstE, worstPQC, worstPQCe, tapShare: kmAll? kmQ/kmAll : 0, mwProt, mwAll, worstTN, worstTNn, cut}; }
+function bridges(nodes, E){ // Tarjan on multigraph by edge index
+  const A=new Map(); nodes.forEach(n=>A.set(n,[])); E.forEach((e,i)=>{ A.get(e[0]).push([e[1],i]); A.get(e[1]).push([e[0],i]); });
+  const tin=new Map(), low=new Map(); let t=0; const out=[];
+  for(const r of nodes){ if(tin.has(r)) continue; const st=[[r,-1,0]]; tin.set(r,t); low.set(r,t); t++;
+    while(st.length){ const top=st[st.length-1]; const [u,pe]=top; const L=A.get(u);
+      if(top[2]<L.length){ const [v,i]=L[top[2]++]; if(i===pe) continue;
+        if(tin.has(v)) low.set(u,Math.min(low.get(u),tin.get(v))); else { tin.set(v,t); low.set(v,t); t++; st.push([v,i,0]); } }
+      else { st.pop(); if(st.length){ const p=st[st.length-1][0]; low.set(p,Math.min(low.get(p),low.get(u))); if(low.get(u)>tin.get(p)) out.push(pe); } } } }
+  return out; }
+function cutAnalysis(cc){
+  const ROOT = cc.length>1 ? "_CC_" : cc[0];
+  const nodes=[...S.nodes.keys()].concat(cc.length>1?["_CC_"]:[]); const E=S.edges.filter(e=>S.nodes.has(e.a)&&S.nodes.has(e.b)).map(e=>[e.a,e.b,e.km]); if(cc.length>1) cc.forEach(c=>E.push([c,"_CC_",0]));
+  const worstCut=(E)=>{ const br=bridges(nodes,E); let w=0; for(const bi of br){ const keep=E.filter((_,i)=>i!==bi); const A=new Map(); nodes.forEach(n=>A.set(n,[])); keep.forEach(e=>{A.get(e[0]).push(e[1]);A.get(e[1]).push(e[0]);});
+      const seen=new Set([ROOT]), q=[ROOT]; while(q.length){const u=q.shift(); for(const v of A.get(u)) if(!seen.has(v)){seen.add(v); q.push(v);} }
+      let m=0; for(const [s,n] of S.nodes) if(!seen.has(s)) m+=n.mw; w=Math.max(w,m); } return {br:br.length, w}; };
+  const before=worstCut(E); const added=[]; const A0=adj();
+  for(let it=0; it<60; it++){ const br=new Set(bridges(nodes,E)); if(!br.size) break;
+    // 2-edge-connected components
+    const A=new Map(); nodes.forEach(n=>A.set(n,[])); E.forEach((e,i)=>{ if(!br.has(i)){A.get(e[0]).push(e[1]);A.get(e[1]).push(e[0]);} });
+    const comp=new Map(); let c=0; for(const n of nodes){ if(comp.has(n)) continue; const q=[n]; comp.set(n,c); while(q.length){const u=q.shift(); for(const v of A.get(u)) if(!comp.has(v)){comp.set(v,c); q.push(v);} } c++; }
+    const deg=new Array(c).fill(0); const TA=Array.from({length:c},()=>[]); for(const i of br){ const a=comp.get(E[i][0]), b=comp.get(E[i][1]); deg[a]++; deg[b]++; TA[a].push(b); TA[b].push(a); }
+    const leaves=[]; for(let k=0;k<c;k++) if(deg[k]===1) leaves.push(k); if(leaves.length===0) break;
+    if(leaves.length===1){ const root=comp.get(ROOT); if(root===leaves[0]) break; leaves.push(root); }
+    const bfs=(s)=>{ const d=new Map([[s,0]]), q=[s]; while(q.length){const u=q.shift(); for(const v of TA[u]) if(!d.has(v)){d.set(v,d.get(u)+1); q.push(v);} } return d; };
+    let pair=null; for(const a of leaves){ const d=bfs(a); for(const b of leaves){ if(b<=a) continue; const dd=d.get(b)??-1; if(!pair||dd>pair[0]) pair=[dd,a,b]; } }
+    const mem=k=>nodes.filter(n=>comp.get(n)===k && n!=="_CC_");
+    let choice=null; const ma=mem(pair[1]), mb=mem(pair[2]);
+    for(const u of ma){ const {d}=dijkstra(A0,u); for(const v of mb){ if(u===v) continue; if(E.some(e=>(e[0]===u&&e[1]===v)||(e[0]===v&&e[1]===u))) continue; const km=d.get(v); if(km!==undefined && (!choice||km<choice[2])) choice=[u,v,km]; } }
+    if(!choice) break; E.push(choice); added.push(choice); }
+  const after=worstCut(E);
+  return {bridgesBefore:before.br, worstBefore:before.w, worstAfter:after.w, added}; }
+
+
+function loadNet(obj, key){
+  S.nodes=new Map(); obj.nodes.forEach((n,k)=>S.nodes.set(String(n.id),{id:String(n.id), mw:+n.mw||0, kv:+n.kv||0, x:n.x??null, y:n.y??null}));
+  S.edges=obj.edges.filter(e=>S.nodes.has(String(e.a))&&S.nodes.has(String(e.b))&&e.a!==e.b).map(e=>({a:String(e.a), b:String(e.b), km:+e.km||1}));
+  S.cc=(obj.cc||[]).map(String).filter(c=>S.nodes.has(c)).slice(0,2); S.design=null; S.tapped=null; S.presetKey=key||null; S.edited=false;
+  if([...S.nodes.values()].some(n=>n.x===null||n.y===null)) layout(); else fit();
+  if(!S.cc.length) S.cc=autoCC(); draw(); showResults(); }
+function fit(){ const xs=[...S.nodes.values()].map(n=>n.x), ys=[...S.nodes.values()].map(n=>n.y); if(!xs.length) return;
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys); if(S.bg) return;
+  const sx=920/((x1-x0)||1), sy=620/((y1-y0)||1), s=Math.min(sx,sy); for(const n of S.nodes.values()){ n.x=40+(n.x-x0)*s; n.y=40+(n.y-y0)*s; } }
+function layout(){ const N=[...S.nodes.values()]; N.forEach((n,i)=>{ if(n.x===null){ n.x=500+300*Math.cos(2*Math.PI*i/N.length); n.y=350+250*Math.sin(2*Math.PI*i/N.length);} });
+  for(let it=0;it<400;it++){ const F=new Map(N.map(n=>[n.id,[0,0]]));
+    for(let i=0;i<N.length;i++) for(let j=i+1;j<N.length;j++){ const a=N[i],b=N[j]; let dx=a.x-b.x, dy=a.y-b.y; const d2=dx*dx+dy*dy+0.01, f=3000/d2; F.get(a.id)[0]+=dx*f; F.get(a.id)[1]+=dy*f; F.get(b.id)[0]-=dx*f; F.get(b.id)[1]-=dy*f; }
+    for(const e of S.edges){ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); const dx=b.x-a.x, dy=b.y-a.y; const d=Math.sqrt(dx*dx+dy*dy)+0.01, f=(d-60)*0.02; F.get(a.id)[0]+=dx/d*f*d; F.get(a.id)[1]+=dy/d*f*d; F.get(b.id)[0]-=dx/d*f*d; F.get(b.id)[1]-=dy/d*f*d; }
+    const step=Math.max(0.02, 1-it/400); for(const n of N){ const [fx,fy]=F.get(n.id); const m=Math.sqrt(fx*fx+fy*fy)||1; n.x+=fx/m*Math.min(m,10)*step; n.y+=fy/m*Math.min(m,10)*step; } }
+  fit(); }
+
+
+// ---------------------------------------------------------------- rendering
+const svg=$("map"); const NS="http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const x=document.createElementNS(NS,tag); for(const k in attrs) x.setAttribute(k,attrs[k]); (parent||svg).appendChild(x); return x; }
+const short=s=>s.replace(/^(CHATTANOOGA|KNOXVILLE|NASHVILLE|HUNTSVILLE|MEMPHIS|ATLANTA) /,(m,c)=>({CHATTANOOGA:"CHA",KNOXVILLE:"KNX",NASHVILLE:"NSH",HUNTSVILLE:"HSV",MEMPHIS:"MEM",ATLANTA:"ATL"})[c]+" ").replace(/\b([A-Z])([A-Z]+)\b/g,(m,a,b)=>a+b.toLowerCase());
+function hull(pts){ pts=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]); const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); const lo=[],up=[];
+  for(const p of pts){ while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0) lo.pop(); lo.push(p); }
+  for(const p of pts.slice().reverse()){ while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0) up.pop(); up.push(p); }
+  return lo.slice(0,-1).concat(up.slice(0,-1)); }
+function setView(){ const w=1000/S.zoom, h=700/S.zoom; svg.setAttribute("viewBox",`${S.cx-w/2} ${S.cy-h/2} ${w} ${h}`); }
+function draw(){
+  svg.innerHTML=""; const p=P(); const D=S.design;
+  const defs=el("defs",{}); defs.innerHTML=`<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#c9d6ee"/></pattern>`;
+  el("rect",{x:-3000,y:-3000,width:7000,height:7000,fill:"#eaf1fb"});
+  // land mass around the network
+  const pts=[...S.nodes.values()].map(n=>[n.x,n.y]);
+  if(pts.length>2 && !S.bg){ const H=hull(pts); const d="M"+H.map(q=>q.join(",")).join("L")+"Z";
+    el("path",{d,fill:"#f9fbff",stroke:"#f9fbff","stroke-width":120,"stroke-linejoin":"round",filter:"url(#soft)"});
+    el("path",{d,fill:"#fbfcff",stroke:"#fbfcff","stroke-width":80,"stroke-linejoin":"round"});
+    el("path",{d,fill:"url(#dots)",stroke:"none",opacity:.6}); }
+  if(S.bg) el("image",{href:S.bg,x:0,y:0,width:1000,height:700,preserveAspectRatio:"xMidYMid meet",opacity:S.bgOp});
+  const Y=D?D.Y:new Set(), prot=D?new Set(D.an.ev.prot):new Set(), used=D?D.an.ev.used:new Set();
+  const gE=el("g",{}), gB=el("g",{}), gQ=el("g",{}), gH=el("g",{}), gN=el("g",{}), gL=el("g",{"pointer-events":"none"}), gT=el("g",{"pointer-events":"none"});
+  S.edges.forEach((e,i)=>{ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) return; const q=Y.has(i), feas=e.km*p.db<=p.loss+1e-9;
+    if(q){ el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#1f6feb","stroke-width":6,"stroke-linecap":"round",opacity:.25},gQ);
+           el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#1f6feb","stroke-width":3.6,"stroke-linecap":"round"},gQ);
+           el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#bcd6ff","stroke-width":1.4,"stroke-dasharray":"2 8","class":"flow"},gQ); }
+    else el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:feas?"#b3c0d9":"#c9d2e3","stroke-width":feas?1.6:1.3,"stroke-dasharray":feas?"":"5 5","stroke-linecap":"round"},gE);
+    if(S.tapped===i){ const mx=(a.x+b.x)/2,my=(a.y+b.y)/2; const c=q?"#e5484d":"#7a869e";
+      el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,"stroke-width":5,opacity:.6},gT);
+      el("circle",{cx:mx,cy:my,r:9,fill:"none",stroke:c,"stroke-width":3,class:"pulse"},gT);
+      const t=el("text",{x:mx,y:my+7,"text-anchor":"middle","font-size":20},gT); t.textContent="🕵️"; }
+    const hit=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"transparent","stroke-width":14,style:"cursor:pointer"},gH);
+    const tt=el("title",{},hit); tt.textContent=`${e.a} – ${e.b} · ${fmt(e.km,1)} km${q?" · QKD":""}${feas?"":" · too long for QKD"}`;
+    hit.addEventListener("click",ev=>{ ev.stopPropagation(); onEdge(i); }); });
+  if(D) for(const [u,v] of D.an.cut.added){ const a=S.nodes.get(u), b=S.nodes.get(v); if(a&&b) el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#22b35e","stroke-width":2.2,"stroke-dasharray":"7 5",opacity:.9},gB); }
+  for(const [id,n] of S.nodes){ const isCC=S.cc.includes(id), isT=used.has(id), isP=prot.has(id);
+    const g=el("g",{transform:`translate(${n.x},${n.y})`,style:"cursor:pointer"},gN); const sel=S.sel===id||S.linkStart===id;
+    if(isCC){ el("circle",{r:17,fill:"#1f6feb",opacity:.15},g); el("rect",{x:-11,y:-11,width:22,height:22,rx:6,fill:"#1f6feb",stroke:"#fff","stroke-width":2.5},g);
+      const ic=el("g",{transform:"translate(-8,-8) scale(.67)"},g); ic.innerHTML=`<g fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${IC[SEC.icon]}</g>`; }
+    else if(isT){ el("circle",{r:11.5,fill:"#fff",stroke:"#22b35e","stroke-width":4.2,filter:"url(#gl)"},g); el("circle",{r:3.2,fill:"#22b35e"},g); }
+    else if(isP){ el("circle",{r:8,fill:"#fff",stroke:"#22b35e","stroke-width":3},g); }
+    else el("circle",{r:Math.max(4.5,Math.min(8,3+Math.sqrt(n.mw||0)/2)),fill:"#3a4a6b",stroke:"#fff","stroke-width":1.8},g);
+    if(sel) el("circle",{r:16,fill:"none",stroke:"#e5484d","stroke-width":2.5},g);
+    const t=el("title",{},g); t.textContent=`${id}\n${fmt(n.mw,1)} ${SEC.unit}${isCC?"\n"+SEC.hub:""}${isT?"\nQKD hub (trusted node)":""}${isP&&!isCC&&!isT?"\nQKD on every hop":""}`;
+    if(isCC||isT||(isP&&S.nodes.size<=60)||S.nodes.size<=25){ const tx=el("text",{x:n.x,y:n.y-(isCC?20:15),"text-anchor":"middle","font-size":isCC?13:11,"font-weight":isCC?800:600,fill:isCC?"#0b1f5c":"#334","paint-order":"stroke",stroke:"#fff","stroke-width":4},gL); tx.textContent=short(id); }
+    g.addEventListener("mousedown",ev=>onNodeDown(ev,id)); }
+  setView(); drawThumbs(); }
+function miniGraph(target, W, H, opts={}){ const t=$(target); t.innerHTML=""; let N=[...S.nodes.values()]; if(!N.length) return;
+  const Yd=S.design?S.design.Y:new Set(); const prot=S.design?new Set(S.design.an.ev.prot):new Set(); const used=S.design?S.design.an.ev.used:new Set();
+  let E=S.edges.map((e,i)=>[e,i]);
+  if(opts.qkdOnly){ E=E.filter(([e,i])=>Yd.has(i)); const keep=new Set(E.flatMap(([e])=>[e.a,e.b])); S.cc.forEach(c=>keep.add(c)); N=N.filter(n=>keep.has(n.id)); if(!N.length) return; }
+  const xs=N.map(n=>n.x), ys=N.map(n=>n.y), x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const pad=opts.qkdOnly?12:6; const sc=Math.min((W-2*pad)/((x1-x0)||1),(H-2*pad)/((y1-y0)||1)); const X=x=>pad+(x-x0)*sc+((W-2*pad)-(x1-x0)*sc)/2, Yv=y=>pad+(y-y0)*sc+((H-2*pad)-(y1-y0)*sc)/2;
+  let h="";
+  for(const [e,i] of E){ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) continue; const q=Yd.has(i);
+    h+=`<line x1="${X(a.x)}" y1="${Yv(a.y)}" x2="${X(b.x)}" y2="${Yv(b.y)}" stroke="${q?"#1f6feb":"#9aa8c4"}" stroke-width="${q?(opts.qkdOnly?3:2.2):1}" stroke-linecap="round"/>`; }
+  for(const n of N){ const cc=S.cc.includes(n.id), tn=used.has(n.id), p=prot.has(n.id);
+    h+= opts.qkdOnly && tn ? `<circle cx="${X(n.x)}" cy="${Yv(n.y)}" r="6" fill="#fff" stroke="#22b35e" stroke-width="3"/>`
+      : `<circle cx="${X(n.x)}" cy="${Yv(n.y)}" r="${cc?(opts.qkdOnly?7:3.6):opts.qkdOnly?5:2}" fill="${cc?"#1f6feb":p?"#22b35e":"#3a4a6b"}"/>`; }
+  t.innerHTML=h; }
+function drawThumbs(){ miniGraph("thumb",96,62); miniGraph("optThumb",280,90,{qkdOnly:true}); }
+// ---------------------------------------------------------------- results
+function ring(p, color, label, big=false){ const sz=big?128:86, sw=big?13:9, R=(sz-sw)/2-2, C=2*Math.PI*R;
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${R}" fill="none" stroke="#e8edf6" stroke-width="${sw}"/>
+    <circle cx="${sz/2}" cy="${sz/2}" r="${R}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${C*Math.max(0,Math.min(1,p))} ${C}" transform="rotate(-90 ${sz/2} ${sz/2})" style="transition:stroke-dasharray 1s"/>
+    <text x="${sz/2}" y="${sz/2+(big?6:6)}" text-anchor="middle" font-size="${big?27:20}" font-weight="800" fill="#0f1b3d">${label}</text>${big?`<text x="${sz/2}" y="${sz/2+26}" text-anchor="middle" font-size="12" fill="#334">protected</text>`:""}</svg>`; }
+function showResults(){
+  const D=S.design; if(!D){ return; } const a=D.an, cut=a.cut, p=D.M.p;
+  const cov=a.mwProt/(a.mwAll||1), red=a.worstPQC>0?1-a.worst/a.worstPQC:0;
+  $("ringCov").innerHTML=ring(cov,"#22b35e",`${(100*cov).toFixed(1)}%`,true);
+  $("gainV").textContent=`${(100*red).toFixed(0)}%`;
+  $("mLinks").textContent=D.Y.size; $("mHubs").textContent=a.ev.used.size;
+  $("gainBox").textContent=`${fmt(a.mwProt)} ${SEC.unit} kept secret`;
+  $("gainSub").textContent=`even if post-quantum math is broken · worst wiretap ${fmt(a.worstPQC)} → ${fmt(a.worst)} ${SEC.unit}`;
+  const R0=3200; let minRate=Infinity; for(const i of D.Y) minRate=Math.min(minRate, R0*Math.pow(10,-S.edges[i].km*p.db/10));
+  $("rings").innerHTML=[[cov,"#22b35e",`${(100*cov).toFixed(0)}%`,`${SEC.what[0].toUpperCase()+SEC.what.slice(1)} protected`],[D.Y.size/(+$("K").max),"#3b82f6",D.Y.size,"QKD links"],
+    [a.ev.used.size/Math.max(1,p.T||1),"#8b5cf6",a.ev.used.size,"Key hubs"],[isFinite(minRate)?Math.min(1,minRate/R0):0,"#f59f00",isFinite(minRate)?`${(minRate/1000).toFixed(1)}k`:"–","Min key rate (bps)"]]
+    .map(([v,c,l,t])=>`<div>${ring(v,c,l)}<div class="l">${t}</div></div>`).join("");
+  // path: control-center chain, or the longest protected path
+  let best=null; for(const [s,pth] of a.ev.chosen){ if(!best || (s===S.cc[1]) || pth.E.length>best.pth.E.length && best.s!==S.cc[1]) best={s,pth}; }
+  if(best){ const nodes=[]; let cur=null; const E=best.pth.E.map(i=>S.edges[i]);
+    // order nodes from the control center
+    const start=S.cc.find(c=>E.some(e=>e.a===c||e.b===c)) || E[0].a; cur=start; nodes.push(cur);
+    for(const e of E){ const nx=e.a===cur?e.b:e.b===cur?e.a:null; if(nx){ nodes.push(nx); cur=nx; } }
+    if(nodes.length<E.length+1){ nodes.length=0; nodes.push(E[0].a); for(const e of E) nodes.push(e.a===nodes[nodes.length-1]?e.b:e.a); }
+    const end=nodes[nodes.length-1], mids=nodes.slice(1,-1);
+    const icon=SEC.icon; let h=`<div class="pnode"><div class="pcircle">${ico(icon,30,"#1b2b55",1.7)}</div>${short(nodes[0])}</div>`;
+    for(const m of mids){ h+=`<div class="pseg"></div><div class="phop ${a.ev.used.has(m)?"tn":""}"><span>${short(m)}</span></div>`; }
+    h+=`<div class="pseg"></div><div class="pnode"><div class="pcircle">${ico(icon,30,"#1b2b55",1.7)}</div>${short(end)}</div>`;
+    $("path").innerHTML=h; const km=E.reduce((s,e)=>s+e.km,0);
+    $("pathNote").textContent=best.s===S.cc[1]?"(control-center link)":"(example)";
+    $("pathSub").textContent=`${E.length} QKD hop${E.length>1?"s":""} · ${fmt(km,1)} km · ${mids.length} trusted relay${mids.length===1?"":"s"} (orange = key hub)`; }
+  else { $("path").innerHTML=`<p class="note">No QKD chain fits these settings.</p>`; $("pathSub").textContent=""; }
+  const allUnder=[...D.Y].every(i=>S.edges[i].km*p.db<=p.loss+1e-9);
+  const checks=[[allUnder,`Minimized fiber loss: every QKD link ≤ ${p.loss} dB`],[a.ev.ccOK,`${SEC.hub[0].toUpperCase()+SEC.hub.slice(1)}s joined by QKD`],[cut.worstAfter===0,`Single-cut weak spots fixed (${cut.added.length} backup route${cut.added.length===1?"":"s"})`],
+    [red>=0.25,`Balanced load: worst wiretap cut ${(100*red).toFixed(0)}%`],[true,"PQC (ML-KEM / ML-DSA) on every link"],[D.exactGap!==null&&D.exactGap<0.5,D.exactGap===null?"Exact-solver check (presets at default settings)":D.exactGap<0.5?"Matches the exact integer program":`Within ${D.exactGap.toFixed(1)}% of exact optimum`]];
+  $("checks").innerHTML=checks.map(([ok,t])=>`<div class="chk ${ok?"":"no"}"><span class="b">${ico(ok?"check":"check",14,"#fff",3)}</span>${t}</div>`).join("");
+}
+// ---------------------------------------------------------------- actions
+function optimize(){
+  if(!S.cc.length) S.cc=autoCC(); const p=P(); const M=buildModel(p); if(!M){ $("solveNote").textContent="Mark at least one control center first."; return; }
+  const {Y,ms}=solve(M); const an=analyze(M,Y); let exactGap=null; const pr=PRESETS.find(x=>x.key===S.presetKey);
+  if(pr && !S.edited && p.K===pr.exact.K && p.T===pr.exact.T && p.H===pr.exact.H && Math.abs(p.mu-pr.exact.mu)<1e-9 && Math.abs(p.db-pr.exact.db)<1e-9 && p.loss===pr.exact.loss){
+    const idx=new Map(S.edges.map((e,i)=>[ek(e.a,e.b),i])); const YX=new Set(pr.exact.links.map(([a,b])=>idx.get(ek(a,b))).filter(i=>i!==undefined));
+    const ox=objective(M,YX,p.T).obj, oy=objective(M,Y,p.T).obj; exactGap=Math.max(0,100*(ox-oy)/Math.abs(ox||1)); }
+  S.design={Y,an,M,exactGap}; S.tapped=null; $("toast").style.display="none";
+  $("solveNote").textContent=`Optimized in ${fmt(ms)} ms · ${M.feasible.size} of ${S.edges.length} links short enough for QKD.`;
+  draw(); showResults(); }
+function onEdge(i){ if(S.mode==="del"){ S.edges.splice(i,1); edited(); return; } tap(i); }
+function tap(i){ S.tapped=i; const e=S.edges[i], D=S.design, T=$("toast");
+  if(!D){ T.className="toast"; T.innerHTML="Run the optimization first."; T.style.display="block"; draw(); return; }
+  const q=D.Y.has(i), mw=D.an.through[i]; const meas=EVIDENCE.filter(r=>/tap every round/.test(r.attack)); const pick=meas[Math.floor(Math.random()*meas.length)];
+  T.className="toast"+(q?" good":"");
+  T.innerHTML = q ? `<b class="t"><span class="pill">ALARM</span> Tap caught on ${short(e.a)} – ${short(e.b)}</b>BB84 error rate jumps to <b>${(parseFloat(pick?.result||0.25)*100).toFixed(1)}%</b>${pick?` (measured on ${pick.device} via qBraid)`:""}, above the 11% abort line. ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} stays protected.`
+    : `<b class="t"><span class="pill" style="background:#7a869e">UNSEEN</span> Tap on ${short(e.a)} – ${short(e.b)}</b>PQC-only link: ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} crosses it with no quantum alarm. PQC keeps it unreadable today; fiber monitoring or a QKD upgrade would catch the tap.`;
+  T.style.display="block"; draw(); }
+function randomTap(){ const tot=S.edges.reduce((s,e)=>s+e.km,0); let r=Math.random()*tot; for(let i=0;i<S.edges.length;i++){ r-=S.edges[i].km; if(r<=0){ tap(i); return; } } }
+// editing
+function svgPt(ev){ const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+let drag=null, pan=null;
+function onNodeDown(ev,id){ ev.stopPropagation(); const m=S.mode;
+  if(m==="move"){ drag=id; return; }
+  if(m==="del"){ S.nodes.delete(id); S.edges=S.edges.filter(e=>e.a!==id&&e.b!==id); S.cc=S.cc.filter(c=>c!==id); edited(); return; }
+  if(m==="cc"){ if(S.cc.includes(id)) S.cc=S.cc.filter(c=>c!==id); else { S.cc.push(id); if(S.cc.length>2) S.cc.shift(); } edited(); return; }
+  if(m==="link"){ if(!S.linkStart){ S.linkStart=id; draw(); return; } if(S.linkStart!==id){ const a=S.nodes.get(S.linkStart), b=S.nodes.get(id); const km=Math.max(0.1,Math.round(Math.hypot(a.x-b.x,a.y-b.y)/20*10)/10); S.edges.push({a:S.linkStart,b:id,km}); } S.linkStart=null; edited(); return; }
+  S.sel=id; draw(); }
+svg.addEventListener("mousedown",ev=>{ if(S.mode==="tap"||S.mode==="move"){ pan={x:ev.clientX,y:ev.clientY,cx:S.cx,cy:S.cy}; } });
+window.addEventListener("mousemove",ev=>{ if(drag){ const p=svgPt(ev); const n=S.nodes.get(drag); n.x=p.x; n.y=p.y; draw(); return; }
+  if(pan){ const r=svg.getBoundingClientRect(); const k=1000/S.zoom/r.width; S.cx=pan.cx-(ev.clientX-pan.x)*k; S.cy=pan.cy-(ev.clientY-pan.y)*k; setView(); } });
+window.addEventListener("mouseup",()=>{ drag=null; pan=null; });
+svg.addEventListener("click",ev=>{ if(S.mode!=="node") return; const p=svgPt(ev); let k=S.nodes.size+1; while(S.nodes.has("S"+k)) k++; S.nodes.set("S"+k,{id:"S"+k,mw:20,kv:115,x:p.x,y:p.y}); edited(); });
+function edited(){ S.edited=true; S.design=null; S.tapped=null; draw(); updateNetCard(); }
+$("zin").onclick=()=>{ S.zoom=Math.min(4,S.zoom*1.3); setView(); scaleTxt(); }; $("zout").onclick=()=>{ S.zoom=Math.max(.6,S.zoom/1.3); setView(); scaleTxt(); };
+function scaleTxt(){ // 200 px of the bar ≈ map units; estimate km per map unit from links
+  let s=0,n=0; for(const e of S.edges){ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) continue; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d>1){ s+=e.km/d; n++; } }
+  const kmPerUnit=n? s/n : 0.05; const r=svg.getBoundingClientRect(); const units=200*(1000/S.zoom)/(r.width||1000); const tot=kmPerUnit*units;
+  $("scaleTxt").innerHTML=[0,1,2,3].map(k=>`<span>${k===0?"0":Math.round(tot*k/3)}${k===3?" km":""}</span>`).join(""); }
+// ---------------------------------------------------------------- inputs / UI
+function updateNetCard(){ $("netNodes").textContent=`${S.nodes.size} nodes`; $("netLinks").textContent=`${S.edges.length} links`; $("netOk").innerHTML=S.nodes.size?ico("check",20,"#22b35e",3):""; drawThumbs(); }
+const lab={K:v=>v, H:v=>v, db:v=>(v/100).toFixed(2), loss:v=>v};
+for(const k in lab){ const f=()=>$(k+"V").textContent=lab[k](+$(k).value); $(k).addEventListener("input",f); $(k).addEventListener("change",()=>{ if(S.design) optimize(); }); f(); }
+["secLevel","goal"].forEach(k=>$(k).addEventListener("change",()=>{ if(S.design) optimize(); }));
+$("run").onclick=optimize; $("randTap").onclick=randomTap;
+document.querySelectorAll("#toolbar [data-mode]").forEach(b=>b.onclick=()=>{ S.mode=b.dataset.mode; S.linkStart=null; document.querySelectorAll("#toolbar [data-mode]").forEach(x=>x.classList.toggle("on",x===b)); svg.style.cursor=S.mode==="node"?"crosshair":"default"; });
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b)); $(b.dataset.go).scrollIntoView({behavior:"smooth",block:"start"}); });
+// sector
+Object.entries(SECTORS).forEach(([k,v])=>{ const o=document.createElement("option"); o.value=k; o.textContent=v.name; $("sector").appendChild(o); });
+function applySector(setParams=true){ SEC=SECTORS[$("sector").value];
+  if(setParams){ $("K").value=SEC.p.K; $("H").value=SEC.p.H; $("db").value=SEC.p.db; $("loss").value=SEC.p.loss; $("secLevel").value=String(SEC.p.T); $("goal").value=String(SEC.p.mu); for(const k in lab) $(k+"V").textContent=lab[k](+$(k).value); }
+  $("sectorNote").innerHTML=`<b>${SEC.name}:</b> ${SEC.why} Values per site are read as ${SEC.unit}. Starting settings are illustrative; adjust freely.`;
+  $("lgNode").textContent=SEC.site[0].toUpperCase()+SEC.site.slice(1); $("lgLine").textContent=SEC.line[0].toUpperCase()+SEC.line.slice(1)+" (PQC)"; $("lgCC").textContent=SEC.hub[0].toUpperCase()+SEC.hub.slice(1);
+  $("addNodeBtn").textContent="+ "+SEC.site.split(" ")[0][0].toUpperCase()+SEC.site.split(" ")[0].slice(1);
+  if(setParams && S.nodes.size) optimize(); else { draw(); showResults(); } }
+$("sector").onchange=()=>applySector(true);
+// modals
+const openM=id=>$(id).style.display="grid"; document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".modal").style.display="none");
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.style.display="none"; }));
+$("btnExample").onclick=()=>openM("mExample"); $("btnUpload").onclick=()=>openM("mUpload");
+$("exList").innerHTML=PRESETS.map(p=>`<button data-k="${p.key}"><b>${p.title}</b><small>${p.nodes.length} nodes · ${p.edges.length} links</small></button>`).join("");
+$("exList").querySelectorAll("button").forEach(b=>b.onclick=()=>{ loadPreset(b.dataset.k); $("mExample").style.display="none"; });
+function loadPreset(k){ const p=PRESETS.find(x=>x.key===k); S.bg=null; S.zoom=1; S.cx=500; S.cy=350; loadNet(p,p.key); $("netName").textContent=p.title.replace(" (ACTIVSg70k)",""); updateNetCard(); optimize(); scaleTxt(); }
+$("jsonFile").onchange=ev=>{ const f=ev.target.files[0]; if(!f) return; f.text().then(t=>{ $("jsonIn").value=t; $("jsonLoad").click(); }); };
+$("jsonLoad").onclick=()=>{ try{ const o=JSON.parse($("jsonIn").value); S.bg=null; loadNet(o,null); S.edited=true; $("netName").textContent=o.name||"Uploaded grid"; updateNetCard(); optimize(); $("mUpload").style.display="none"; scaleTxt(); } catch(e){ $("qbMsg").textContent="Could not read that JSON: "+e.message; } };
+$("newBlank").onclick=()=>{ S.nodes=new Map(); S.edges=[]; S.cc=[]; S.design=null; S.presetKey=null; S.edited=true; $("netName").textContent="New grid"; draw(); updateNetCard(); $("mUpload").style.display="none"; document.querySelector('#toolbar [data-mode="node"]').click(); };
+$("imgFile").onchange=ev=>{ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ S.bg=r.result; S.nodes=new Map(); S.edges=[]; S.cc=[]; S.design=null; S.presetKey=null; S.edited=true; S.zoom=1; S.cx=500; S.cy=350; $("netName").textContent="Traced image"; draw(); updateNetCard(); $("qbMsg").textContent="Image loaded: read it with qBraid AI, or close this and trace it with + Node / + Link."; }; r.readAsDataURL(f); };
+// qBraid AI Gateway
+const GW="https://api-v2.qbraid.com/api/v1/ai"; let MODELS=[];
+$("qbConnect").onclick=async()=>{ const key=$("qbKey").value.trim(); if(!key){ $("qbMsg").textContent="Paste your qBraid API key first."; return; } $("qbMsg").textContent="Asking qBraid for models…";
+  try{ const r=await fetch(GW+"/models",{headers:{"X-API-Key":key}}); if(!r.ok) throw new Error("HTTP "+r.status); const j=await r.json();
+    MODELS=(j.data||[]).map(m=>({id:m.id,caps:JSON.stringify(m._qbraid?.capabilities||m.capabilities||""),eps:JSON.stringify(m._qbraid?.supportedEndpoints||"")}));
+    const vis=MODELS.filter(m=>/image|vision/i.test(m.caps)); const list=vis.length?vis:MODELS; $("qbModel").innerHTML=list.map(m=>`<option>${m.id}</option>`).join("");
+    $("qbMsg").textContent=`${list.length} ${vis.length?"vision ":""}models ready.`; }
+  catch(e){ $("qbMsg").innerHTML=`Could not reach qBraid from this page (${e.message}). Use <code>3i_grid_image_to_design.ipynb</code> in qBraid Lab, then load its JSON here.`; } };
+$("qbRead").onclick=async()=>{ const key=$("qbKey").value.trim(), model=$("qbModel").value; if(!S.bg){ $("qbMsg").textContent="Choose an image first."; return; } if(!key||!model){ $("qbMsg").textContent="Load models first."; return; }
+  const m=S.bg.match(/^data:(image\/[a-z+]+);base64,(.*)$/); const img=new Image(); img.src=S.bg; await img.decode(); const W=img.naturalWidth, Hh=img.naturalHeight;
+  $("qbMsg").textContent="qBraid AI is reading the image…"; const prompt=$("aiPrompt").value+`\nThe image is ${W} x ${Hh} pixels.`;
+  try{ let text; const meta=MODELS.find(x=>x.id===model)||{eps:""};
+    if(/messages/.test(meta.eps)||/claude/i.test(model)){ const r=await fetch(GW+"/v1/messages",{method:"POST",headers:{"X-API-Key":key,"x-api-key":key,"content-type":"application/json","anthropic-version":"2023-06-01"},body:JSON.stringify({model,max_tokens:8000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:m[1],data:m[2]}},{type:"text",text:prompt}]}]})});
+      if(!r.ok) throw new Error("HTTP "+r.status); const j=await r.json(); text=(j.content||[]).map(c=>c.text||"").join(""); }
+    else { const r=await fetch(GW+"/chat/completions",{method:"POST",headers:{"X-API-Key":key,"content-type":"application/json"},body:JSON.stringify({model,messages:[{role:"user",content:[{type:"image_url",image_url:{url:S.bg}},{type:"text",text:prompt}]}]})});
+      if(!r.ok) throw new Error("HTTP "+r.status); const j=await r.json(); text=j.choices?.[0]?.message?.content||""; }
+    const js=JSON.parse(text.slice(text.indexOf("{"),text.lastIndexOf("}")+1)); const sc=Math.min(1000/W,700/Hh), ox=(1000-W*sc)/2, oy=(700-Hh*sc)/2;
+    js.nodes.forEach(n=>{ if(n.x!=null) n.x=ox+n.x*sc; if(n.y!=null) n.y=oy+n.y*sc; }); const bg=S.bg; loadNet(js,null); S.bg=bg; S.edited=true;
+    $("netName").textContent="Read by qBraid AI"; updateNetCard(); optimize(); $("mUpload").style.display="none"; scaleTxt();
+  } catch(e){ $("qbMsg").innerHTML=`qBraid AI call failed (${e.message}). Use <code>3i_grid_image_to_design.ipynb</code> in qBraid Lab instead.`; } };
+$("exportDesign").onclick=()=>{ const D=S.design; if(!D) return; const out={network:S.presetKey||"custom",sector:$("sector").value,params:D.M.p,control_centers:S.cc,
+  qkd_links:[...D.Y].map(i=>({a:S.edges[i].a,b:S.edges[i].b,km:S.edges[i].km,loss_db:+(S.edges[i].km*D.M.p.db).toFixed(2),traffic_mw:+D.an.through[i].toFixed(1)})),
+  trusted_nodes:[...D.an.ev.used],protected:D.an.ev.prot,backup_routes:D.an.cut.added.map(([a,b,km])=>({a,b,km:+km.toFixed(1)}))};
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:"application/json"})); a.download="grid_design.json"; a.click(); };
+$("evidence").innerHTML="<tr><th>Device</th><th>Attack</th><th>QBER</th></tr>"+EVIDENCE.map(r=>`<tr title="${r.job}"><td>${r.device}</td><td>${r.attack}</td><td>${r.result}</td></tr>`).join("");
+// icons into static UI
+$("tabNet").innerHTML=ico("net",18)+"Network"; $("tabPar").innerHTML=ico("sliders",18)+"Parameters"; $("tabRes").innerHTML=ico("chart",18)+"Results";
+$("qbBadge").innerHTML=ico("atom",15)+"Runs on qBraid";
+$("btnUpload").innerHTML=ico("cloud",26,"#fff")+"Upload File"; $("btnExample").innerHTML=ico("hub",26,"#334")+"Load Example";
+$("i-sector").innerHTML=ico("building",18,"#1f6feb"); $("i-K").innerHTML=ico("link",18,"#1f6feb"); $("i-H").innerHTML=ico("chain",18,"#1f6feb"); $("i-db").innerHTML=ico("wave",18,"#1f6feb"); $("i-loss").innerHTML=ico("gauge",18,"#1f6feb");
+$("i-sec").innerHTML=ico("shield",18,"#1f6feb"); $("i-goal").innerHTML=ico("trophy",18,"#f59f00");
+$("run").innerHTML=ico("play",18,"#fff")+"Run Optimization";
+$("shieldIc").innerHTML=`<svg width="40" height="44" viewBox="0 0 24 26"><path d="M12 1l9 4v7c0 6.5-4.5 11-9 13-4.5-2-9-6.5-9-13V5z" fill="#1f6feb"/><rect x="8" y="11" width="8" height="7" rx="1.5" fill="#fff"/><path d="M9.7 11V9.2a2.3 2.3 0 0 1 4.6 0V11" stroke="#fff" stroke-width="1.6" fill="none"/></svg>`;
+$("ic-links").innerHTML=ico("link",28,"#1f6feb",2.2); $("ic-hubs").innerHTML=ico("hub",28,"#f59f00",2.2); $("optIc").innerHTML=`<span style="width:20px;height:20px;border-radius:50%;background:#22b35e;display:grid;place-items:center">${ico("check",13,"#fff",3)}</span>`;
+$("gainIc").innerHTML=`<span style="width:38px;height:38px;border-radius:50%;background:#22b35e;display:grid;place-items:center">${ico("check",22,"#fff",3)}</span>`;
+$("ic-metrics").innerHTML=ico("chart",20,"#1f6feb",2.4); $("ic-path").innerHTML=ico("link",20,"#1f6feb",2.2); $("ic-details").innerHTML=ico("chart",20,"#1f6feb",2.4);
+$("mExTitle").innerHTML=ico("hub",20,"#1f6feb")+"Load an example grid"; $("mUpTitle").innerHTML=ico("cloud",20,"#1f6feb")+"Upload a grid";
+
+// ---------------------------------------------------------------- slide / embed mode
+function fitStage(){ const st=$("stage"); if(!document.body.classList.contains("fit")){ st.style.transform=""; st.style.left=""; st.style.top=""; return; }
+  const k=Math.min(window.innerWidth/1920, window.innerHeight/1080); st.style.transform=`scale(${k})`;
+  st.style.left=((window.innerWidth-1920*k)/2)+"px"; st.style.top=((window.innerHeight-1080*k)/2)+"px"; }
+function setFit(on){ document.body.classList.toggle("fit",on); $("fitBtn").textContent=on?"⤢ Page mode":"⛶ Slide mode"; fitStage(); setTimeout(()=>{ scaleTxt(); },50); }
+const qs=new URLSearchParams(location.search);
+const embedded = (()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
+setFit(true);
+$("fitBtn").onclick=()=>setFit(!document.body.classList.contains("fit"));
+
+// start
+applySector(false); loadPreset(PRESETS[0].key);
+</script>
+</body>
+</html>
