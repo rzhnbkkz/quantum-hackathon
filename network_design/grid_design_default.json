@@ -1,0 +1,111 @@
+{
+ "network": "chattanooga_r1",
+ "params": {
+  "K": 8,
+  "T": 4,
+  "H": 3,
+  "db": 0.35,
+  "loss": 10,
+  "mu": 0.25
+ },
+ "control_centers": [
+  "CHATTANOOGA 3",
+  "CHATTANOOGA 11"
+ ],
+ "qkd_links": [
+  {
+   "a": "CHATTANOOGA 3",
+   "b": "CHATTANOOGA 24",
+   "km": 3.72,
+   "loss_db": 1.3,
+   "traffic_mw": 158.4
+  },
+  {
+   "a": "CHATTANOOGA 24",
+   "b": "CHATTANOOGA 12",
+   "km": 10,
+   "loss_db": 3.5,
+   "traffic_mw": 85.3
+  },
+  {
+   "a": "CHATTANOOGA 11",
+   "b": "CHATTANOOGA 12",
+   "km": 4.93,
+   "loss_db": 1.73,
+   "traffic_mw": 372.7
+  },
+  {
+   "a": "CHATTANOOGA 11",
+   "b": "CHATTANOOGA 27",
+   "km": 6.62,
+   "loss_db": 2.32,
+   "traffic_mw": 640.5
+  },
+  {
+   "a": "CHATTANOOGA 23",
+   "b": "CHATTANOOGA 21",
+   "km": 13.57,
+   "loss_db": 4.75,
+   "traffic_mw": 162.5
+  },
+  {
+   "a": "CHATTANOOGA 27",
+   "b": "CHATTANOOGA 21",
+   "km": 3.08,
+   "loss_db": 1.08,
+   "traffic_mw": 453.4
+  },
+  {
+   "a": "ROSSVILLE 2",
+   "b": "CHATTANOOGA 3",
+   "km": 14.01,
+   "loss_db": 4.9,
+   "traffic_mw": 110.3
+  },
+  {
+   "a": "CHATTANOOGA 3",
+   "b": "CHATTANOOGA 13",
+   "km": 16.01,
+   "loss_db": 5.6,
+   "traffic_mw": 60.7
+  }
+ ],
+ "trusted_nodes": [
+  "CHATTANOOGA 24",
+  "CHATTANOOGA 12",
+  "CHATTANOOGA 27",
+  "CHATTANOOGA 21"
+ ],
+ "protected": [
+  "CHATTANOOGA 11",
+  "ROSSVILLE 2",
+  "CHATTANOOGA 23",
+  "CHATTANOOGA 13",
+  "CHATTANOOGA 21",
+  "CHATTANOOGA 12",
+  "CHATTANOOGA 24",
+  "CHATTANOOGA 27"
+ ],
+ "backup_routes": [
+  {
+   "a": "SIGNAL MOUNTAIN 1",
+   "b": "JASPER 18",
+   "km": 74.3
+  },
+  {
+   "a": "LA FAYETTE 4",
+   "b": "CLEVELAND 16",
+   "km": 52.3
+  },
+  {
+   "a": "OLD FORT 2",
+   "b": "JASPER 16",
+   "km": 109
+  },
+  {
+   "a": "CHATTANOOGA 4",
+   "b": "SIGNAL MOUNTAIN 2",
+   "km": 15.5
+  }
+ ]
+}

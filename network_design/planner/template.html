@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure the Grid: QKD + PQC Network Planner</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--ink:#1d2330;--muted:#5d6676;--line:#dfe3ea;--qkd:#e07a1f;--pqc:#4c6ef5;--backup:#2f9e44;--cc:#111827;--tn:#e07a1f;--prot:#4a7c59;--bad:#c92a2a;--good:#2b8a3e}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header p{margin:0;color:var(--muted)}
+.wrap{display:grid;grid-template-columns:300px 1fr 330px;gap:12px;padding:12px;min-height:calc(100vh - 60px)}
+@media (max-width:1150px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 8px}
+.panel h2:first-child{margin-top:0}
+select,input[type=text],input[type=number],textarea{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+textarea{font:12px ui-monospace,Menlo,monospace;height:90px}
+button{font:inherit;padding:7px 10px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer}
+button:hover{border-color:#aab3c2}
+button.primary{background:var(--qkd);border-color:var(--qkd);color:#fff;font-weight:600;width:100%;padding:10px}
+button.on{background:#1d2330;color:#fff;border-color:#1d2330}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.slider{margin:8px 0}
+.slider label{display:flex;justify-content:space-between;font-size:13px}
+.slider label b{font-variant-numeric:tabular-nums}
+.slider small{color:var(--muted);display:block;font-size:11.5px}
+input[type=range]{width:100%}
+.mapbox{position:relative;padding:0;overflow:hidden;align-self:start}
+svg{width:100%;height:auto;aspect-ratio:10/7;display:block;background:#fff;border-radius:10px;user-select:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{display:inline-block;width:18px;height:4px;border-radius:2px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:8px}
+.kpi .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:11.5px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted)}
+.callout{border-left:3px solid var(--qkd);background:#fff7ef;padding:8px 10px;border-radius:4px;font-size:13px;margin:8px 0}
+.callout.bad{border-color:var(--bad);background:#fff1f1}
+.callout.good{border-color:var(--good);background:#effaf2}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:4px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+code{font:11px ui-monospace,Menlo,monospace;word-break:break-all}
+.tabs{display:flex;gap:4px;margin-bottom:8px}
+.tabs button{flex:1;padding:6px 4px;font-size:12.5px}
+.hide{display:none}
+.toolbar{position:absolute;left:10px;top:10px;display:flex;gap:4px;flex-wrap:wrap;z-index:2}
+.toolbar button{font-size:12px;padding:5px 8px;background:#ffffffee}
+.toolbar button.on{background:#1d2330;color:#fff;border-color:#1d2330}
+.status{position:absolute;left:10px;bottom:46px;font-size:12px;background:#ffffffe6;padding:4px 8px;border-radius:6px;border:1px solid var(--line);max-width:70%}
+details summary{cursor:pointer;color:var(--muted);font-size:13px;margin:6px 0}
+.edge{cursor:pointer}
+.node{cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Secure the Grid · QKD + PQC Network Planner</h1>
+  <p>Post-quantum cryptography on every link, quantum key distribution only where it pays off. Load a grid, change the assumptions, and attack the result.</p>
+</header>
+<div class="wrap">
+<!-- LEFT: inputs -->
+<div class="panel" id="left">
+  <h2>0 · Sector</h2>
+  <select id="sectorSel"></select>
+  <p class="note" id="sectorNote"></p>
+  <h2>1 · Network</h2>
+  <div class="tabs"><button data-tab="preset" class="on">Presets</button><button data-tab="build">Build / image</button><button data-tab="json">Import</button></div>
+  <div id="tab-preset">
+    <select id="presetSel"></select>
+    <p class="note" id="presetNote"></p>
+  </div>
+  <div id="tab-build" class="hide">
+    <div class="row"><button id="newBlank">New blank grid</button><label class="note" style="display:flex;align-items:center;gap:6px"><input type="file" id="imgFile" accept="image/*" style="width:150px">trace an image</label></div>
+    <div class="slider"><label>Image opacity <b id="opV">50%</b></label><input type="range" id="imgOp" min="0" max="100" value="50"></div>
+    <div class="slider"><label>Map scale <b id="scaleV">5 km / 100 px</b></label><input type="range" id="scale" min="1" max="60" value="5"><small>Sets the length of new links you draw. You can edit any link's km below.</small></div>
+    <details id="aiBox"><summary><b>Read a grid image with qBraid AI</b></summary>
+      <p class="note">Uses qBraid's AI Gateway (vision model, billed to your qBraid AI allowance). Your key stays in this page's memory and is sent only to api-v2.qbraid.com.</p>
+      <input type="password" id="qbKey" placeholder="qBraid API key">
+      <div class="row"><button id="qbConnect">Load models</button><select id="qbModel" style="flex:1"></select></div>
+      <div class="row"><button id="qbRead" class="on">Read uploaded image</button></div>
+      <p class="note" id="qbMsg"></p>
+    </details>
+    <p class="note">Use the map toolbar: <b>+ Substation</b> (click empty space), <b>+ Link</b> (click two substations), <b>Control center</b> (click to set main/backup), <b>Delete</b>, or <b>Move</b>.</p>
+    <div id="editBox" class="note"></div>
+  </div>
+  <div id="tab-json" class="hide">
+    <p class="note">Paste a grid as JSON: <code>{"nodes":[{"id":"A","mw":40,"kv":115}],"edges":[{"a":"A","b":"B","km":6.5}],"cc":["A","B"]}</code>. Positions (x, y) are optional.</p>
+    <textarea id="jsonIn" placeholder='{"nodes":[...],"edges":[...]}'></textarea>
+    <div class="row"><button id="jsonLoad">Load JSON</button><button id="jsonExport">Copy current grid</button></div>
+    <details><summary>Turn a grid image into JSON with AI (qBraid Lab agent)</summary>
+      <p class="note">Open the Claude or Codex agent in qBraid Lab, attach the image, and paste this prompt:</p>
+      <textarea id="aiPrompt" readonly>Read this power-grid diagram. List every substation and every line between substations as JSON with exactly this shape:
+{"nodes":[{"id":"<name>","mw":<load MW, or 20 if unknown>,"kv":<voltage kV, or 115 if unknown>,"x":<pixel x>,"y":<pixel y>}],
+ "edges":[{"a":"<id>","b":"<id>","km":<length in km if shown, else estimate from the scale bar>}],
+ "cc":["<main control center id>","<backup control center id>"]}
+Use the substation's position in the image for x and y. Output only the JSON.</textarea>
+    </details>
+  </div>
+
+  <h2>2 · Assumptions</h2>
+  <div class="slider"><label>QKD link budget <b id="KV"></b></label><input type="range" id="K" min="0" max="24" value="8"><small>How many links get QKD hardware.</small></div>
+  <div class="slider"><label>Trusted nodes allowed <b id="TV"></b></label><input type="range" id="T" min="0" max="12" value="4"><small>Relay sites where keys are decrypted and re-encrypted.</small></div>
+  <div class="slider"><label>Longest QKD chain <b id="HV"></b></label><input type="range" id="H" min="1" max="4" value="3"><small>Hops to a control center (EPB tested 3).</small></div>
+  <div class="slider"><label>Fiber loss <b id="dbV"></b></label><input type="range" id="db" min="15" max="60" value="35"><small>dB per km (EPB measured 0.35).</small></div>
+  <div class="slider"><label>QKD loss limit <b id="lossV"></b></label><input type="range" id="loss" min="4" max="20" value="10"><small>Max loss one QKD link tolerates.</small></div>
+  <div class="slider"><label>Weight on tap detection <b id="muV"></b></label><input type="range" id="mu" min="0" max="100" value="25"><small>0 = only keep keys secret; higher = also watch the busiest fiber.</small></div>
+  <button class="primary" id="run">Optimize network</button>
+  <p class="note" id="solveNote"></p>
+</div>
+
+<!-- CENTER: map -->
+<div class="panel mapbox">
+  <div class="toolbar" id="toolbar">
+    <button data-mode="tap" class="on" title="Click a link to tap it">Tap a link</button>
+    <button data-mode="move">Move</button>
+    <button data-mode="node" id="addNodeBtn">+ Substation</button>
+    <button data-mode="link">+ Link</button>
+    <button data-mode="cc" id="ccBtn">Control center</button>
+    <button data-mode="del">Delete</button>
+    <button id="randTap" title="An attacker taps a random link, weighted by length">Random attack</button>
+  </div>
+  <svg id="map" viewBox="0 0 1000 700"></svg>
+  <div class="status" id="status">Load a grid and press <b>Optimize network</b>.</div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--qkd);height:6px"></i>QKD + PQC</span>
+    <span><i class="sw" style="background:var(--pqc)"></i>PQC only</span>
+    <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--pqc) 0 4px,transparent 4px 7px)"></i>Too long for QKD</span>
+    <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--backup) 0 5px,transparent 5px 8px)"></i>New backup route</span>
+    <span>● <b style="color:var(--cc)" id="lgCC">control center</b></span>
+    <span>■ <b style="color:var(--tn)">trusted node</b></span>
+    <span>● <b style="color:var(--prot)">QKD every hop</b></span>
+  </div>
+</div>
+
+<!-- RIGHT: results -->
+<div class="panel" id="right">
+  <h2>3 · Results</h2>
+  <div class="kpis" id="kpis"></div>
+  <div id="verdict"></div>
+  <h2>Attack test</h2>
+  <div id="attackOut" class="note">Click any link on the map to tap it, or press <b>Random attack</b>.</div>
+  <h2>Run on qBraid</h2>
+  <p class="note">Export this design and run <code>3h_design_on_qbraid.ipynb</code> in qBraid Lab: it runs BB84 on every QKD link of the design in one circuit on qBraid's GPU simulator.</p>
+  <div class="row"><button id="exportDesign">Download design JSON</button></div>
+  <details open><summary>Measured on qBraid (CHA 3–CHA 24 link)</summary>
+    <table id="evidence"></table>
+  </details>
+  <details><summary>How the optimizer works</summary>
+    <p class="note">PQC (ML-KEM / ML-DSA) protects every link. A substation counts as QKD-protected only if every hop to a control center has QKD, with at most the chosen number of trusted relays. Score = load protected (MW × route km) + weight × traffic watched on QKD fiber. The page runs greedy path selection plus swap local search with restarts. For the presets at default settings it is checked against the exact integer program (SciPy HiGHS) from the notebooks.</p>
+    <p class="note">Attack tests: a tap is caught only on a QKD link; trusted-node loss exposes keys relayed through it; one cut fiber can isolate substations unless a backup route exists.</p>
+  </details>
+</div>
+</div>
+
+<script>
+const PRESETS = /*PRESETS*/[];
+const EVIDENCE = /*EVIDENCE*/[];
+// ---------------------------------------------------------------- sectors (same math, different labels)
+const SECTORS = {
+  power:   {name:"Electric utility", unit:"MW", what:"load", site:"substation", hub:"control center", traffic:"control traffic", note:"Value per site = load in MW (stands in for NERC CIP-002 impact)."},
+  water:   {name:"Water / wastewater utility", unit:"k people", what:"people served", site:"pump or treatment site", hub:"SCADA control center", traffic:"SCADA traffic", note:"Value per site = thousands of people served. Same fiber physics, same attacks."},
+  pipeline:{name:"Oil & gas pipeline", unit:"k bbl/day", what:"throughput", site:"compressor / valve station", hub:"pipeline control room", traffic:"control traffic", note:"Value per site = throughput it controls (thousand barrels/day)."},
+  health:  {name:"Hospital network", unit:"beds", what:"patients (beds)", site:"hospital or clinic", hub:"data center", traffic:"patient-record traffic", note:"Value per site = beds served; records must stay secret for decades."},
+  finance: {name:"Bank / exchange", unit:"$M/day", what:"transactions", site:"branch or data center", hub:"primary data center", traffic:"transaction traffic", note:"Value per site = daily transaction value; long-lived secrets make harvest-now-decrypt-later real."}};
+let SEC = SECTORS.power;
+// ---------------------------------------------------------------- state
+const S = {nodes:new Map(), edges:[], cc:[], design:null, mode:"tap", bg:null, bgOp:0.5, sel:null, linkStart:null, presetKey:null, tapped:null};
+const $ = id => document.getElementById(id);
+const P = () => ({K:+$("K").value, T:+$("T").value, H:+$("H").value, db:+$("db").value/100, loss:+$("loss").value, mu:+$("mu").value/100});
+const ek = (a,b) => a < b ? a + "\u0001" + b : b + "\u0001" + a;
+const fmt = (x,d=0) => x.toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+
+// ---------------------------------------------------------------- graph helpers
+function adj(){ const A=new Map(); for(const n of S.nodes.keys()) A.set(n,[]); S.edges.forEach((e,i)=>{ if(A.has(e.a)&&A.has(e.b)){A.get(e.a).push([e.b,e.km,i]);A.get(e.b).push([e.a,e.km,i]);} }); return A; }
+function dijkstra(A, src){ const d=new Map([[src,0]]), prev=new Map(), done=new Set(); const Q=[[0,src]];
+  while(Q.length){ Q.sort((x,y)=>x[0]-y[0]); const [du,u]=Q.shift(); if(done.has(u)) continue; done.add(u);
+    for(const [v,w,i] of A.get(u)){ const nd=du+w; if(!d.has(v)||nd<d.get(v)-1e-12){ d.set(v,nd); prev.set(v,[u,i]); Q.push([nd,v]); } } }
+  return {d,prev}; }
+function pathEdges(prev, s){ const E=[]; let u=s; while(prev.has(u)){ const [p,i]=prev.get(u); E.push(i); u=p; } return E; }
+function autoCC(){ const A=adj(); const ids=[...S.nodes.keys()]; if(!ids.length) return [];
+  let best=null; for(const s of ids){ const {d}=dijkstra(A,s); if(d.size<ids.length*0.6) continue; let sum=0; for(const v of d.values()) sum+=v;
+    const sc=(S.nodes.get(s).kv||0)*1e6 - sum; if(!best||sc>best[0]) best=[sc,s]; }
+  const c1=best?best[1]:ids[0]; const H=P().H;
+  // backup: closest-to-center node within H hops (BFS) other than c1
+  const hop=new Map([[c1,0]]), q=[c1]; while(q.length){const u=q.shift(); for(const [v] of A.get(u)) if(!hop.has(v)){hop.set(v,hop.get(u)+1); if(hop.get(v)<=H) q.push(v);} }
+  let b2=null; for(const [s,h] of hop){ if(s===c1||h>H) continue; const {d}=dijkstra(A,s); let sum=0; for(const v of d.values()) sum+=v; if(!b2||sum<b2[0]) b2=[sum,s]; }
+  return b2? [c1,b2[1]] : [c1]; }
+
+// ---------------------------------------------------------------- model (mirrors network_design/v11.py)
+function buildModel(p){
+  const A=adj(); const cc=S.cc.filter(c=>S.nodes.has(c)); if(cc.length===0) return null;
+  const feasible=new Set(); S.edges.forEach((e,i)=>{ if(e.km*p.db<=p.loss+1e-9) feasible.add(i); });
+  const dist=new Map(); for(const c of cc){ const {d}=dijkstra(A,c); for(const [s,v] of d) dist.set(s, Math.min(dist.get(s)??Infinity, v)); }
+  const value=new Map(); for(const [s,n] of S.nodes) if(!cc.includes(s) && dist.has(s)) value.set(s, n.mw*dist.get(s));
+  // feasible adjacency
+  const F=new Map(); for(const n of S.nodes.keys()) F.set(n,[]); for(const i of feasible){ const e=S.edges[i]; F.get(e.a).push([e.b,i]); F.get(e.b).push([e.a,i]); }
+  const paths=new Map(); const cc2=cc[1];
+  const targets=[...value.keys()]; if(cc2) targets.push(cc2);
+  // DFS from each control center up to H hops
+  const reach=new Map(); // target -> list of {E:[edge idx], R:[relays]}
+  for(const c of cc){ const stack=[[c,[c],[]]]; let count=0;
+    while(stack.length && count<200000){ const [u,nodes,E]=stack.pop(); count++;
+      if(E.length>0){ const t=u; if((!cc.includes(t) && value.has(t)) || (t===cc2 && c===cc[0])){ if(!reach.has(t)) reach.set(t,[]); const L=reach.get(t); if(L.length<80) L.push({E:E.slice(), R:nodes.slice(1,-1).filter(n=>!cc.includes(n))}); } }
+      if(E.length>=p.H) continue;
+      for(const [v,i] of F.get(u)){ if(nodes.includes(v)) continue; stack.push([v,[...nodes,v],[...E,i]]); } } }
+  for(const t of targets) if(reach.has(t)) paths.set(t, reach.get(t));
+  const ccReach = !!(cc2 && paths.has(cc2));
+  let maxValue=0; for(const [s,v] of value) if(paths.has(s)) maxValue+=v;
+  // traffic per feasible edge (PQC baseline: shortest route from nearest control center)
+  const traffic=new Float64Array(S.edges.length); const routes0=baseRoutes(A,cc);
+  for(const [s,E] of routes0) if(!cc.includes(s)) for(const i of E) traffic[i]+=S.nodes.get(s).mw;   // objective: substations only (as in v11.traffic)
+  const through0=new Float64Array(S.edges.length); for(const [s,E] of routes0) for(const i of E) through0[i]+=S.nodes.get(s).mw;   // attacks: incl. backup control center
+  let tot=0; for(const i of feasible) tot+=traffic[i]*S.edges[i].km; const scale= tot>0 ? maxValue/tot : 0;
+  return {A,cc,feasible,value,paths,ccReach,maxValue,traffic,through0,scale,routes0,p};
+}
+function baseRoutes(A,cc){ const R=new Map(); const runs=cc.map(c=>dijkstra(A,c));
+  for(const s of S.nodes.keys()){ if(cc.includes(s) && s!==cc[1]) continue; let best=null;
+    runs.forEach((r,k)=>{ if(cc[k]===s) return; if(r.d.has(s) && (!best || r.d.get(s)<best[0])) best=[r.d.get(s), pathEdges(r.prev,s)]; });
+    if(best) R.set(s,best[1]); }
+  return R; }
+function evaluate(M, Y, T){ // Y: Set of edge idx
+  const used=new Set(), prot=[], chosen=new Map(); let val=0;
+  const order=(M.ccReach?[M.cc[1]]:[]).concat([...M.paths.keys()].filter(s=>s!==M.cc[1]).sort((a,b)=>M.value.get(b)-M.value.get(a)));
+  for(const s of order){ let best=null;
+    for(const pth of M.paths.get(s)){ if(!pth.E.every(i=>Y.has(i))) continue; const nw=pth.R.filter(n=>!used.has(n));
+      if(used.size+nw.length<=T && (!best || nw.length<best.nw.length)) best={nw,pth}; }
+    if(best){ best.nw.forEach(n=>used.add(n)); prot.push(s); chosen.set(s,best.pth); val+=M.value.get(s)||0; } }
+  const ccOK = !M.ccReach || prot.includes(M.cc[1]);
+  return {val: ccOK? val : -1, used, prot, chosen, ccOK}; }
+function objective(M,Y,T){ const ev=evaluate(M,Y,T); if(ev.val<0) return {...ev, obj:-1e18+ev.val};
+  let det=0; for(const i of Y) det+=M.traffic[i]*S.edges[i].km; return {...ev, obj: ev.val + M.p.mu*M.scale*det}; }
+
+function solve(M){
+  const {K,T}=M.p; const feas=[...M.feasible]; const t0=performance.now();
+  const greedy=(start)=>{ let Y=new Set(start); let cur=objective(M,Y,T).obj;
+    for(let it=0; it<200 && Y.size<K; it++){ let best=null;
+      const cands=[]; for(const [s,L] of M.paths) for(const pth of L){ const nw=pth.E.filter(i=>!Y.has(i)); if(nw.length && Y.size+nw.length<=K) cands.push(nw); }
+      for(const i of feas) if(!Y.has(i)) cands.push([i]);
+      for(const nw of cands){ const Y2=new Set([...Y,...nw]); const o=objective(M,Y2,T).obj; const g=(o-cur)/nw.length; if(o>cur+1e-9 && (!best||g>best[0])) best=[g,Y2,o]; }
+      if(!best) break; Y=best[1]; cur=best[2]; }
+    return Y; };
+  const local=(Y)=>{ let cur=objective(M,Y,T).obj; let improved=true, rounds=0;
+    while(improved && rounds<20){ improved=false; rounds++;
+      for(const out of [...Y]){ for(const inn of feas){ if(Y.has(inn)) continue; const Y2=new Set(Y); Y2.delete(out); Y2.add(inn); const o=objective(M,Y2,T).obj; if(o>cur+1e-9){ Y=Y2; cur=o; improved=true; break; } } if(improved) break; }
+      if(!improved && Y.size<K){ for(const inn of feas){ if(Y.has(inn)) continue; const Y2=new Set([...Y,inn]); const o=objective(M,Y2,T).obj; if(o>cur+1e-9){ Y=Y2; cur=o; improved=true; break; } } } }
+    return Y; };
+  // start: cheapest control-center chain that fits
+  let start=[]; if(M.ccReach){ const L=[...M.paths.get(M.cc[1])].filter(p=>p.E.length<=K && p.R.length<=T).sort((a,b)=>a.E.length-b.E.length || a.R.length-b.R.length); if(L.length) start=L[0].E; }
+  // several starting points: control-center chain, busiest fiber first, empty
+  const busy=[...feas].sort((a,b)=>M.traffic[b]*S.edges[b].km-M.traffic[a]*S.edges[a].km).slice(0,Math.max(1,Math.floor(K/2)));
+  let best=null, bestO=-Infinity; const consider=Y=>{ const o=objective(M,Y,T).obj; if(o>bestO+1e-9){ best=Y; bestO=o; } };
+  for(const st of [start, [...new Set([...start,...busy])].slice(0,K), []]) consider(local(greedy(st)));
+  let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const budgetMs = 400;
+  for(let r=0; r<60 && performance.now()-t0<budgetMs; r++){ const Y=[...best]; const drop=1+Math.floor(rnd()*Math.min(4,Y.length||1));
+    for(let k=0;k<drop && Y.length;k++) Y.splice(Math.floor(rnd()*Y.length),1);
+    if(rnd()<0.5){ const add=feas[Math.floor(rnd()*feas.length)]; if(!Y.includes(add) && Y.length<K) Y.push(add); }
+    consider(local(greedy(Y))); }
+  return {Y:best, ms:performance.now()-t0}; }
+
+// ---------------------------------------------------------------- attacks and resilience
+function analyze(M, Y){
+  const T=M.p.T; const ev=evaluate(M,Y,T);
+  // routes: QKD path if protected, else shortest route
+  const R=new Map(); for(const [s,E] of M.routes0) R.set(s,{E, q:false, R:[]});
+  for(const [s,pth] of ev.chosen) R.set(s,{E:pth.E, q:true, R:pth.R});
+  const through=new Float64Array(S.edges.length); for(const [s,r] of R) for(const i of r.E) through[i]+=S.nodes.get(s).mw;
+  let worstPQC=0, worstPQCe=-1; const thr0=M.through0; for(let i=0;i<S.edges.length;i++) if(thr0[i]>worstPQC){worstPQC=thr0[i]; worstPQCe=i;}
+  let worst=0, worstE=-1; for(let i=0;i<S.edges.length;i++){ if(Y.has(i)) continue; if(through[i]>worst){worst=through[i]; worstE=i;} }
+  let kmAll=0, kmQ=0; S.edges.forEach((e,i)=>{ kmAll+=e.km; if(Y.has(i)) kmQ+=e.km; });
+  let mwProt=0; for(const s of ev.prot) mwProt+=S.nodes.get(s).mw;
+  let mwAll=0; for(const n of S.nodes.values()) mwAll+=n.mw;
+  let worstTN=0, worstTNn=null; for(const n of ev.used){ let m=0; for(const [s,r] of R) if(r.q && r.R.includes(n)) m+=S.nodes.get(s).mw; if(m>worstTN){worstTN=m; worstTNn=n;} }
+  const cut=cutAnalysis(M.cc);
+  return {ev, R, through, worst, worstE, worstPQC, worstPQCe, tapShare: kmAll? kmQ/kmAll : 0, mwProt, mwAll, worstTN, worstTNn, cut}; }
+function bridges(nodes, E){ // Tarjan on multigraph by edge index
+  const A=new Map(); nodes.forEach(n=>A.set(n,[])); E.forEach((e,i)=>{ A.get(e[0]).push([e[1],i]); A.get(e[1]).push([e[0],i]); });
+  const tin=new Map(), low=new Map(); let t=0; const out=[];
+  for(const r of nodes){ if(tin.has(r)) continue; const st=[[r,-1,0]]; tin.set(r,t); low.set(r,t); t++;
+    while(st.length){ const top=st[st.length-1]; const [u,pe]=top; const L=A.get(u);
+      if(top[2]<L.length){ const [v,i]=L[top[2]++]; if(i===pe) continue;
+        if(tin.has(v)) low.set(u,Math.min(low.get(u),tin.get(v))); else { tin.set(v,t); low.set(v,t); t++; st.push([v,i,0]); } }
+      else { st.pop(); if(st.length){ const p=st[st.length-1][0]; low.set(p,Math.min(low.get(p),low.get(u))); if(low.get(u)>tin.get(p)) out.push(pe); } } } }
+  return out; }
+function cutAnalysis(cc){
+  const ROOT = cc.length>1 ? "_CC_" : cc[0];
+  const nodes=[...S.nodes.keys()].concat(cc.length>1?["_CC_"]:[]); const E=S.edges.filter(e=>S.nodes.has(e.a)&&S.nodes.has(e.b)).map(e=>[e.a,e.b,e.km]); if(cc.length>1) cc.forEach(c=>E.push([c,"_CC_",0]));
+  const worstCut=(E)=>{ const br=bridges(nodes,E); let w=0; for(const bi of br){ const keep=E.filter((_,i)=>i!==bi); const A=new Map(); nodes.forEach(n=>A.set(n,[])); keep.forEach(e=>{A.get(e[0]).push(e[1]);A.get(e[1]).push(e[0]);});
+      const seen=new Set([ROOT]), q=[ROOT]; while(q.length){const u=q.shift(); for(const v of A.get(u)) if(!seen.has(v)){seen.add(v); q.push(v);} }
+      let m=0; for(const [s,n] of S.nodes) if(!seen.has(s)) m+=n.mw; w=Math.max(w,m); } return {br:br.length, w}; };
+  const before=worstCut(E); const added=[]; const A0=adj();
+  for(let it=0; it<60; it++){ const br=new Set(bridges(nodes,E)); if(!br.size) break;
+    // 2-edge-connected components
+    const A=new Map(); nodes.forEach(n=>A.set(n,[])); E.forEach((e,i)=>{ if(!br.has(i)){A.get(e[0]).push(e[1]);A.get(e[1]).push(e[0]);} });
+    const comp=new Map(); let c=0; for(const n of nodes){ if(comp.has(n)) continue; const q=[n]; comp.set(n,c); while(q.length){const u=q.shift(); for(const v of A.get(u)) if(!comp.has(v)){comp.set(v,c); q.push(v);} } c++; }
+    const deg=new Array(c).fill(0); const TA=Array.from({length:c},()=>[]); for(const i of br){ const a=comp.get(E[i][0]), b=comp.get(E[i][1]); deg[a]++; deg[b]++; TA[a].push(b); TA[b].push(a); }
+    const leaves=[]; for(let k=0;k<c;k++) if(deg[k]===1) leaves.push(k); if(leaves.length===0) break;
+    if(leaves.length===1){ const root=comp.get(ROOT); if(root===leaves[0]) break; leaves.push(root); }
+    const bfs=(s)=>{ const d=new Map([[s,0]]), q=[s]; while(q.length){const u=q.shift(); for(const v of TA[u]) if(!d.has(v)){d.set(v,d.get(u)+1); q.push(v);} } return d; };
+    let pair=null; for(const a of leaves){ const d=bfs(a); for(const b of leaves){ if(b<=a) continue; const dd=d.get(b)??-1; if(!pair||dd>pair[0]) pair=[dd,a,b]; } }
+    const mem=k=>nodes.filter(n=>comp.get(n)===k && n!=="_CC_");
+    let choice=null; const ma=mem(pair[1]), mb=mem(pair[2]);
+    for(const u of ma){ const {d}=dijkstra(A0,u); for(const v of mb){ if(u===v) continue; if(E.some(e=>(e[0]===u&&e[1]===v)||(e[0]===v&&e[1]===u))) continue; const km=d.get(v); if(km!==undefined && (!choice||km<choice[2])) choice=[u,v,km]; } }
+    if(!choice) break; E.push(choice); added.push(choice); }
+  const after=worstCut(E);
+  return {bridgesBefore:before.br, worstBefore:before.w, worstAfter:after.w, added}; }
+
+// ---------------------------------------------------------------- rendering
+const svg=$("map"); const NS="http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const x=document.createElementNS(NS,tag); for(const k in attrs) x.setAttribute(k,attrs[k]); (parent||svg).appendChild(x); return x; }
+const short=s=>s.replace("CHATTANOOGA","CHA").replace("KNOXVILLE","KNX").replace("NASHVILLE","NSH").replace("HUNTSVILLE","HSV").replace("MEMPHIS","MEM").replace("ATLANTA","ATL").replace(/\b(\w)(\w+)/g,(m,a,b)=>a+b.toLowerCase()).replace(/^(Cha|Knx|Nsh|Hsv|Mem|Atl)/,m=>m.toUpperCase());
+function draw(){
+  svg.innerHTML=""; const p=P(); const D=S.design;
+  if(S.bg){ const im=el("image",{href:S.bg, x:0, y:0, width:1000, height:700, preserveAspectRatio:"xMidYMid meet", opacity:S.bgOp}); }
+  const Y=D? D.Y : new Set(); const prot=D? new Set(D.an.ev.prot):new Set(); const used=D? D.an.ev.used : new Set();
+  const gE=el("g",{}), gB=el("g",{}), gN=el("g",{}), gL=el("g",{});
+  S.edges.forEach((e,i)=>{ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) return;
+    const q=Y.has(i), feas=e.km*p.db<=p.loss+1e-9; const tapped=S.tapped===i;
+    const ln=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke: tapped? "var(--bad)" : q? "var(--qkd)":"var(--pqc)", "stroke-width": q?6:(tapped?4:1.6), "stroke-dasharray": (!feas&&!q)?"5 4":"", opacity: q||tapped?1:0.75, class:"edge"},gE);
+    const hit=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke:"transparent","stroke-width":12, class:"edge"},gE);
+    const t=el("title",{},hit); t.textContent=`${e.a} – ${e.b}: ${fmt(e.km,1)} km${q?" · QKD":""}${feas?"":" · too long for QKD"}`;
+    hit.addEventListener("click",ev=>{ev.stopPropagation(); onEdge(i);}); });
+  if(D) for(const [u,v] of D.an.cut.added){ const a=S.nodes.get(u), b=S.nodes.get(v); if(a&&b) el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"var(--backup)","stroke-width":2.2,"stroke-dasharray":"7 4"},gB); }
+  for(const [id,n] of S.nodes){ const isCC=S.cc.includes(id), isT=used.has(id), isP=prot.has(id);
+    const r=Math.max(5, Math.min(14, 4+Math.sqrt(n.mw||0)));
+    const fill= isCC? "var(--cc)" : isT? "var(--tn)" : isP? "var(--prot)" : "#adb5bd";
+    const g=el("g",{class:"node", transform:`translate(${n.x},${n.y})`},gN);
+    if(isT) el("rect",{x:-r,y:-r,width:2*r,height:2*r,fill,stroke:"#fff","stroke-width":1.5},g); else el("circle",{r: isCC? r+2 : r, fill, stroke: S.sel===id||S.linkStart===id? "var(--bad)":"#fff","stroke-width": S.sel===id||S.linkStart===id? 3:1.5},g);
+    const t=el("title",{},g); t.textContent=`${id}\n${fmt(n.mw,1)} ${SEC.unit}${n.kv&&SEC===SECTORS.power?` · ${n.kv} kV`:""}${isCC?"\n"+SEC.hub:""}${isT?"\ntrusted node":""}${isP&&!isCC?"\nQKD on every hop":""}`;
+    if(isCC||isT||isP||S.nodes.size<=40){ const tx=el("text",{x:n.x, y:n.y-r-4, "text-anchor":"middle","font-size": isCC?12:10,"font-weight":isCC?700:400, fill:"#333","paint-order":"stroke",stroke:"#fff","stroke-width":3},gL); tx.textContent=short(id); }
+    g.addEventListener("mousedown",ev=>onNodeDown(ev,id)); }
+}
+
+// ---------------------------------------------------------------- results panel
+function showResults(){
+  const D=S.design; if(!D){ $("kpis").innerHTML=""; $("verdict").innerHTML=""; return; }
+  const a=D.an; const cut=a.cut;
+  const kp=[[`${fmt(a.mwProt)} ${SEC.unit}`, `${SEC.what} with QKD on every hop (${fmt(100*a.mwProt/a.mwAll)}% of ${fmt(a.mwAll)} ${SEC.unit})`],
+            [`${D.Y.size} / ${a.ev.used.size}`, "QKD links / trusted nodes used"],
+            [`${fmt(a.worst)} ${SEC.unit}`, `worst undetected tap (PQC only: ${fmt(a.worstPQC)} ${SEC.unit})`],
+            [`${fmt(100*a.tapShare)}%`, "of random taps land on QKD fiber (by length)"],
+            [`${fmt(a.worstTN)} ${SEC.unit}`, "exposed if the worst trusted node is compromised"],
+            [`${fmt(cut.worstBefore)} → ${fmt(cut.worstAfter)} ${SEC.unit}`, `worst single fiber cut, with ${cut.added.length} new backup route${cut.added.length===1?"":"s"}`]];
+  $("kpis").innerHTML=kp.map(([v,l])=>`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  const red = a.worstPQC>0 ? 100*(1-a.worst/a.worstPQC) : 0; let html="";
+  html+=`<div class="callout ${red>=30?"good":""}">The worst single wiretap reads <b>${fmt(red)}% less</b> ${SEC.what} undetected than PQC alone.</div>`;
+  if(!a.ev.ccOK) html+=`<div class="callout bad">The two ${SEC.hub}s could not be joined by QKD with these limits. Raise the budget, trusted nodes or hop limit.</div>`;
+  if(100*a.tapShare<20) html+=`<div class="callout">Most fiber still has no quantum alarm: pair QKD with classical fiber monitoring (OTDR / vibration).</div>`;
+  if(D.exactGap!==null) html+=`<div class="callout ${D.exactGap<0.5?"good":""}">${D.exactGap<0.5? "Matches the exact integer-program solution from the notebooks." : `Within ${fmt(D.exactGap,1)}% of the exact integer-program solution.`}</div>`;
+  $("verdict").innerHTML=html; }
+
+// ---------------------------------------------------------------- actions
+function optimize(){
+  if(!S.cc.length) S.cc=autoCC();
+  const p=P(); const M=buildModel(p); if(!M){ $("status").innerHTML="Mark at least one control center first."; return; }
+  const {Y,ms}=solve(M); const an=analyze(M,Y);
+  let exactGap=null; const pr=PRESETS.find(x=>x.key===S.presetKey);
+  if(pr && !S.edited && p.K===pr.exact.K && p.T===pr.exact.T && p.H===pr.exact.H && Math.abs(p.mu-pr.exact.mu)<1e-9 && Math.abs(p.db-pr.exact.db)<1e-9 && p.loss===pr.exact.loss){
+    const idx=new Map(S.edges.map((e,i)=>[ek(e.a,e.b),i])); const YX=new Set(pr.exact.links.map(([a,b])=>idx.get(ek(a,b))).filter(i=>i!==undefined));
+    const ox=objective(M,YX,p.T).obj, oy=objective(M,Y,p.T).obj; exactGap=Math.max(0,100*(ox-oy)/Math.abs(ox||1)); }
+  S.design={Y,an,M,exactGap}; S.tapped=null;
+  $("solveNote").textContent=`Solved in ${fmt(ms)} ms · ${M.feasible.size} of ${S.edges.length} links short enough for QKD · ${M.paths.size} substations reachable by a QKD chain.`;
+  $("status").innerHTML=`Optimized: QKD on <b>${Y.size}</b> links. Click a link to tap it.`;
+  $("attackOut").innerHTML="Click any link on the map to tap it, or press <b>Random attack</b>.";
+  draw(); showResults(); }
+function onEdge(i){
+  if(S.mode==="del"){ S.edges.splice(i,1); S.edited=true; S.design=null; draw(); showResults(); return; }
+  if(S.mode==="tap" || S.mode==="move"){ tap(i); return; }
+  const e=S.edges[i]; S.sel="edge:"+i; showEdit(); }
+function tap(i){
+  S.tapped=i; const e=S.edges[i]; const D=S.design; let msg;
+  if(!D){ msg=`Tapped ${e.a} – ${e.b}. Run the optimizer first to score it.`; }
+  else { const q=D.Y.has(i); const mw=D.an.through[i]; const subs=[...D.an.R].filter(([s,r])=>r.E.includes(i)).map(([s])=>s);
+    msg = q ? `<div class="callout good"><b>Caught.</b> ${e.a} – ${e.b} has QKD: the tap raises the BB84 error rate (QBER) and the alarm fires. ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} stays protected; the link drops to PQC keys until it is cleared.</div>`
+            : `<div class="callout bad"><b>Not caught by QKD.</b> ${e.a} – ${e.b} is PQC only, so ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} (${subs.length} ${SEC.site}${subs.length===1?"":"s"}) crosses a tap with no quantum alarm. PQC keeps it unreadable today; only classical fiber monitoring can flag the tap.</div>`;
+    msg += `<p class="note">${fmt(e.km,1)} km link${e.km*D.M.p.db>D.M.p.loss?" (too long for QKD at these settings)":""}.</p>`; }
+  $("attackOut").innerHTML=msg; draw(); }
+function randomTap(){ const tot=S.edges.reduce((s,e)=>s+e.km,0); let r=Math.random()*tot; for(let i=0;i<S.edges.length;i++){ r-=S.edges[i].km; if(r<=0){ tap(i); return; } } }
+function loadNet(obj, key){
+  S.nodes=new Map(); obj.nodes.forEach((n,k)=>S.nodes.set(String(n.id),{id:String(n.id), mw:+n.mw||0, kv:+n.kv||0, x:n.x??null, y:n.y??null}));
+  S.edges=obj.edges.filter(e=>S.nodes.has(String(e.a))&&S.nodes.has(String(e.b))&&e.a!==e.b).map(e=>({a:String(e.a), b:String(e.b), km:+e.km||1}));
+  S.cc=(obj.cc||[]).map(String).filter(c=>S.nodes.has(c)).slice(0,2); S.design=null; S.tapped=null; S.presetKey=key||null; S.edited=false;
+  if([...S.nodes.values()].some(n=>n.x===null||n.y===null)) layout(); else fit();
+  if(!S.cc.length) S.cc=autoCC(); draw(); showResults(); }
+function fit(){ const xs=[...S.nodes.values()].map(n=>n.x), ys=[...S.nodes.values()].map(n=>n.y); if(!xs.length) return;
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys); if(S.bg) return;
+  const sx=920/((x1-x0)||1), sy=620/((y1-y0)||1), s=Math.min(sx,sy); for(const n of S.nodes.values()){ n.x=40+(n.x-x0)*s; n.y=40+(n.y-y0)*s; } }
+function layout(){ const N=[...S.nodes.values()]; N.forEach((n,i)=>{ if(n.x===null){ n.x=500+300*Math.cos(2*Math.PI*i/N.length); n.y=350+250*Math.sin(2*Math.PI*i/N.length);} });
+  for(let it=0;it<400;it++){ const F=new Map(N.map(n=>[n.id,[0,0]]));
+    for(let i=0;i<N.length;i++) for(let j=i+1;j<N.length;j++){ const a=N[i],b=N[j]; let dx=a.x-b.x, dy=a.y-b.y; const d2=dx*dx+dy*dy+0.01, f=3000/d2; F.get(a.id)[0]+=dx*f; F.get(a.id)[1]+=dy*f; F.get(b.id)[0]-=dx*f; F.get(b.id)[1]-=dy*f; }
+    for(const e of S.edges){ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); const dx=b.x-a.x, dy=b.y-a.y; const d=Math.sqrt(dx*dx+dy*dy)+0.01, f=(d-60)*0.02; F.get(a.id)[0]+=dx/d*f*d; F.get(a.id)[1]+=dy/d*f*d; F.get(b.id)[0]-=dx/d*f*d; F.get(b.id)[1]-=dy/d*f*d; }
+    const step=Math.max(0.02, 1-it/400); for(const n of N){ const [fx,fy]=F.get(n.id); const m=Math.sqrt(fx*fx+fy*fy)||1; n.x+=fx/m*Math.min(m,10)*step; n.y+=fy/m*Math.min(m,10)*step; } }
+  fit(); }
+
+// ---------------------------------------------------------------- editing
+function svgPt(ev){ const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+let drag=null;
+function onNodeDown(ev,id){ ev.stopPropagation(); const m=S.mode;
+  if(m==="move"){ drag=id; return; }
+  if(m==="del"){ S.nodes.delete(id); S.edges=S.edges.filter(e=>e.a!==id&&e.b!==id); S.cc=S.cc.filter(c=>c!==id); edited(); return; }
+  if(m==="cc"){ if(S.cc.includes(id)) S.cc=S.cc.filter(c=>c!==id); else { S.cc.push(id); if(S.cc.length>2) S.cc.shift(); } edited(); return; }
+  if(m==="link"){ if(!S.linkStart){ S.linkStart=id; draw(); return; } if(S.linkStart!==id){ const a=S.nodes.get(S.linkStart), b=S.nodes.get(id); const km=Math.round(Math.hypot(a.x-b.x,a.y-b.y)/100*(+$("scale").value)*10)/10; S.edges.push({a:S.linkStart,b:id,km:Math.max(0.1,km)}); } S.linkStart=null; edited(); return; }
+  S.sel=id; showEdit(); draw(); }
+svg.addEventListener("mousemove",ev=>{ if(!drag) return; const p=svgPt(ev); const n=S.nodes.get(drag); n.x=p.x; n.y=p.y; draw(); });
+window.addEventListener("mouseup",()=>{ drag=null; });
+svg.addEventListener("click",ev=>{ if(S.mode!=="node") return; const p=svgPt(ev); let k=S.nodes.size+1; while(S.nodes.has("S"+k)) k++; const id="S"+k; S.nodes.set(id,{id,mw:20,kv:115,x:p.x,y:p.y}); S.sel=id; edited(); showEdit(); });
+function edited(){ S.edited=true; S.design=null; S.tapped=null; draw(); showResults(); }
+function showEdit(){ const box=$("editBox"); if(!S.sel){ box.innerHTML=""; return; }
+  if(S.sel.startsWith("edge:")){ const i=+S.sel.slice(5), e=S.edges[i]; if(!e){box.innerHTML="";return;} box.innerHTML=`<b>Link ${e.a} – ${e.b}</b><br>km <input type="number" step="0.1" id="eKm" value="${e.km}">`; $("eKm").onchange=ev=>{ e.km=+ev.target.value; edited(); }; switchTab("build"); return; }
+  const n=S.nodes.get(S.sel); if(!n){box.innerHTML="";return;}
+  box.innerHTML=`<b>${SEC.site}</b><br>Name <input type="text" id="nId" value="${n.id}"><br>Value (${SEC.unit}) <input type="number" id="nMw" value="${n.mw}"><br>Voltage (kV) <input type="number" id="nKv" value="${n.kv}">`;
+  $("nMw").onchange=ev=>{ n.mw=+ev.target.value; edited(); }; $("nKv").onchange=ev=>{ n.kv=+ev.target.value; edited(); };
+  $("nId").onchange=ev=>{ const v=ev.target.value.trim(); if(!v||S.nodes.has(v)) return; S.nodes.delete(n.id); S.edges.forEach(e=>{ if(e.a===n.id) e.a=v; if(e.b===n.id) e.b=v; }); S.cc=S.cc.map(c=>c===n.id?v:c); n.id=v; S.nodes.set(v,n); S.sel=v; edited(); };
+  switchTab("build"); }
+
+// ---------------------------------------------------------------- UI wiring
+function switchTab(t){ document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); ["preset","build","json"].forEach(x=>$("tab-"+x).classList.toggle("hide",x!==t)); }
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+document.querySelectorAll("#toolbar [data-mode]").forEach(b=>b.onclick=()=>{ S.mode=b.dataset.mode; S.linkStart=null; document.querySelectorAll("#toolbar [data-mode]").forEach(x=>x.classList.toggle("on",x===b));
+  $("status").innerHTML={tap:"Click a link to tap it.",move:"Drag substations to move them.",node:"Click empty space to add a substation.",link:"Click two substations to join them.",cc:"Click a substation to make it a control center (max 2).",del:"Click a substation or link to delete it."}[S.mode]; draw(); });
+$("randTap").onclick=randomTap;
+const lab={K:v=>v, T:v=>v, H:v=>v+" hop"+(v>1?"s":""), db:v=>(v/100).toFixed(2)+" dB/km", loss:v=>v+" dB", mu:v=>(v/100).toFixed(2)};
+for(const k in lab){ const f=()=>{ $(k+"V").textContent=lab[k](+$(k).value); }; $(k).addEventListener("input",()=>{ f(); }); $(k).addEventListener("change",()=>{ if(S.design) optimize(); }); f(); }
+$("run").onclick=optimize;
+PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.key; o.textContent=`${p.title} · ${p.nodes.length} substations`; $("presetSel").appendChild(o); });
+$("presetSel").onchange=()=>{ const p=PRESETS.find(x=>x.key===$("presetSel").value); S.bg=null; loadNet(p,p.key); $("presetNote").textContent=`${p.nodes.length} sites, ${p.edges.length} links. ${SEC.hub}s: ${p.cc.join(", ")}.${SEC===SECTORS.power?"":" Grid values relabeled as "+SEC.unit+" for illustration."}`; optimize(); };
+$("newBlank").onclick=()=>{ S.nodes=new Map(); S.edges=[]; S.cc=[]; S.design=null; S.presetKey=null; S.edited=true; draw(); showResults(); document.querySelector('#toolbar [data-mode="node"]').click(); };
+$("imgFile").onchange=ev=>{ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ S.bg=r.result; S.nodes=new Map(); S.edges=[]; S.cc=[]; S.design=null; S.presetKey=null; S.edited=true; draw(); showResults(); document.querySelector('#toolbar [data-mode="node"]').click(); $("status").innerHTML="Image loaded. Click on each substation in the picture, then use <b>+ Link</b> to trace the lines."; }; r.readAsDataURL(f); };
+$("imgOp").oninput=ev=>{ S.bgOp=ev.target.value/100; $("opV").textContent=ev.target.value+"%"; draw(); };
+$("scale").oninput=ev=>{ $("scaleV").textContent=ev.target.value+" km / 100 px"; };
+$("jsonLoad").onclick=()=>{ try{ const o=JSON.parse($("jsonIn").value); loadNet(o,null); S.edited=true; optimize(); } catch(e){ $("status").innerHTML="Could not read that JSON: "+e.message; } };
+$("jsonExport").onclick=()=>{ const o={nodes:[...S.nodes.values()].map(n=>({id:n.id,mw:n.mw,kv:n.kv,x:Math.round(n.x),y:Math.round(n.y)})), edges:S.edges, cc:S.cc}; $("jsonIn").value=JSON.stringify(o); try{navigator.clipboard.writeText($("jsonIn").value);}catch(e){} };
+$("exportDesign").onclick=()=>{ const D=S.design; if(!D){ $("status").innerHTML="Optimize first."; return; }
+  const out={network:S.presetKey||"custom", params:D.M.p, control_centers:S.cc,
+    qkd_links:[...D.Y].map(i=>({a:S.edges[i].a,b:S.edges[i].b,km:S.edges[i].km,loss_db:+(S.edges[i].km*D.M.p.db).toFixed(2), traffic_mw:+D.an.through[i].toFixed(1)})),
+    trusted_nodes:[...D.an.ev.used], protected:D.an.ev.prot, backup_routes:D.an.cut.added.map(([a,b,km])=>({a,b,km:+km.toFixed(1)})),
+    nodes:[...S.nodes.values()].map(n=>({id:n.id,mw:n.mw,kv:n.kv})), edges:S.edges};
+  const blob=new Blob([JSON.stringify(out,null,1)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="grid_design.json"; a.click(); };
+// evidence table
+$("evidence").innerHTML="<tr><th>Device</th><th>Attack</th><th>QBER</th><th>Job</th></tr>"+EVIDENCE.map(r=>`<tr><td>${r.device}</td><td>${r.attack}</td><td>${r.result}</td><td><code title="${r.job}">${r.job.includes('qjob-')? '…'+r.job.slice(-10) : r.job}</code></td></tr>`).join("");
+// sector switcher
+Object.entries(SECTORS).forEach(([k,v])=>{ const o=document.createElement("option"); o.value=k; o.textContent=v.name; $("sectorSel").appendChild(o); });
+function applySector(){ SEC=SECTORS[$("sectorSel").value]; $("sectorNote").textContent=SEC.note;
+  $("addNodeBtn").textContent="+ "+SEC.site.split(" ")[0].replace(/^./,c=>c.toUpperCase()); $("ccBtn").textContent=SEC.hub.replace(/^./,c=>c.toUpperCase()); $("lgCC").textContent=SEC.hub;
+  draw(); showResults(); if(S.tapped!==null) tap(S.tapped); }
+$("sectorSel").onchange=applySector;
+// ---------------------------------------------------------------- qBraid AI Gateway: grid image -> network
+const GW="https://api-v2.qbraid.com/api/v1/ai"; let MODELS=[];
+$("qbConnect").onclick=async()=>{ const key=$("qbKey").value.trim(); if(!key){ $("qbMsg").textContent="Paste your qBraid API key (account.qbraid.com → API keys)."; return; }
+  $("qbMsg").textContent="Asking qBraid for models…";
+  try{ const r=await fetch(GW+"/models",{headers:{"X-API-Key":key}}); if(!r.ok) throw new Error("HTTP "+r.status); const j=await r.json();
+    MODELS=(j.data||[]).map(m=>({id:m.id, caps:JSON.stringify(m._qbraid?.capabilities||m.capabilities||""), eps:JSON.stringify(m._qbraid?.supportedEndpoints||"")}));
+    const vis=MODELS.filter(m=>/image|vision/i.test(m.caps)); const list=(vis.length?vis:MODELS);
+    $("qbModel").innerHTML=list.map(m=>`<option value="${m.id}">${m.id}</option>`).join("");
+    $("qbMsg").textContent=`${list.length} ${vis.length?"vision-capable ":""}models available. Upload an image above, then press Read.`;
+  }catch(e){ $("qbMsg").innerHTML=`Could not reach qBraid from this page (${e.message}). Browsers can block this call; use <code>3i_grid_image_to_design.ipynb</code> in qBraid Lab instead, then paste its JSON in the Import tab.`; } };
+$("qbRead").onclick=async()=>{ const key=$("qbKey").value.trim(), model=$("qbModel").value; if(!S.bg){ $("qbMsg").textContent="Upload a grid image first (trace an image, above)."; return; } if(!key||!model){ $("qbMsg").textContent="Load models first."; return; }
+  const m=S.bg.match(/^data:(image\/[a-z+]+);base64,(.*)$/); if(!m){ $("qbMsg").textContent="Image format not supported."; return; }
+  const img=new Image(); img.src=S.bg; await img.decode(); const W=img.naturalWidth, Hh=img.naturalHeight;
+  $("qbMsg").textContent="qBraid AI is reading the image…";
+  const prompt=$("aiPrompt").value+`\nThe image is ${W} x ${Hh} pixels.`;
+  try{ let text;
+    const meta=MODELS.find(x=>x.id===model)||{eps:""};
+    if(/messages/.test(meta.eps) || /claude/i.test(model)){
+      const r=await fetch(GW+"/v1/messages",{method:"POST",headers:{"X-API-Key":key,"x-api-key":key,"content-type":"application/json","anthropic-version":"2023-06-01"},
+        body:JSON.stringify({model,max_tokens:8000,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:m[1],data:m[2]}},{type:"text",text:prompt}]}]})});
+      if(!r.ok) throw new Error("HTTP "+r.status+" "+(await r.text()).slice(0,160)); const j=await r.json(); text=(j.content||[]).map(c=>c.text||"").join("");
+    } else {
+      const r=await fetch(GW+"/chat/completions",{method:"POST",headers:{"X-API-Key":key,"content-type":"application/json"},
+        body:JSON.stringify({model,messages:[{role:"user",content:[{type:"image_url",image_url:{url:S.bg}},{type:"text",text:prompt}]}]})});
+      if(!r.ok) throw new Error("HTTP "+r.status+" "+(await r.text()).slice(0,160)); const j=await r.json(); text=j.choices?.[0]?.message?.content||""; }
+    const js=JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}")+1));
+    // map image pixels onto the 1000 x 700 map (image is drawn centered, aspect kept)
+    const sc=Math.min(1000/W,700/Hh), ox=(1000-W*sc)/2, oy=(700-Hh*sc)/2;
+    js.nodes.forEach(n=>{ if(n.x!=null) n.x=ox+n.x*sc; if(n.y!=null) n.y=oy+n.y*sc; });
+    const bg=S.bg; loadNet(js,null); S.bg=bg; S.edited=true; draw();
+    $("qbMsg").textContent=`qBraid AI found ${S.nodes.size} sites and ${S.edges.length} links. Fix anything it missed with the toolbar, then Optimize.`;
+    optimize();
+  }catch(e){ $("qbMsg").innerHTML=`qBraid AI call failed (${e.message}). Use <code>3i_grid_image_to_design.ipynb</code> in qBraid Lab instead.`; } };
+// start
+$("presetSel").value=PRESETS[0]?.key; $("presetSel").onchange(); applySector();
+</script>
+</body>
+</html>

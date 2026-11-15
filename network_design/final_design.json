@@ -1,0 +1,107 @@
+{
+ "network": "chattanooga_r1",
+ "substations": 49,
+ "links": 65,
+ "qkd_feasible_links": 58,
+ "control_centers": [
+  "CHATTANOOGA 3",
+  "CHATTANOOGA 11"
+ ],
+ "qkd_links": [
+  "CHATTANOOGA 11 - CHATTANOOGA 12",
+  "CHATTANOOGA 11 - CHATTANOOGA 27",
+  "CHATTANOOGA 12 - CHATTANOOGA 24",
+  "CHATTANOOGA 13 - CHATTANOOGA 3",
+  "CHATTANOOGA 21 - CHATTANOOGA 23",
+  "CHATTANOOGA 21 - CHATTANOOGA 27",
+  "CHATTANOOGA 24 - CHATTANOOGA 3",
+  "CHATTANOOGA 3 - ROSSVILLE 2"
+ ],
+ "qkd_link_km": {
+  "CHATTANOOGA 11 - CHATTANOOGA 12": 4.9,
+  "CHATTANOOGA 11 - CHATTANOOGA 27": 6.6,
+  "CHATTANOOGA 12 - CHATTANOOGA 24": 10.0,
+  "CHATTANOOGA 13 - CHATTANOOGA 3": 16.0,
+  "CHATTANOOGA 21 - CHATTANOOGA 23": 13.6,
+  "CHATTANOOGA 21 - CHATTANOOGA 27": 3.1,
+  "CHATTANOOGA 24 - CHATTANOOGA 3": 3.7,
+  "CHATTANOOGA 3 - ROSSVILLE 2": 14.0
+ },
+ "trusted_nodes": [
+  "CHATTANOOGA 12",
+  "CHATTANOOGA 21",
+  "CHATTANOOGA 24",
+  "CHATTANOOGA 27"
+ ],
+ "protected_substations": [
+  "CHATTANOOGA 11",
+  "ROSSVILLE 2",
+  "CHATTANOOGA 23",
+  "CHATTANOOGA 13",
+  "CHATTANOOGA 21",
+  "CHATTANOOGA 12",
+  "CHATTANOOGA 24",
+  "CHATTANOOGA 27"
+ ],
+ "mw_behind_qkd": 316.7,
+ "total_mw": 1406.4,
+ "routes": {
+  "CHATTANOOGA 11": [
+   "CHATTANOOGA 24 - CHATTANOOGA 3",
+   "CHATTANOOGA 12 - CHATTANOOGA 24",
+   "CHATTANOOGA 11 - CHATTANOOGA 12"
+  ],
+  "ROSSVILLE 2": [
+   "CHATTANOOGA 3 - ROSSVILLE 2"
+  ],
+  "CHATTANOOGA 23": [
+   "CHATTANOOGA 11 - CHATTANOOGA 27",
+   "CHATTANOOGA 21 - CHATTANOOGA 27",
+   "CHATTANOOGA 21 - CHATTANOOGA 23"
+  ],
+  "CHATTANOOGA 13": [
+   "CHATTANOOGA 13 - CHATTANOOGA 3"
+  ],
+  "CHATTANOOGA 21": [
+   "CHATTANOOGA 11 - CHATTANOOGA 27",
+   "CHATTANOOGA 21 - CHATTANOOGA 27"
+  ],
+  "CHATTANOOGA 12": [
+   "CHATTANOOGA 24 - CHATTANOOGA 3",
+   "CHATTANOOGA 12 - CHATTANOOGA 24"
+  ],
+  "CHATTANOOGA 24": [
+   "CHATTANOOGA 24 - CHATTANOOGA 3"
+  ],
+  "CHATTANOOGA 27": [
+   "CHATTANOOGA 11 - CHATTANOOGA 27"
+  ]
+ },
+ "backup": {
+  "bridges_before": 11,
+  "worst_cut_mw_before": 76.8,
+  "lower_bound_links": 4,
+  "backup_links": 4,
+  "bridges_after": 0,
+  "worst_cut_mw_after": 0.0,
+  "backup_km_total": 251.1,
+  "added": [
+   {
+    "link": "SIGNAL MOUNTAIN 1 - JASPER 18",
+    "km_estimate": 74.3
+   },
+   {
+    "link": "LA FAYETTE 4 - CLEVELAND 16",
+    "km_estimate": 52.3
+   },
+   {
+    "link": "OLD FORT 2 - JASPER 16",
+    "km_estimate": 109.0
+   },
+   {
+    "link": "CHATTANOOGA 4 - SIGNAL MOUNTAIN 2",
+    "km_estimate": 15.5
+   }
+  ]
+ }
+}
