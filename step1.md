@@ -24,7 +24,7 @@ The team also tested a spy who only intercepts some of the qubits (the sweep cel
 
 Real QKD systems handle this by assuming every error was caused by a spy. They fix the errors with error correction and then use privacy amplification, which shrinks the key until the spy knows almost nothing about what is left. The more errors there are, the more the key shrinks. Above about 11% QBER, BB84 cannot produce a secure key at all and the key is thrown away (Shor and Preskill, 2000).
 
-## Part 4: What Physics Buys, and What It Doesn't
+## Part 4: Physics
 
 BB84's secrecy comes from physics, as measuring a qubit in the wrong basis gives a random result and changes the qubit, and Eve does not know which basis Alice used. She also cannot copy the qubit and measure the copy later because the no-cloning theorem says an unknown quantum state cannot be copied. So any information Eve gains causes errors, which is the jump to about 25% QBER in Part 2. Classical key exchange such as RSA or ECDH cannot match this. Anyone on the line can copy its messages perfectly without leaving a trace, and its safety depends on a math problem that Shor's algorithm breaks (Step 2). That is what makes "harvest now, decrypt later" possible. BB84's security does not depend on the attacker's computing power, so a future quantum computer does not help.
 
