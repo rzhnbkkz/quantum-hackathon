@@ -1,0 +1,21 @@
+## slide 1: the problem
+
+Every power company sends commands to its substations over encrypted fiber. That encryption has an expiration date. Once quantum computers arrive, today’s locks open, and attackers are already recording traffic to read later. The government has set the deadline: 2030 to start replacing it, 2035 to be done. The fixes exist, but a city utility can’t afford the premium one on every cable, and today nobody can tell them which cables matter most. So they either overspend or guess.
+
+## slide 2: ideal customer
+
+Our first customer is a utility like EPB here in Chattanooga. They own their fiber, they’re bound by federal grid-security rules, and they have one budget. The people who’d use our tool are their security engineers. The person who signs off is the security chief, who has to show regulators a plan. And nothing in the tool is specific to electricity. A water system, a pipeline, a hospital network or a bank is the same picture: sites, cables, and a value on each site. Change three numbers and it plans for them too.
+
+## slide 3: solution
+
+This is the QKD Grid Optimizer. I load Chattanooga. Every cable gets quantum-safe software, which is a software update. Then it picks just eight cables for quantum hardware, the ones where an eavesdropper would do the most damage. Watch: I tap a cable with quantum hardware *[click]*, and the alarm fires. That’s real data from a quantum computer we ran through qBraid. I tap a cable without it *[click]*: still protected by software, but no alarm, so the tool tells you to add fiber monitoring there. Now I switch to Hospital *[click]*, and the plan changes for hospital priorities. Same tool, different industry. You can even photograph a network diagram and it builds the map for you.
+
+We were honest about limits. Quantum hardware only watches its own cable, so the plan pairs it with ordinary fiber monitoring. And quantum computers didn’t beat normal computers at the planning itself, so the planning runs on a laptop. The quantum hardware goes on the cable.
+
+## slide 4: the team
+
+We split the work the way a real project would: one group proved the eavesdropper alarm on real hardware, one sized up the threat and the migration timeline, and I built the design tool and attacked it. [One sentence per teammate
+
+## slide 5: what we changed
+
+Three things changed our minds. First, targeting works: a few links protect a big share of the grid. Second, quantum hardware only catches taps on its own cable, so the right answer is quantum plus ordinary monitoring, which together caught 84% of small taps. Third, we expected a quantum computer to do the planning, and normal computers beat it, so we put quantum where it actually wins: on the wire. Next we’d plug in real utility data and pilot it on the route EPB already tested. Then we’d take it to water utilities, which face the same deadline with smaller budgets. Every network that can’t afford to guess needs this plan, and now it takes seconds.
