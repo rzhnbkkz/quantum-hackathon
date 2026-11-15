@@ -94,7 +94,11 @@ Through qBraid, the quiet link gave a QBER of 0.000 on the qBraid QIR simulator 
 
 Wind gusts on the fiber still fooled every alarm that only looks at QBER. Adding a normal fiber monitor as a second signal raised the catch rate for a 2% tap from 56% to 84%.
 
-**Attacks.** In `3f_attacks_on_hardware.ipynb` we tried five attacks on the local simulator with 2.5% line noise. Each attack is one small circuit, so the numbers are rough. The quiet link had a QBER of 0.024, a full tap 0.174, a partial tap 0.092, and a denial of service attack 0.584. A blinding attack kept the QBER at 0.026, but only 67% of the rounds gave a result. So the error check misses it, and it takes a click-rate monitor to catch it. The tap, partial tap and denial of service circuits were also sent to the IonQ Forte 1 quantum computer. Those results are not in the notebook yet.
+**Attacks.** In `3f_attacks_on_hardware.ipynb` we tried five attacks on one BB84 circuit of 12 rounds, so the numbers are rough. Alice's and Bob's random choices came from a 3-shot job on the qBraid QIR simulator. That is a classical simulator, so these bits are not truly random from physics; a real QPU would be needed for that. In a blinding attack, Eve controls Bob's detectors so that he only gets a result when his basis matches hers. We modeled it by keeping only those rounds from the tap run.
+
+On the local simulator with 2.5% line noise, the quiet link had a QBER of 0.019, a full tap 0.207 and a denial of service attack 0.677. The partial tap (3 of 12 rounds) gave 0.024, the same as the line noise: in a circuit this small, the tapped rounds happened to cause no errors. Blinding kept the QBER at 0.021, but only 62% of the rounds gave a result.
+
+On the IonQ Forte 1 quantum computer, the quiet link had a QBER of 0.002, so the alarm was set at 0.009. The full tap gave 0.188 and set off the alarm. Scored as blinding, the same job gave a QBER of 0.002 with only 62% of the rounds giving a result. The error check passed it, and only a click-rate monitor caught it. Each Forte job cost 10 Open Quantum credits, and we ran out after these two, so the partial tap and denial of service jobs were cancelled. We ran them on the IonQ simulator with the Forte noise model instead: the quiet link and the partial tap both gave 0.000, and denial of service gave 0.677.
 
 ## Part 4: Rollout Plan
 
