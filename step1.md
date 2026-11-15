@@ -24,15 +24,13 @@ The team also tested a spy who only intercepts some of the qubits (the sweep cel
 
 Real QKD systems handle this by assuming every error was caused by a spy. They fix the errors with error correction and then use privacy amplification, which shrinks the key until the spy knows almost nothing about what is left. The more errors there are, the more the key shrinks. Above about 11% QBER, BB84 cannot produce a secure key at all and the key is thrown away (Shor and Preskill, 2000).
 
-## Part 4: Limits and Use in the Grid
+## Part 4: What Physics Buys, and What It Doesn't
 
-This is a small demonstration of BB84, not a complete key distribution system. In a real deployment, Alice and Bob would need to authenticate their public discussion, compare a sample of the sifted key, and discard the tested bits. They would also need error correction and privacy amplification before using the remaining bits as a key.
+BB84's secrecy comes from physics, as measuring a qubit in the wrong basis gives a random result and changes the qubit, and Eve does not know which basis Alice used. She also cannot copy the qubit and measure the copy later because the no-cloning theorem says an unknown quantum state cannot be copied. So any information Eve gains causes errors, which is the jump to about 25% QBER in Part 2. Classical key exchange such as RSA or ECDH cannot match this. Anyone on the line can copy its messages perfectly without leaving a trace, and its safety depends on a math problem that Shor's algorithm breaks (Step 2). That is what makes "harvest now, decrypt later" possible. BB84's security does not depend on the attacker's computing power, so a future quantum computer does not help.
 
-BB84 can help protect a key exchange on a suitable quantum link, but it does not encrypt grid traffic by itself or secure every substation and control center. The resulting key would still need to be used by ordinary encryption equipment. These tests do not demonstrate a deployed fiber link or prove that QKD is the most cost-effective choice for a utility. A smaller or resource-limited grid would need to compare QKD’s cost and operating requirements with post-quantum cryptography.
+BB84 still needs classical cryptography. In a real deployment, Alice and Bob would need to authenticate their public discussion. Without it, Eve could pretend to be Bob to Alice and Alice to Bob, run a separate BB84 session with each, and neither would see any errors. They would also need error correction and privacy amplification before using the remaining bits as a key. BB84 does not encrypt grid traffic by itself: the resulting key would still need to be used by ordinary encryption equipment.
 
-Real QKD systems have been attacked through their hardware and not through the math. In 2010, researchers showed that the detectors in two commercial QKD systems could be controlled with bright light, which let an attacker learn the key without causing errors (Lydersen et al., 2010).
-
-The NSA does not recommend QKD for national security systems. It says QKD does not authenticate who sent the key, needs special equipment, often needs trusted relays, is hard to validate, and raises the risk of denial of service. The UK NCSC says QKD does not provide authentication, will not support it for government or military use, and recommends post-quantum cryptography as the main fix.
+Real QKD systems have been attacked through their hardware and not through the math. In 2010, researchers showed that the detectors in two commercial QKD systems could be controlled with bright light, which let an attacker learn the key without causing errors (Lydersen et al., 2010). For these and other reasons, the NSA and the UK NCSC do not recommend QKD for government use and recommend post-quantum cryptography instead.
 
 Sources:
 
