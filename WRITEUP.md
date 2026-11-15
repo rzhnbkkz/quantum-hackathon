@@ -28,15 +28,13 @@ The team also tested a spy who only intercepts some of the qubits (the sweep cel
 
 Real QKD systems handle this by assuming every error was caused by a spy. They fix the errors with error correction and then use privacy amplification, which shrinks the key until the spy knows almost nothing about what is left. The more errors there are, the more the key shrinks. Above about 11% QBER, BB84 cannot produce a secure key at all and the key is thrown away (Shor and Preskill, 2000).
 
-## Step 1, Part 4: Limits and Use in the Grid
+## Step 1, Part 4: Physics
 
-This is a small demonstration of BB84, not a complete key distribution system. In a real deployment, Alice and Bob would need to authenticate their public discussion, compare a sample of the sifted key, and discard the tested bits. They would also need error correction and privacy amplification before using the remaining bits as a key.
+BB84's secrecy comes from physics, as measuring a qubit in the wrong basis gives a random result and changes the qubit, and Eve does not know which basis Alice used. She also cannot copy the qubit and measure the copy later because the no-cloning theorem says an unknown quantum state cannot be copied. So any information Eve gains causes errors, which is the jump to about 25% QBER in Part 2. Classical key exchange such as RSA or ECDH cannot match this. Anyone on the line can copy its messages perfectly without leaving a trace, and its safety depends on a math problem that Shor's algorithm breaks (Step 2). That is what makes "harvest now, decrypt later" possible. BB84's security does not depend on the attacker's computing power, so a future quantum computer does not help.
 
-BB84 can help protect a key exchange on a suitable quantum link, but it does not encrypt grid traffic by itself or secure every substation and control center. The resulting key would still need to be used by ordinary encryption equipment. These tests do not demonstrate a deployed fiber link or prove that QKD is the most cost-effective choice for a utility. A smaller or resource-limited grid would need to compare QKD’s cost and operating requirements with post-quantum cryptography.
+BB84 still needs classical cryptography. In a real deployment, Alice and Bob would need to authenticate their public discussion. Without it, Eve could pretend to be Bob to Alice and Alice to Bob, run a separate BB84 session with each, and neither would see any errors. They would also need error correction and privacy amplification before using the remaining bits as a key. BB84 does not encrypt grid traffic by itself: the resulting key would still need to be used by ordinary encryption equipment.
 
-Real QKD systems have been attacked through their hardware and not through the math. In 2010, researchers showed that the detectors in two commercial QKD systems could be controlled with bright light, which let an attacker learn the key without causing errors (Lydersen et al., 2010).
-
-The NSA does not recommend QKD for national security systems. It says QKD does not authenticate who sent the key, needs special equipment, often needs trusted relays, is hard to validate, and raises the risk of denial of service. The UK NCSC says QKD does not provide authentication, will not support it for government or military use, and recommends post-quantum cryptography as the main fix.
+Real QKD systems have been attacked through their hardware and not through the math. In 2010, researchers showed that the detectors in two commercial QKD systems could be controlled with bright light, which let an attacker learn the key without causing errors (Lydersen et al., 2010). For these and other reasons, the NSA and the UK NCSC do not recommend QKD for government use and recommend post-quantum cryptography instead.
 
 Sources:
 
@@ -122,49 +120,69 @@ On IonQ’s simulator with a Forte noise model, it fell to 100%, 79% and 44% as 
 
 ## Step 3, Part 1: Architecture
 
-We designed a small made-up utility network. It has 2 control centers, 1 communications hub and 6 substations (DS1 to DS6). The link lengths are our own guesses for a city-sized network. They are not real EPB data.
+A real utility's network layout is restricted information, so we did not use EPB's real network. We used the Texas A&M ACTIVSg70k synthetic grid. It is made up, but it was built to match real U.S. grids and it sits on real towns. We kept every Chattanooga substation plus its direct neighbors, which gives 49 substations and 65 links. The design is built in `3b_network_design.ipynb` (version 0) and `3c_network_design_v1.ipynb` (version 1).
 
-| Link | Length (our guess) | Protection |
-|---|---|---|
-| Main control to hub | 8 km | PQC + optional QKD pilot |
-| Backup control to hub | 12 km | PQC |
-| Hub to DS1 | 6 km | PQC |
-| DS1 to DS4 | 9 km | PQC |
-| Hub to DS2 | 7 km | PQC |
-| DS2 to DS5 | 11 km | PQC |
-| Hub to DS3 | 5 km | PQC |
-| DS3 to DS6 | 14 km | PQC |
-| Backup control to DS3 | not set | PQC (proposed backup route) |
+![Network design, version 1](3c_network_map.png)
 
-We put post-quantum cryptography (PQC) on every link. It works on the equipment and fiber the utility already has, so it is the cheapest way to cover all 6 substations. We would use ML-KEM (FIPS 203) for exchanging keys and ML-DSA (FIPS 204) for signatures.
+Orange links carry QKD. Thicker orange means the link was picked in more of the 400 test runs. Blue links are PQC only, and dashed blue links are too long for QKD.
 
-We only use QKD on one link, main control to hub, and only as an optional pilot. QKD works between two points, so every extra substation would need its own QKD equipment. That adds up fast for a utility on a tight budget.
+| What | Number |
+|---|---|
+| Substations | 49 |
+| Links | 65 |
+| Link length | 2.1 km shortest, 6.8 km median, 83.1 km longest |
+| Links short enough for QKD | 58 of 65 |
+| Control centers | 2 (CHATTANOOGA 3 and CHATTANOOGA 11) |
+| Links with PQC | all 65 |
+| Links with QKD | 7 |
+| Trusted nodes | 4 |
+| Load with QKD on every hop to a control center | 253.9 MW |
 
-Trusted nodes: on a long QKD path, the key has to be unlocked and re-locked at each stop in the middle. That means every stop has to be trusted. Our pilot is one short link, so it does not need any trusted nodes.
+We put post-quantum cryptography (PQC) on every link. It works on the equipment and fiber the utility already has, so it covers all 49 substations no matter how long the link is. We would use ML-KEM (FIPS 203) for exchanging keys and ML-DSA (FIPS 204) for signatures, running next to the encryption used today, as in our Step 2 plan.
 
-Distance: QKD makes keys more slowly as the fiber gets longer and loses more light. That is why we picked a short link for the pilot.
+QKD only goes on a few links, and an optimizer picks them. Each substation gets a score: the load it carries, times the chance its traffic gets tapped, times the chance the BB84 alarm catches the tap. The score drops a little for every trusted node the key passes through. The link between the two control centers counts as the whole system's load, because it carries data about everything. The optimizer is an integer program solved with SciPy. It finds the set of links with the best total score for the budget.
+
+At a budget of 8 links it picked 7 QKD links and 4 trusted nodes (a trusted node counts as 0.2 of a link). That reaches 83% of the most risk reduction possible on this network. The 7 links are:
+
+- CHATTANOOGA 3 to CHATTANOOGA 24 to CHATTANOOGA 12 to CHATTANOOGA 11. These 3 links join the two control centers.
+- CHATTANOOGA 3 to ROSSVILLE 2 to ROSSVILLE 1 to RINGGOLD 5. These are 3 more links.
+- CHATTANOOGA 3 to CHATTANOOGA 13.
+
+Distance: we assumed a fiber loss of 0.35 dB/km, which is what was measured on EPB's fiber, and that a link can carry QKD if its loss is 10 dB or less. That is about 28.6 km. 7 of the 65 links are longer than that, so they get PQC only.
+
+Number of substations: QKD works between two points, so on a small budget it cannot reach 49 substations. PQC can. That is why QKD is only on 7 links.
+
+Trusted nodes: when a key passes through a substation in the middle, it is unlocked and locked again there, so that substation has to be trusted. Our design has 4 of them: CHATTANOOGA 12, CHATTANOOGA 24, ROSSVILLE 1 and ROSSVILLE 2. Every QKD chain is 3 hops or less, which is the length EPB tested.
 
 Timing: the two ends of a QKD link have to agree on time so they can match what was sent with what was received. QKD does not give the substations their time. The utility would keep using the clocks it already has.
 
-Things our design does not fix: if the fiber is cut, the link needs another path. Both control centers go through the same hub, so if the hub fails, the backup center does not help. That is why we proposed one backup route to DS3 that skips the hub. We have not checked if that route is possible.
+Things this design does not fix: 11 substations have only one path to a control center, so a single fiber cut could cut them off. They need backup routes.
 
 ## Step 3, Part 2: Assumptions and Tradeoffs
 
-- The network and the link lengths are made up.
-- We assumed the utility already has fiber on these links. We did not verify this.
-- We did not measure fiber loss or QKD key rate. Those would need to be measured before buying QKD equipment.
+- The grid is synthetic. It is not EPB's real network.
+- We assumed the fiber follows the power lines. Link lengths are estimated from each line's electrical values. They are not measured.
+- Fiber loss is assumed to be 0.35 dB/km and the QKD limit 10 dB. Real fiber would have to be measured before buying QKD equipment.
+- The grid model does not say where the control centers are. The highest-voltage, most central Chattanooga substation stands in for the main one (CHATTANOOGA 3), and the most central substation within 3 hops stands in for the backup (CHATTANOOGA 11).
+- The chance of a tap, the chance the alarm catches it, and the risk at a trusted node are our guesses. To see if the guesses decide the answer, the optimizer was run 400 times with different values. 4 links were picked every time, and the other 3 in 68% to 85% of the runs.
+- Line noise on a link is assumed to be 2.5%. EPB measured 1.4% to 3.9%.
 - PQC is cheap, but it depends on math problems that we believe are hard. QKD depends on physics, but it needs special hardware, spare fiber and trained staff.
 - QKD still needs normal authentication, so it does not replace PQC.
 
 Numbers from the EPB field test (Evans et al., 2021): the test network was about 22 km long and had three QKD links of 3.4 km, 10.2 km and 8.3 km. The fiber loss on those links was 1.3 dB, 3.1 dB and 2.9 dB. Two of the links made secret key at about 1,310 and 1,892 bits per second, with error rates of 3.9% and 1.4%. After the keys were relayed through the trusted nodes, the whole network produced 115 bits per second, which is about one 256-bit key every two seconds. The test ran for 28 hours.
 
-Our 8 km pilot link is in the same range as those links, but we have not measured its loss. A key rate like that is enough to keep refreshing encryption keys. It is not enough to encrypt all the traffic with QKD key directly.
+Most of our links are in the same range as those links: the median is 6.8 km. A key rate like that is enough to keep refreshing encryption keys. It is not enough to encrypt all the traffic with QKD key directly.
 
-Source: Evans et al., "Trusted Node QKD at an Electrical Utility," IEEE Access, 2021. https://arxiv.org/abs/2103.09877
+Sources:
+
+- Evans et al., "Trusted Node QKD at an Electrical Utility," IEEE Access, 2021. https://arxiv.org/abs/2103.09877
+- Birchfield et al., IEEE Transactions on Power Systems, 2017 (the ACTIVSg70k synthetic grid, from MATPOWER's copy of the case).
 
 ## Step 3, Part 3: Working Prototype
 
-We picked Option B and built the teleportation circuit in `3_secure_grid_link.ipynb`.
+We built both options.
+
+**Teleportation link (Option B).** We built the teleportation circuit in `3_secure_grid_link.ipynb`.
 
 The circuit sends the state of qubit 0 to qubit 2. First we entangle qubits 1 and 2. Then Alice links her message qubit to her half of the pair, and Bob's qubit gets two corrections. To check it, we undo the state on qubit 2 at the end. If the link works, qubit 2 reads 0 every time.
 
@@ -172,29 +190,56 @@ On the local simulator, qubit 2 read 0 on 1,024 of 1,024 shots. On the IonQ simu
 
 These are simulator results. We did not run this on real hardware. All three qubits are on one chip, so it shows the logic works but not that it works over a distance.
 
-This could help with the trusted node problem. In QKD, every stop in the middle has to unlock the key and lock it again, so every stop has to be trusted. With teleportation, a middle stop only passes entanglement along and never holds the key. That needs quantum repeaters, which utilities cannot buy yet, so our design keeps QKD to one short link.
+This could help with the trusted node problem. In QKD, every stop in the middle has to unlock the key and lock it again, so every stop has to be trusted. With teleportation, a middle stop only passes entanglement along and never holds the key. That needs quantum repeaters, which utilities cannot buy yet, so our design keeps QKD chains to 3 hops and treats every middle stop as a trusted node.
+
+**BB84 as a link in the design (Option A).** In `3a_bb84_grid_link.ipynb` we ran BB84 as one link from the design: the 3.7 km link from control center CHATTANOOGA 3 to CHATTANOOGA 24. With 2.5% line noise the quiet link had a QBER of 0.025, so the alarm is set at 0.034. A full tap raised the QBER to 0.269. The alarm caught a tap on 15% of the rounds 98% of the time, but a tap on 5% of the rounds only 63% of the time. So a small tap can still hide.
+
+Through qBraid, the quiet link gave a QBER of 0.000 on the qBraid QIR simulator and on the IonQ simulator. The fully tapped link gave 0.426 and 0.433. Each of those runs is one small batch with about 6 usable rounds, so the result depends on a handful of random choices and came out above the 0.269 average.
+
+**A better alarm.** In `3d_alarm_threshold.ipynb` we tested alarms on line noise that drifts. All three were tuned to about 1 false alarm per 1,000 batches. The table shows how often each one caught the tap.
+
+| Tap size | Fixed threshold | Kalman filter | Kalman + CUSUM |
+|---|---|---|---|
+| 1% of rounds | 6% | 28% | 50% |
+| 2% of rounds | 7% | 32% | 65% |
+| 5% of rounds | 20% | 95% | 100% |
+
+Wind gusts on the fiber still fooled every alarm that only looks at QBER. Adding a normal fiber monitor as a second signal raised the catch rate for a 2% tap from 56% to 84%.
+
+**Attacks.** In `3f_attacks_on_hardware.ipynb` we tried five attacks on the local simulator with 2.5% line noise. Each attack is one small circuit, so the numbers are rough. The quiet link had a QBER of 0.024, a full tap 0.174, a partial tap 0.092, and a denial of service attack 0.584. A blinding attack kept the QBER at 0.026, but only 67% of the rounds gave a result. So the error check misses it, and it takes a click-rate monitor to catch it. The tap, partial tap and denial of service circuits were also sent to the IonQ Forte 1 quantum computer. Those results are not in the notebook yet.
 
 ## Step 3, Part 4: Rollout Plan
 
-1. First: make a list of where the utility uses RSA and elliptic-curve cryptography. Fix firmware signing first, since a fake update would do the most damage. Turn on PQC at the control centers and the hub.
-2. Next: add PQC at the substations, one branch at a time. Replace old gateways that cannot be updated.
-3. Later: measure the fiber on the main control to hub link. Only try the QKD pilot if the measurements and the budget make sense.
+1. First: make a list of where the utility uses RSA and elliptic-curve cryptography. Fix firmware signing first, since a fake update would do the most damage. Turn on PQC at the two control centers.
+2. Next: add PQC at the other 47 substations. Replace old gateways that cannot be updated.
+3. Then, if the budget allows QKD: measure the fiber, and start with the chain that joins the two control centers (CHATTANOOGA 3 to 24 to 12 to 11). In the budget chart in `3c_network_design_v1.ipynb`, the risk reduced jumps from under 10% at a budget of 3 links to about 70% at 4 links, and this chain is the reason. These 3 links and CHATTANOOGA 3 to ROSSVILLE 2 were picked in all 400 test runs, so they are the safest first purchases.
+4. Later: add the other 3 QKD links, and build backup routes for the 11 substations that have only one path.
 
 ## Step 3, Part 5: Cost vs Security
 
 | Option | Cost | What it protects | What is still exposed |
 |---|---|---|---|
 | Keep what they have | Nothing new | Attackers today | Traffic recorded now can be read later |
-| PQC on every link | Software updates and some new gateways | All 8 links | Old devices behind the gateways, hub failure, fiber cuts |
-| PQC + QKD pilot | Same as above plus QKD hardware, fiber and staff | Extra check for eavesdropping on 1 link | Same as PQC alone |
+| PQC on every link | Software updates and some new gateways | All 65 links | Old devices behind the gateways, fiber cuts |
+| PQC + QKD on 7 links | Same as above plus 7 QKD links, 4 hardened trusted nodes, fiber and staff | Adds physics-based keys and tap detection where the risk is highest: 83% of the most risk reduction possible | The 11 substations with one path |
 
-We recommend PQC on every link. It protects the whole network for the least money. The QKD pilot only adds protection to one link that PQC already covers, so it should wait until the fiber has been measured.
+We recommend PQC on every link first. It protects the whole network for the least money. QKD comes second, starting with the control center chain, and only after the fiber has been measured.
 
-These costs are our guesses. We looked for public prices for QKD equipment and did not find any, because the vendors do not list them. A real comparison would need a quote.
+More budget helps less and less. The first 4 links get to about 70%, 8 links get to 83%, and it takes about 25 links to reach 100%. Where the QKD goes matters more than how much is bought: at the same budget of 8 links, picking the busiest links first reached under 5%. A simple greedy method came within 0.5% of the optimizer, so a careful engineer could get close by hand. The optimizer makes sure of it. The 70%, the 25 links and the 5% are read off the budget chart in `3c_network_design_v1.ipynb`.
+
+We do not have real prices. The budget is counted in QKD links, with a trusted node counted as 0.2 of a link, because QKD vendors do not publish prices. A real comparison would need a quote.
 
 ## Step 3, Stretch
 
-We did not do the QAOA stretch.
+We did the QAOA stretch in `3e_qaoa_vs_classical.ipynb`. We gave QAOA a small version of the problem, choosing which links get QKD on a budget, at 10 and 12 qubits, and compared it with classical methods.
+
+- The exact solver and the greedy method found the best answer every time, in about 0.01 seconds.
+- Standard QAOA at 10 qubits returned the best answer on 0.24% to 0.31% of shots. Random guessing within the budget gets 0.40%, so standard QAOA did worse than guessing.
+- XY-mixer QAOA did better, up to 1.68% at 10 qubits and 0.29% at 12 qubits.
+- The standard QAOA circuits need 106 to 318 two-qubit gates at 10 qubits, which is too many for today's hardware.
+- Through qBraid, the 10-qubit circuit stayed within the budget on 58% of shots on the qBraid QIR simulator and 52% on the IonQ simulator. It found the best answer on 0.10% of shots on both.
+
+So we use classical optimization to plan the network, and quantum for the key exchange and the tap detection.
 
 # Run Record
 
@@ -218,3 +263,13 @@ Every cloud run, labeled simulator, emulator or QPU, including the ones that fai
 | Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2bdf15852ed27b723ed` | 200 | Completed | Qubit 2 read 0 on 197/200 |
 | Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2b7f15852ed27b723df` | 200 | Completed | Not used in the write-up |
 | Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2a7f15852ed27b723d5` | 200 | Completed | Not used in the write-up |
+| Step 3, Part 3 | BB84 link, quiet | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8f6a3c8f5265fb3f21786` | 200 | Completed | QBER 0.000 |
+| Step 3, Part 3 | BB84 link, quiet | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8f6afc8f5265fb3f2178e` | 200 | Completed | QBER 0.000 |
+| Step 3, Part 3 | BB84 link, fully tapped | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8f6c0c8f5265fb3f2179e` | 200 | Completed | QBER 0.426 |
+| Step 3, Part 3 | BB84 link, fully tapped | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8f6ccc8f5265fb3f217a4` | 200 | Completed | QBER 0.433 |
+| Step 3, Part 3 | Attack test, random bits for Alice and Bob | qBraid QIR simulator | Simulator | not printed in the notebook | 3 | Completed | 36 random bits |
+| Step 3, Part 3 | Attack test, full tap | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b1c8f5265fb3f229e1` | 200 | Submitted | Result not in the notebook yet |
+| Step 3, Part 3 | Attack test, partial tap | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b1c8f5265fb3f229e4` | 200 | Submitted | Result not in the notebook yet |
+| Step 3, Part 3 | Attack test, denial of service | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b2c8f5265fb3f229e7` | 200 | Submitted | Result not in the notebook yet |
+| Step 3, Stretch | QAOA, 10 qubits | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8fab9c8f5265fb3f21a35` | 1,000 | Completed | Within budget on 58% of shots, best answer on 0.10% |
+| Step 3, Stretch | QAOA, 10 qubits | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8facec8f5265fb3f21a47` | 1,000 | Completed | Within budget on 52% of shots, best answer on 0.10% |
