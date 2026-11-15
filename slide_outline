@@ -1,0 +1,85 @@
+1 · Track: secure the grid - The Problem: “Today’s locks expire in 2030”
+Certain current encryption methods will be rendered obselete by quantum computing
+Attackers record encrypted utility traffic now, to unlock it once quantum computers arrive.
+NIST deadline: today’s encryption is phased out by 2030 and banned by 2035.
+Utilities can’t afford premium security on every cable, and nothing tells them where it matters most.
+
+2 · Customers: “One tool, every critical network”
+
+First customer: utilities like EPB. Users are security engineers; the decision maker is the security chief facing NERC CIP rules.
+Why they’d buy: a fixed deadline, a fixed budget, and a plan they can defend to regulators.
+Sector table:
+Power: load in MW
+Water: people served
+Pipeline: barrels per day
+Hospital: beds
+Bank: dollars per day
+For each one, the table says what’s at risk and how the plan changes.
+Bottom line: same deadline, same buyer, same product.
+Live moment: switch the sector in the tool.
+
+3 · Solution: “QKD Grid Optimizer”
+
+Load a map, draw one, or import a photo of one, and get a plan in under a second.
+Quantum-safe software on every link; quantum “intruder alarm” hardware only where it pays off; backup routes.
+Chattanooga results: about 1 in 8 links gets hardware, covering 23% of the load and cutting the worst wiretap by 48%.
+Tested on 21 networks; ran on IonQ and Quantinuum backends through qBraid.
+Honest limits: hardware price and field trials are unproven, and quantum computers didn’t beat classical ones at optimization & planning.
+
+4 · The Team
+
+Names, majors
+
+5 · What We Learned
+
+Confirmed: targeting works, and the alarm works on real hardware.
+Surprise: quantum hardware only watches its own cable. Combining it with fiber monitoring catches 84% of small taps, against 56% for either alone.
+Disproved: using a quantum computer for the planning.
+Gap: two simultaneous cable cuts.
+Next: real utility data, a pilot on EPB’s tested route, then water utilities.
+Closing line: “A defensible quantum-security plan in seconds, for any network that can’t afford to guess.”
+
+Backup · “Under the hood: how we know it works” (shown only if asked)
+Eight tiles:
+
+21 real-structure grids
+Parameters from EPB’s field trial
+Sobol sensitivity analysis to pick the formula
+Exact solver proven optimal against 7 other algorithms
+Six attack types tested
+Adaptive plus combined alarm (84%)
+Backups and fail-safes
+qBraid runs, plus an honest quantum-vs-classical comparison
+
+Quantum circuits run through qBraid
+What	Device	Real hardware?	Result
+BB84 key exchange, no eavesdropper (Step 1)	IonQ Forte 1	Yes (QPU)	QBER 0.004
+Same circuit (Step 1)	IonQ simulator	No	0.001
+BB84 on the CHA 3–CHA 24 link, quiet and tapped (3a)	qBraid QIR simulator, IonQ simulator	No	Quiet 0.000; tapped 0.419 / 0.425
+Five attack circuits: none, partial tap, full tap, detector blinding, jamming (3f)	IonQ simulator with noise, Quantinuum H2 emulator, QIR simulator	No (emulator = a classical model of their hardware’s noise)	Tap 0.24–0.26; blinding 0.000 QBER, 50% click yield; jamming 0.87
+Random bits for Alice and Bob (3f)	QIR simulator	No, so these bits are pseudorandom (writeup says so)	36 bits
+QAOA link-selection circuit, 10 qubits (3e)	QIR simulator, IonQ simulator	No	Best plan in 0.10% of shots
+Teleportation link (teammates’ Step 3)	IonQ simulator	No	195/200
+Attack circuits on Forte (3f)	IonQ Forte 1	Yes, if your teammate’s run finishes	Pending
+Every QKD link of a design in one circuit (3h)	qBraid GPU simulator	No	Not run yet
+Quantum algorithms simulated on a laptop (classical)
+QAOA on 19 networks (6–14 qubits). Exact numpy state-vector simulation, comparing standard and XY-mixer QAOA against random guessing.
+BB84 alarm studies (3a, 3d). Thousands of BB84 batches on Qiskit Aer with 2.5% line noise, used to set the alarm level and measure the smallest tap it catches.
+Purely classical
+Grid extraction: the 21 networks pulled from the Texas A&M synthetic grid file, with line lengths estimated from line reactance.
+Optimizer: an exact integer program (SciPy’s HiGHS solver), which picks the QKD links. The web page uses a fast heuristic, checked against the exact solver.
+Benchmark: 8 algorithms on 192 test cases.
+Sobol sensitivity analysis: 11 parameters across 3 cities.
+SMAA: 400 re-solves with uncertain parameter values.
+Attack simulations: wiretaps, random taps, relay compromise, detector blinding, jamming and cable cuts, across 21 networks and 3 budgets.
+Resilience: backup routes (graph bridge removal) and key splitting.
+Alarm design: Kalman filter plus CUSUM, and fusion with fiber monitoring.
+Key-rate estimate: a loss model fitted to EPB’s measured links.
+Image to grid: qBraid AI Gateway, which is a classical AI model even though it’s a qBraid feature.
+
+How to say it in one line: “The quantum part is the key exchange and its eavesdropper alarm, which we ran on IonQ hardware and three qBraid simulators and emulators. The planning is classical because, when we tested QAOA, the classical solver won.”
+
+Two numbers to keep straight in the pitch:
+
+The 0.004 baseline is the only real-hardware number unless the Forte attack run finishes.
+The 24–26% tap figures come from simulators and an emulator, so say “measured on IonQ and Quantinuum backends,” not “on real quantum hardware.”
