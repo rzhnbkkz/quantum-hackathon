@@ -120,11 +120,11 @@ On IonQ’s simulator with a Forte noise model, it fell to 100%, 79% and 44% as 
 
 ## Step 3, Part 1: Architecture
 
-A real utility's network layout is restricted information, so we did not use EPB's real network. We used the Texas A&M ACTIVSg70k synthetic grid. It is made up, but it was built to match real U.S. grids and it sits on real towns. We kept every Chattanooga substation plus its direct neighbors, which gives 49 substations and 65 links. The design is built in `3b_network_design.ipynb` (version 0) and `3c_network_design_v1.ipynb` (version 1).
+A real utility's network layout is restricted information, so we did not use EPB's real network. We used the Texas A&M ACTIVSg70k synthetic grid. It is made up, but it was built to match real U.S. grids and it sits on real towns. We kept every Chattanooga substation plus its direct neighbors, which gives 49 substations and 65 links. The design went through three versions: `3b_network_design.ipynb` (version 0), `3c_network_design_v1.ipynb` (version 1) and the final one in `network_design/final_design.py`, which writes `network_design/final_design.json`.
 
-![Network design, version 1](3c_network_map.png)
+![Final network design](network_diagram.png)
 
-Orange links carry QKD. Thicker orange means the link was picked in more of the 400 test runs. Blue links are PQC only, and dashed blue links are too long for QKD.
+Orange links carry QKD and PQC. Blue links are PQC only, and dashed blue links are too long for QKD. Dashed green links are new backup routes. Orange squares are trusted nodes.
 
 | What | Number |
 |---|---|
@@ -134,29 +134,35 @@ Orange links carry QKD. Thicker orange means the link was picked in more of the 
 | Links short enough for QKD | 58 of 65 |
 | Control centers | 2 (CHATTANOOGA 3 and CHATTANOOGA 11) |
 | Links with PQC | all 65 |
-| Links with QKD | 7 |
+| Links with QKD | 8 |
 | Trusted nodes | 4 |
-| Load with QKD on every hop to a control center | 253.9 MW |
+| Load with QKD on every hop to a control center | 316.7 of 1,406.4 MW |
+| New backup routes | 4 |
 
 We put post-quantum cryptography (PQC) on every link. It works on the equipment and fiber the utility already has, so it covers all 49 substations no matter how long the link is. We would use ML-KEM (FIPS 203) for exchanging keys and ML-DSA (FIPS 204) for signatures, running next to the encryption used today, as in our Step 2 plan.
 
-QKD only goes on a few links, and an optimizer picks them. Each substation gets a score: the load it carries, times the chance its traffic gets tapped, times the chance the BB84 alarm catches the tap. The score drops a little for every trusted node the key passes through. The link between the two control centers counts as the whole system's load, because it carries data about everything. The optimizer is an integer program solved with SciPy. It finds the set of links with the best total score for the budget.
+QKD only goes on a few links, and an optimizer picks them. Each substation gets a score: the load it carries, times the chance its traffic gets tapped, times the chance the BB84 alarm catches the tap. The score drops a little for every trusted node the key passes through. The link between the two control centers counts as the whole system's load, because it carries data about everything. The final version also gives credit for catching taps on the busiest fiber. The optimizer is an integer program. It finds the best set of links for the budget.
 
-At a budget of 8 links it picked 7 QKD links and 4 trusted nodes (a trusted node counts as 0.2 of a link). That reaches 83% of the most risk reduction possible on this network. The 7 links are:
+With a budget of 8 QKD links and no more than 4 trusted nodes, it picked these links:
 
-- CHATTANOOGA 3 to CHATTANOOGA 24 to CHATTANOOGA 12 to CHATTANOOGA 11. These 3 links join the two control centers.
-- CHATTANOOGA 3 to ROSSVILLE 2 to ROSSVILLE 1 to RINGGOLD 5. These are 3 more links.
-- CHATTANOOGA 3 to CHATTANOOGA 13.
+- CHATTANOOGA 3 to CHATTANOOGA 24 (3.7 km), CHATTANOOGA 24 to CHATTANOOGA 12 (10 km) and CHATTANOOGA 12 to CHATTANOOGA 11 (4.9 km). These 3 links join the two control centers.
+- CHATTANOOGA 11 to CHATTANOOGA 27 (6.6 km), CHATTANOOGA 27 to CHATTANOOGA 21 (3.1 km) and CHATTANOOGA 21 to CHATTANOOGA 23 (13.6 km).
+- CHATTANOOGA 3 to ROSSVILLE 2 (14 km).
+- CHATTANOOGA 3 to CHATTANOOGA 13 (16 km).
+
+That puts 8 substations behind QKD on every hop to a control center. Together they carry 316.7 MW, which is 22.5% of the 1,406.4 MW on this grid.
+
+Version 1 in `3c` only scored secrecy. At the same budget it picked 7 links and reached 83% of the most risk reduction possible. The budget numbers in Parts 4 and 5 come from that version.
 
 Distance: we assumed a fiber loss of 0.35 dB/km, which is what was measured on EPB's fiber, and that a link can carry QKD if its loss is 10 dB or less. That is about 28.6 km. 7 of the 65 links are longer than that, so they get PQC only.
 
-Number of substations: QKD works between two points, so on a small budget it cannot reach 49 substations. PQC can. That is why QKD is only on 7 links.
+Number of substations: QKD works between two points, so on a small budget it cannot reach 49 substations. PQC can. That is why QKD is only on 8 links.
 
-Trusted nodes: when a key passes through a substation in the middle, it is unlocked and locked again there, so that substation has to be trusted. Our design has 4 of them: CHATTANOOGA 12, CHATTANOOGA 24, ROSSVILLE 1 and ROSSVILLE 2. Every QKD chain is 3 hops or less, which is the length EPB tested.
+Trusted nodes: when a key passes through a substation in the middle, it is unlocked and locked again there, so that substation has to be trusted. Our design has 4 of them: CHATTANOOGA 12, CHATTANOOGA 21, CHATTANOOGA 24 and CHATTANOOGA 27. Every QKD chain is 3 hops or less, which is the length EPB tested.
 
 Timing: the two ends of a QKD link have to agree on time so they can match what was sent with what was received. QKD does not give the substations their time. The utility would keep using the clocks it already has.
 
-Things this design does not fix: 11 substations have only one path to a control center, so a single fiber cut could cut them off. They need backup routes.
+Backup routes: 11 substations had only one path to a control center, so a single fiber cut could cut them off. The worst cut would drop 76.8 MW. The design adds 4 backup routes with PQC: SIGNAL MOUNTAIN 1 to JASPER 18 (74.3 km), LA FAYETTE 4 to CLEVELAND 16 (52.3 km), OLD FORT 2 to JASPER 16 (109 km) and CHATTANOOGA 4 to SIGNAL MOUNTAIN 2 (15.5 km). That is 251.1 km in total. After that, no single cut isolates a substation. These routes are proposed and the lengths are estimates. We have not checked that fiber exists along them.
 
 ## Step 3, Part 2: Assumptions and Tradeoffs
 
@@ -164,7 +170,7 @@ Things this design does not fix: 11 substations have only one path to a control 
 - We assumed the fiber follows the power lines. Link lengths are estimated from each line's electrical values. They are not measured.
 - Fiber loss is assumed to be 0.35 dB/km and the QKD limit 10 dB. Real fiber would have to be measured before buying QKD equipment.
 - The grid model does not say where the control centers are. The highest-voltage, most central Chattanooga substation stands in for the main one (CHATTANOOGA 3), and the most central substation within 3 hops stands in for the backup (CHATTANOOGA 11).
-- The chance of a tap, the chance the alarm catches it, and the risk at a trusted node are our guesses. To see if the guesses decide the answer, the optimizer was run 400 times with different values. 4 links were picked every time, and the other 3 in 68% to 85% of the runs.
+- The chance of a tap, the chance the alarm catches it, and the risk at a trusted node are our guesses. To see if the guesses decide the answer, the version 1 optimizer was run 400 times with different values. 4 links were picked every time, and all 4 are in the final design.
 - Line noise on a link is assumed to be 2.5%. EPB measured 1.4% to 3.9%.
 - PQC is cheap, but it depends on math problems that we believe are hard. QKD depends on physics, but it needs special hardware, spare fiber and trained staff.
 - QKD still needs normal authentication, so it does not replace PQC.
@@ -212,8 +218,8 @@ Wind gusts on the fiber still fooled every alarm that only looks at QBER. Adding
 
 1. First: make a list of where the utility uses RSA and elliptic-curve cryptography. Fix firmware signing first, since a fake update would do the most damage. Turn on PQC at the two control centers.
 2. Next: add PQC at the other 47 substations. Replace old gateways that cannot be updated.
-3. Then, if the budget allows QKD: measure the fiber, and start with the chain that joins the two control centers (CHATTANOOGA 3 to 24 to 12 to 11). In the budget chart in `3c_network_design_v1.ipynb`, the risk reduced jumps from under 10% at a budget of 3 links to about 70% at 4 links, and this chain is the reason. These 3 links and CHATTANOOGA 3 to ROSSVILLE 2 were picked in all 400 test runs, so they are the safest first purchases.
-4. Later: add the other 3 QKD links, and build backup routes for the 11 substations that have only one path.
+3. Then, if the budget allows QKD: measure the fiber, and start with the chain that joins the two control centers (CHATTANOOGA 3 to 24 to 12 to 11). In the budget chart in `3c_network_design_v1.ipynb`, the risk reduced jumps from under 10% at a budget of 3 links to about 70% at 4 links, and this chain is the reason. These 3 links and CHATTANOOGA 3 to ROSSVILLE 2 were picked in all 400 test runs of version 1, so they are the safest first purchases.
+4. Later: add the other 4 QKD links, and build the 4 backup routes for the 11 substations that have only one path.
 
 ## Step 3, Part 5: Cost vs Security
 
@@ -221,11 +227,11 @@ Wind gusts on the fiber still fooled every alarm that only looks at QBER. Adding
 |---|---|---|---|
 | Keep what they have | Nothing new | Attackers today | Traffic recorded now can be read later |
 | PQC on every link | Software updates and some new gateways | All 65 links | Old devices behind the gateways, fiber cuts |
-| PQC + QKD on 7 links | Same as above plus 7 QKD links, 4 hardened trusted nodes, fiber and staff | Adds physics-based keys and tap detection where the risk is highest: 83% of the most risk reduction possible | The 11 substations with one path |
+| PQC + QKD on 8 links + 4 backup routes | Same as above plus 8 QKD links, 4 hardened trusted nodes, about 251 km of backup route, fiber and staff | Adds physics-based keys and tap detection where the risk is highest (316.7 MW behind QKD), and no single fiber cut isolates a substation | Anything a real survey of the fiber turns up |
 
 We recommend PQC on every link first. It protects the whole network for the least money. QKD comes second, starting with the control center chain, and only after the fiber has been measured.
 
-More budget helps less and less. The first 4 links get to about 70%, 8 links get to 83%, and it takes about 25 links to reach 100%. Where the QKD goes matters more than how much is bought: at the same budget of 8 links, picking the busiest links first reached under 5%. A simple greedy method came within 0.5% of the optimizer, so a careful engineer could get close by hand. The optimizer makes sure of it. The 70%, the 25 links and the 5% are read off the budget chart in `3c_network_design_v1.ipynb`.
+More budget helps less and less. In version 1's budget chart, the first 4 links get to about 70%, 8 links get to 83%, and it takes about 25 links to reach 100%. Where the QKD goes matters more than how much is bought: at the same budget of 8 links, picking the busiest links first reached under 5%. A simple greedy method came within 0.5% of the optimizer, so a careful engineer could get close by hand. The optimizer makes sure of it. The 70%, the 25 links and the 5% are read off the budget chart in `3c_network_design_v1.ipynb`.
 
 We do not have real prices. The budget is counted in QKD links, with a trusted node counted as 0.2 of a link, because QKD vendors do not publish prices. A real comparison would need a quote.
 
