@@ -212,7 +212,11 @@ Through qBraid, the quiet link gave a QBER of 0.000 on the qBraid QIR simulator 
 
 Wind gusts on the fiber still fooled every alarm that only looks at QBER. Adding a normal fiber monitor as a second signal raised the catch rate for a 2% tap from 56% to 84%.
 
-**Attacks.** In `3f_attacks_on_hardware.ipynb` we tried five attacks on the local simulator with 2.5% line noise. Each attack is one small circuit, so the numbers are rough. The quiet link had a QBER of 0.024, a full tap 0.174, a partial tap 0.092, and a denial of service attack 0.584. A blinding attack kept the QBER at 0.026, but only 67% of the rounds gave a result. So the error check misses it, and it takes a click-rate monitor to catch it. The tap, partial tap and denial of service circuits were also sent to the IonQ Forte 1 quantum computer. Those results are not in the notebook yet.
+**Attacks.** In `3f_attacks_on_hardware.ipynb` we tried five attacks on one BB84 circuit of 12 rounds, so the numbers are rough. Alice's and Bob's random choices came from a 3-shot job on the qBraid QIR simulator. That is a classical simulator, so these bits are not truly random from physics; a real QPU would be needed for that. In a blinding attack, Eve controls Bob's detectors so that he only gets a result when his basis matches hers. We modeled it by keeping only those rounds from the tap run.
+
+On the local simulator with 2.5% line noise, the quiet link had a QBER of 0.019, a full tap 0.207 and a denial of service attack 0.677. The partial tap (3 of 12 rounds) gave 0.024, the same as the line noise: in a circuit this small, the tapped rounds happened to cause no errors. Blinding kept the QBER at 0.021, but only 62% of the rounds gave a result.
+
+On the IonQ Forte 1 quantum computer, the quiet link had a QBER of 0.002, so the alarm was set at 0.009. The full tap gave 0.188 and set off the alarm. Scored as blinding, the same job gave a QBER of 0.002 with only 62% of the rounds giving a result. The error check passed it, and only a click-rate monitor caught it. Each Forte job cost 10 Open Quantum credits, and we ran out after these two, so the partial tap and denial of service jobs were cancelled. We ran them on the IonQ simulator with the Forte noise model instead: the quiet link and the partial tap both gave 0.000, and denial of service gave 0.677.
 
 ## Step 3, Part 4: Rollout Plan
 
@@ -259,23 +263,21 @@ Every cloud run, labeled simulator, emulator or QPU, including the ones that fai
 | Step 1, Part 3 | BB84, 16 rounds in one circuit | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-b095-qjob-6af88ac6c8f5265fb3f1bd8d` | 200 | Failed | Open Quantum terms not accepted yet |
 | Step 1, Part 3 | BB84, 16 rounds in one circuit | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-b095-qjob-6af88a4bc8f5265fb3f1bd6e` | 200 | Failed | Open Quantum terms not accepted yet |
 | Step 1, Part 3 | BB84, 16 rounds in one circuit | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-b095-qjob-6af8896cc8f5265fb3f1bd3a` | 200 | Failed | Open Quantum account not connected yet |
-| Step 1, Part 3 | BB84, earlier practice run | IonQ simulator | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7c852f15852ed27b72101` | 200 | Completed | Not used in the write-up |
-| Step 1, Part 3 | BB84, earlier practice run | IonQ simulator | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7c842f15852ed27b720fa` | 200 | Completed | Not used in the write-up |
 | Step 2, Part 5 | Grover, N=4 | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af7e58ef15852ed27b72b26` | 200 | Completed | 200/200 on key (100%) |
 | Step 2, Part 5 | Grover, N=8 | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af86a41c8f5265fb3f1b033` | 200 | Completed | 158/200 on key (79%) |
 | Step 2, Part 5 | Grover, N=16 | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af7e25ef15852ed27b72a6b` | 200 | Completed | 87/200 on key (44%) |
 | Step 2, Part 5 | Grover, N=16 | Quantinuum H2 emulator | Emulator | `quantinuum:quantinuum:sim:h2-emulator-0ad7-qjob-6af86c52c8f5265fb3f1b0ee` | 200 | Completed | 165/200 on key (82.5%) |
 | Step 3, Part 3 | Teleportation link | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af89604c8f5265fb3f1cbf3` | 200 | Completed | Qubit 2 read 0 on 195/200 |
 | Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2bdf15852ed27b723ed` | 200 | Completed | Qubit 2 read 0 on 197/200 |
-| Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2b7f15852ed27b723df` | 200 | Completed | Not used in the write-up |
-| Step 3, Part 3 | Teleportation link, earlier run | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-b095-qjob-6af7d2a7f15852ed27b723d5` | 200 | Completed | Not used in the write-up |
 | Step 3, Part 3 | BB84 link, quiet | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8f6a3c8f5265fb3f21786` | 200 | Completed | QBER 0.000 |
 | Step 3, Part 3 | BB84 link, quiet | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8f6afc8f5265fb3f2178e` | 200 | Completed | QBER 0.000 |
 | Step 3, Part 3 | BB84 link, fully tapped | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8f6c0c8f5265fb3f2179e` | 200 | Completed | QBER 0.426 |
 | Step 3, Part 3 | BB84 link, fully tapped | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8f6ccc8f5265fb3f217a4` | 200 | Completed | QBER 0.433 |
-| Step 3, Part 3 | Attack test, random bits for Alice and Bob | qBraid QIR simulator | Simulator | not printed in the notebook | 3 | Completed | 36 random bits |
-| Step 3, Part 3 | Attack test, full tap | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b1c8f5265fb3f229e1` | 200 | Submitted | Result not in the notebook yet |
-| Step 3, Part 3 | Attack test, partial tap | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b1c8f5265fb3f229e4` | 200 | Submitted | Result not in the notebook yet |
-| Step 3, Part 3 | Attack test, denial of service | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-91f5-qjob-6af912b2c8f5265fb3f229e7` | 200 | Submitted | Result not in the notebook yet |
+| Step 3, Part 3 | Attack test, random bits for Alice and Bob | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-0ad7-qjob-6af924c8c8f5265fb3f2389a` | 3 | Completed | 36 random bits, used for every attack run below |
+| Step 3, Part 3 | Attack test, quiet | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-0ad7-qjob-6af924e0c8f5265fb3f238b0` | 200 | Completed | QBER 0.002, click yield 1.00 |
+| Step 3, Part 3 | Attack test, full tap (also scored as blinding) | IonQ Forte 1 (Open Quantum) | QPU | `openquantum:ionq:qpu:forte-1-0ad7-qjob-6af9277bc8f5265fb3f23ba1` | 200 | Completed | Tap: QBER 0.188, click yield 1.00. Blinding: QBER 0.002, click yield 0.62 |
+| Step 3, Part 3 | Attack test, quiet | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af9325fc8f5265fb3f2446f` | 200 | Completed | QBER 0.000, click yield 1.00 |
+| Step 3, Part 3 | Attack test, partial tap | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af9326fc8f5265fb3f24483` | 200 | Completed | QBER 0.000, click yield 1.00 |
+| Step 3, Part 3 | Attack test, denial of service | IonQ simulator (forte-1 noise model) | Simulator | `ionq:ionq:sim:simulator-0ad7-qjob-6af93280c8f5265fb3f24489` | 200 | Completed | QBER 0.677, click yield 1.00 |
 | Step 3, Stretch | QAOA, 10 qubits | qBraid QIR simulator | Simulator | `qbraid:qbraid:sim:qir-sv-91f5-qjob-6af8fab9c8f5265fb3f21a35` | 1,000 | Completed | Within budget on 58% of shots, best answer on 0.10% |
 | Step 3, Stretch | QAOA, 10 qubits | IonQ simulator (aria-1 noise model) | Simulator | `ionq:ionq:sim:simulator-91f5-qjob-6af8facec8f5265fb3f21a47` | 1,000 | Completed | Within budget on 52% of shots, best answer on 0.10% |
