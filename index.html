@@ -49,6 +49,9 @@ select,input[type=text],input[type=password],input[type=number],textarea{font:in
 .n1row{cursor:pointer;font-size:13.5px}.n1row input{justify-self:end;width:18px;height:18px;accent-color:#e0528f}
 .run{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:0;border-radius:12px;background:linear-gradient(90deg,#e0528f,#2563eb);color:#fff;font:700 15.5px inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 16px #e0528f55}
 .run:active{transform:translateY(1px)}
+.run.busy{opacity:.7;cursor:progress}
+.note.flash{animation:noteFlash 1.2s ease-out}
+@keyframes noteFlash{0%{background:#ffe3ef;color:#3a1a2b}100%{background:transparent}}
 .note{font-size:12px;color:var(--muted)}
 /* map */
 .mapcard{position:relative;padding:0;overflow:hidden;background:#fdeef4;display:flex;flex-direction:column;min-height:620px}
@@ -713,6 +716,7 @@ window.addEventListener("mousemove",ev=>{ if(drag){ const p=svgPt(ev); const n=S
   if(pan){ const r=svg.getBoundingClientRect(); const k=1000/S.zoom/r.width; S.cx=pan.cx-(ev.clientX-pan.x)*k; S.cy=pan.cy-(ev.clientY-pan.y)*k; setView(); } });
 window.addEventListener("mouseup",ev=>{ const moved=pan && Math.hypot(ev.clientX-pan.x, ev.clientY-pan.y)>3; const redraw=moved && S.geo; drag=null; pan=null; if(redraw) setTimeout(draw,0); });
 svg.addEventListener("click",ev=>{ if(S.mode!=="node") return; const p=svgPt(ev); let k=S.nodes.size+1; while(S.nodes.has("S"+k)) k++; S.nodes.set("S"+k,{id:"S"+k,mw:20,kv:115,x:p.x,y:p.y}); edited(); });
+function stale(){ if(S.design) $("solveNote").textContent="Settings changed · click Run Optimization to update the design."; }
 function edited(){ S.edited=true; S.design=null; S.tapped=null; draw(); updateNetCard(); }
 $("zin").onclick=()=>{ S.zoom=Math.min(12,S.zoom*1.4); draw(); scaleTxt(); }; $("zout").onclick=()=>{ S.zoom=Math.max(.6,S.zoom/1.4); draw(); scaleTxt(); };
 function scaleTxt(){ // 200 px of the bar ≈ map units; estimate km per map unit from links
@@ -722,11 +726,14 @@ function scaleTxt(){ // 200 px of the bar ≈ map units; estimate km per map uni
 // ---------------------------------------------------------------- inputs / UI
 function updateNetCard(){ $("netNodes").textContent=`${S.nodes.size} nodes`; $("netLinks").textContent=`${S.edges.length} links`; $("netOk").innerHTML=S.nodes.size?ico("check",20,"#22b35e",3):""; drawThumbs(); }
 const lab={K:v=>v, H:v=>v, db:v=>(v/100).toFixed(2), loss:v=>v};
-for(const k in lab){ const f=()=>$(k+"V").textContent=lab[k](+$(k).value); $(k).addEventListener("input",f); $(k).addEventListener("change",()=>{ if(S.design) optimize(); }); f(); }
-["secLevel","goal","n1"].forEach(k=>$(k).addEventListener("change",()=>{ if(S.design) optimize(); }));
+for(const k in lab){ const f=()=>$(k+"V").textContent=lab[k](+$(k).value); $(k).addEventListener("input",f); $(k).addEventListener("change",stale); f(); }
+["secLevel","goal","n1"].forEach(k=>$(k).addEventListener("change",stale));
 $("esri").addEventListener("input",()=>{ ATTR_EDIT=$("esri").textContent.trim()||null; try{ ATTR_EDIT?localStorage.setItem("larp_attr",ATTR_EDIT):localStorage.removeItem("larp_attr"); }catch(e){} });
 $("esri").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("esri").blur(); } e.stopPropagation(); });
-$("run").onclick=optimize; $("basemap").onchange=()=>draw(); $("randTap").onclick=randomTap;
+$("run").onclick=()=>{ const b=$("run"); if(b.disabled) return; const label=b.innerHTML; b.disabled=true; b.classList.add("busy"); b.textContent="Optimizing…";
+  setTimeout(()=>{ try{ optimize(); } finally { b.disabled=false; b.classList.remove("busy"); b.innerHTML=label; }
+    const n=$("solveNote"); n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash"); $("results").scrollIntoView({behavior:"smooth",block:"start"}); },350); };
+$("basemap").onchange=()=>draw(); $("randTap").onclick=randomTap;
 document.querySelectorAll("#toolbar [data-mode]").forEach(b=>b.onclick=()=>{ S.mode=b.dataset.mode; S.linkStart=null; document.querySelectorAll("#toolbar [data-mode]").forEach(x=>x.classList.toggle("on",x===b)); svg.style.cursor=S.mode==="node"?"crosshair":"default"; });
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b)); $(b.dataset.go).scrollIntoView({behavior:"smooth",block:"start"}); });
 // sector
@@ -736,7 +743,7 @@ function applySector(setParams=true){ SEC=SECTORS[$("sector").value];
   $("sectorNote").innerHTML=`<b>${SEC.name}:</b> ${SEC.why} Values per site are read as ${SEC.unit}. Starting settings are illustrative; adjust freely.`;
   $("lgNode").textContent=SEC.site[0].toUpperCase()+SEC.site.slice(1); $("lgLine").textContent=SEC.line[0].toUpperCase()+SEC.line.slice(1)+" (PQC)"; $("lgCC").textContent=SEC.hub[0].toUpperCase()+SEC.hub.slice(1);
   $("addNodeBtn").textContent="+ "+SEC.site.split(" ")[0][0].toUpperCase()+SEC.site.split(" ")[0].slice(1);
-  if(setParams && S.nodes.size) optimize(); else { draw(); showResults(); } }
+  draw(); showResults(); if(setParams) stale(); }
 $("sector").onchange=()=>applySector(true);
 // modals
 const openM=id=>$(id).style.display="grid"; document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".modal").style.display="none");
