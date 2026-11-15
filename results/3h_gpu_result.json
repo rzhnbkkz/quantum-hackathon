@@ -1,0 +1,51 @@
+{
+ "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af94cd3c8f5265fb3f24c5c",
+ "counts": {
+  "100111000110111111001110": 130,
+  "100111000110110111001110": 122,
+  "100111000110010111001110": 123,
+  "100111000110011111001110": 125
+ },
+ "per_link": [
+  {
+   "a": "CHATTANOOGA 3",
+   "b": "CHATTANOOGA 24",
+   "qber": 0.0
+  },
+  {
+   "a": "CHATTANOOGA 24",
+   "b": "CHATTANOOGA 12",
+   "qber": 0.0
+  },
+  {
+   "a": "CHATTANOOGA 11",
+   "b": "CHATTANOOGA 12",
+   "qber": 0.0
+  },
+  {
+   "a": "CHATTANOOGA 11",
+   "b": "CHATTANOOGA 27",
+   "qber": 0.3313333333333333
+  },
+  {
+   "a": "CHATTANOOGA 23",
+   "b": "CHATTANOOGA 21",
+   "qber": 0.0
+  },
+  {
+   "a": "CHATTANOOGA 27",
+   "b": "CHATTANOOGA 21",
+   "qber": 0.0
+  },
+  {
+   "a": "ROSSVILLE 2",
+   "b": "CHATTANOOGA 3",
+   "qber": 0.0
+  },
+  {
+   "a": "CHATTANOOGA 3",
+   "b": "CHATTANOOGA 13",
+   "qber": 0.0
+  }
+ ]
+}

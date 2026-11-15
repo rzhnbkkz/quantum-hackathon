@@ -1,0 +1,104 @@
+{
+ "device": "qbraid:qbraid:sim:gpu-sv (2000 shots each)",
+ "qbraid": {
+  "e91_quiet": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af970c4e538ce0882fae109",
+   "S": 2.78
+  },
+  "e91_tap": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af9714be538ce0882fae13a",
+   "S": 1.4
+  },
+  "e91_blind": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af970cde538ce0882fae111",
+   "S_clicked_only": 2.835,
+   "S_no_click_counted": 1.45,
+   "eve_agrees_bob": 1.0,
+   "yield": 0.5
+  },
+  "six_quiet": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af970d1e538ce0882fae115",
+   "QBER": 0.0
+  },
+  "six_tap": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af97150e538ce0882fae140",
+   "QBER": 0.3292
+  },
+  "bb84_tap": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af97157e538ce0882fae14e",
+   "QBER": 0.2534
+  },
+  "swap1": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af9715ce538ce0882fae158",
+   "S": 2.801
+  },
+  "swap2": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af97169e538ce0882fae166",
+   "S": 2.86
+  },
+  "swap_relay": {
+   "job": "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af9715ee538ce0882fae15b",
+   "alice_bob_agree": 1.0,
+   "relay_info_bits": 0.0011
+  }
+ },
+ "local_noisy_forte_like": {
+  "e91_quiet": {
+   "S": 2.765,
+   "E": [
+    0.7,
+    0.689,
+    0.697,
+    -0.68
+   ]
+  },
+  "e91_tap": {
+   "S": 1.368,
+   "E": [
+    0.671,
+    0.685,
+    0.009,
+    -0.003
+   ]
+  },
+  "e91_blind": {
+   "E": [
+    0.686,
+    0.695,
+    0.652,
+    -0.699
+   ],
+   "S_clicked_only": 2.732,
+   "S_no_click_counted": 1.369,
+   "eve_agrees_bob": 0.989
+  },
+  "six_quiet": {
+   "QBER": 0.005
+  },
+  "six_tap": {
+   "QBER": 0.3358
+  },
+  "bb84_tap": {
+   "QBER": 0.2538
+  },
+  "swap1": {
+   "S": 2.687
+  },
+  "swap2": {
+   "S": 2.649
+  },
+  "swap_relay": {
+   "alice_bob_agree": 0.98,
+   "relay_info_bits": 0.0002,
+   "relay_outcomes": {
+    "01": 0.239,
+    "11": 0.254,
+    "00": 0.249,
+    "10": 0.258
+   }
+  }
+ },
+ "superseded": {
+  "qbraid:qbraid:sim:gpu-sv-91f5-qjob-6af970c8e538ce0882fae10d": "first E91 tap run with Eve's qubits measured; too many distinct outcomes to read back in full, replaced by 6af9714b"
+ }
+}

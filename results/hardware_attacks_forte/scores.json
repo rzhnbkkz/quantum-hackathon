@@ -1,0 +1,17 @@
+{
+ "tap": {
+  "qber": 0.17083333333333334,
+  "click_yield": 1.0,
+  "sifted_rounds": 6
+ },
+ "blinding": {
+  "qber": 0.0025,
+  "click_yield": 0.6666666666666666,
+  "sifted_rounds": 4
+ },
+ "partial": {
+  "qber": 0.085,
+  "click_yield": 1.0,
+  "sifted_rounds": 6
+ }
+}
