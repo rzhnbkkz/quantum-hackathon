@@ -125,9 +125,25 @@ td,th{padding:3px;border-bottom:1px solid var(--line);text-align:left}
 .btn{border:1px solid #cdd8ee;background:#fff;border-radius:9px;padding:7px 12px;font:600 13px inherit;font-family:inherit;cursor:pointer}
 .btn.b{background:var(--blue);border-color:var(--blue);color:#fff}
 textarea{width:100%;height:80px;font:12px ui-monospace,Menlo,monospace}
+
+/* ---- slide / embed mode: fixed 1920x1080 canvas scaled to the window (Faces.app, projector, iframes) ---- */
+body.fit{overflow:hidden;height:100vh;background:#dfe6f3}
+body.fit #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:var(--bg);overflow:hidden;box-shadow:0 0 0 1px #cfd8ea}
+body.fit header{height:104px;min-height:0}
+body.fit .hdr-art{opacity:.95!important}
+body.fit .qb{margin-right:0!important}
+body.fit .fitbtn{margin-right:330px}
+body.fit .wrap{grid-template-columns:400px 1fr 380px;height:702px;padding:14px 18px 10px}
+body.fit .wrap>.card{overflow:auto;min-height:0}
+body.fit .mapcard{min-height:0;height:100%}
+body.fit #map{min-height:0}
+body.fit .bottom{height:274px;padding:0 18px 16px}
+body.fit .bottom>.card{overflow:hidden}
+.fitbtn{z-index:3;border:1px solid #cfe0ff;background:#fff;color:var(--blue);border-radius:999px;padding:5px 12px;font:700 12px inherit;font-family:inherit;cursor:pointer;margin-left:8px}
 </style>
 </head>
 <body>
+<div id="stage">
 <header>
   <div class="logo">
     <svg width="72" height="72" viewBox="0 0 72 72"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e40af"/></linearGradient></defs>
@@ -137,7 +153,7 @@ textarea{width:100%;height:80px;font:12px ui-monospace,Menlo,monospace}
     <div><h1>QKD Grid Optimizer</h1><p>Secure your grid. Optimize your quantum links.</p></div>
   </div>
   <div class="tabs"><button class="on" data-go="network" id="tabNet"></button><button data-go="params" id="tabPar"></button><button data-go="results" id="tabRes"></button></div>
-  <div class="qb" id="qbBadge"></div>
+  <div class="qb" id="qbBadge"></div><button class="fitbtn" id="fitBtn" title="Fixed 16:9 canvas that scales to any window (for Faces.app slides, iframes and projectors)">⛶ Slide mode</button>
   <svg class="hdr-art" viewBox="0 0 420 100" preserveAspectRatio="xMaxYMax meet" width="420" height="100">
     <defs><linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9daf8"/><stop offset="1" stop-color="#e6eefc"/></linearGradient></defs>
     <path d="M40 34 q12-14 28-6 q10-12 26-2 q16 2 12 12 h-66z" fill="#fff" opacity=".9"/>
@@ -228,6 +244,7 @@ textarea{width:100%;height:80px;font:12px ui-monospace,Menlo,monospace}
   </div>
 </div>
 
+</div><!-- /stage -->
 <!-- modals -->
 <div class="modal" id="mExample"><div class="box">
   <h3 id="mExTitle"></h3><div class="ex" id="exList"></div>
@@ -646,6 +663,17 @@ $("ic-links").innerHTML=ico("link",28,"#1f6feb",2.2); $("ic-hubs").innerHTML=ico
 $("gainIc").innerHTML=`<span style="width:38px;height:38px;border-radius:50%;background:#22b35e;display:grid;place-items:center">${ico("check",22,"#fff",3)}</span>`;
 $("ic-metrics").innerHTML=ico("chart",20,"#1f6feb",2.4); $("ic-path").innerHTML=ico("link",20,"#1f6feb",2.2); $("ic-details").innerHTML=ico("chart",20,"#1f6feb",2.4);
 $("mExTitle").innerHTML=ico("hub",20,"#1f6feb")+"Load an example grid"; $("mUpTitle").innerHTML=ico("cloud",20,"#1f6feb")+"Upload a grid";
+
+// ---------------------------------------------------------------- slide / embed mode
+function fitStage(){ const st=$("stage"); if(!document.body.classList.contains("fit")){ st.style.transform=""; st.style.left=""; st.style.top=""; return; }
+  const k=Math.min(window.innerWidth/1920, window.innerHeight/1080); st.style.transform=`scale(${k})`;
+  st.style.left=((window.innerWidth-1920*k)/2)+"px"; st.style.top=((window.innerHeight-1080*k)/2)+"px"; }
+function setFit(on){ document.body.classList.toggle("fit",on); $("fitBtn").textContent=on?"⤢ Page mode":"⛶ Slide mode"; fitStage(); setTimeout(()=>{ scaleTxt(); },50); }
+const qs=new URLSearchParams(location.search);
+const embedded = (()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
+setFit(qs.has("fit")||qs.has("faces")||qs.has("slide")||(embedded && !qs.has("page")));
+$("fitBtn").onclick=()=>setFit(!document.body.classList.contains("fit"));
+window.addEventListener("resize",fitStage);
 // start
 applySector(false); loadPreset(PRESETS[0].key);
 </script>
