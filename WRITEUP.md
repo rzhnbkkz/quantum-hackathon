@@ -124,8 +124,6 @@ On IonQ’s simulator with a Forte noise model, it fell to 100%, 79% and 44% as 
 
 We designed a small made-up utility network. It has 2 control centers, 1 communications hub and 6 substations (DS1 to DS6). The link lengths are our own guesses for a city-sized network. They are not real EPB data.
 
-![Network diagram](network_diagram.png)
-
 | Link | Length (our guess) | Protection |
 |---|---|---|
 | Main control to hub | 8 km | PQC + optional QKD pilot |
