@@ -2,6 +2,9 @@ import json
 pre=json.load(open('presets.json'))
 EV=[
  {"device":"IonQ Forte 1 (QPU)","attack":"none (Step 1)","result":"0.004","job":"openquantum:ionq:qpu:forte-1-b095-qjob-6af88c54c8f5265fb3f1bdde"},
+ {"device":"IonQ Forte 1 (QPU)","attack":"tap every round","result":"0.171","job":"openquantum:ionq:qpu:forte-1-91f5-qjob-6af9149011c57442e208cb02"},
+ {"device":"IonQ Forte 1 (QPU)","attack":"tap 3/12 rounds","result":"0.085","job":"openquantum:ionq:qpu:forte-1-91f5-qjob-6af91e8cc8f5265fb3f234c9"},
+ {"device":"IonQ Forte 1 (QPU)","attack":"detector blinding","result":"0.003 (yield 67%)","job":"same as tap"},
  {"device":"IonQ sim (noise)","attack":"none","result":"0.000","job":"ionq:ionq:sim:simulator-91f5-qjob-6af8fcf6c8f5265fb3f21bf1"},
  {"device":"IonQ sim (noise)","attack":"tap 3/12 rounds","result":"0.117","job":"ionq:ionq:sim:simulator-91f5-qjob-6af8fd17c8f5265fb3f21c04"},
  {"device":"IonQ sim (noise)","attack":"tap every round","result":"0.242","job":"ionq:ionq:sim:simulator-91f5-qjob-6af8fd07c8f5265fb3f21bfc"},

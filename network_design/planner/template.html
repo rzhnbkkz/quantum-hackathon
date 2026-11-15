@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Secure the Grid: QKD + PQC Network Planner</title>
 <style>
-:root{--bg:#f6f7f9;--panel:#fff;--ink:#1d2330;--muted:#5d6676;--line:#dfe3ea;--qkd:#e07a1f;--pqc:#4c6ef5;--backup:#2f9e44;--cc:#111827;--tn:#e07a1f;--prot:#4a7c59;--bad:#c92a2a;--good:#2b8a3e}
+:root{--bg:#eef1f8;--panel:#fff;--ink:#1d2330;--muted:#5d6676;--line:#dfe3ea;--qkd:#e07a1f;--pqc:#4c6ef5;--backup:#2f9e44;--cc:#111827;--tn:#e07a1f;--prot:#4a7c59;--bad:#c92a2a;--good:#2b8a3e}
 *{box-sizing:border-box}
 body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
 header{padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
@@ -29,7 +29,7 @@ button.on{background:#1d2330;color:#fff;border-color:#1d2330}
 .slider small{color:var(--muted);display:block;font-size:11.5px}
 input[type=range]{width:100%}
 .mapbox{position:relative;padding:0;overflow:hidden;align-self:start}
-svg{width:100%;height:auto;aspect-ratio:10/7;display:block;background:#fff;border-radius:10px;user-select:none}
+#map{width:100%;height:auto;aspect-ratio:10/7;display:block;background:#fff;border-radius:10px;user-select:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .sw{display:inline-block;width:18px;height:4px;border-radius:2px}
@@ -51,16 +51,124 @@ code{font:11px ui-monospace,Menlo,monospace;word-break:break-all}
 .toolbar{position:absolute;left:10px;top:10px;display:flex;gap:4px;flex-wrap:wrap;z-index:2}
 .toolbar button{font-size:12px;padding:5px 8px;background:#ffffffee}
 .toolbar button.on{background:#1d2330;color:#fff;border-color:#1d2330}
-.status{position:absolute;left:10px;bottom:46px;font-size:12px;background:#ffffffe6;padding:4px 8px;border-radius:6px;border:1px solid var(--line);max-width:70%}
+.status{position:absolute;right:10px;top:48px;font-size:12px;background:#ffffffe6;padding:4px 8px;border-radius:6px;border:1px solid var(--line);max-width:70%}
 details summary{cursor:pointer;color:var(--muted);font-size:13px;margin:6px 0}
 .edge{cursor:pointer}
 .node{cursor:pointer}
+
+header{background:linear-gradient(110deg,#0b1a3a 0%,#1b2f6b 45%,#5b2a86 100%);border-bottom:none;color:#fff}
+header h1{font-size:19px;letter-spacing:.01em}
+header h1 .q{background:linear-gradient(90deg,#ffb347,#ff7a59);-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{color:#c9d3f0}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#ffffff1f;color:#fff;border:1px solid #ffffff33;margin-left:6px}
+input[type=range]{accent-color:#ff7a1a}
+.panel{box-shadow:0 1px 2px #0b12200d,0 6px 18px #0b122008}
+.panel h2{color:#5b2a86}
+.mapbox{background:#0b1220;border-color:#16213a}
+#map{background:radial-gradient(ellipse at 50% 40%,#13213f 0%,#0b1220 70%)}
+.legend svg{vertical-align:middle}
+.toolbar button{background:#16213aee;color:#dbe4ff;border-color:#2a3a63}
+.toolbar button:hover{border-color:#7aa2ff}
+.toolbar button.on{background:#ff7a1a;color:#fff;border-color:#ff7a1a}
+.status{background:#16213aee;color:#dbe4ff;border-color:#2a3a63}
+.legend{background:#0b1220;color:#9fb0d6;border-top:1px solid #16213a;border-radius:0 0 10px 10px}
+.legend b{color:#dbe4ff!important}
+.kpi{position:relative;overflow:hidden;border:none;background:linear-gradient(180deg,#fff,#f7f8fc);box-shadow:inset 0 0 0 1px #e6e9f2}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc,#ff7a1a)}
+.kpi .v{color:var(--acc,#1d2330)}
+.bar{height:7px;border-radius:4px;background:#e9edf5;margin-top:6px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--acc,#ff7a1a);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.bar.ghost i{background:#b8c0d4}
+.mini{font-size:10.5px;color:#7a8499;display:flex;justify-content:space-between}
+.flow{animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+.pulse{animation:pulse 1.1s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{opacity:.9;r:6}100%{opacity:0;r:34}}
+.blink{animation:blink .8s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.bb84{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin:8px 0 4px}
+.ph{border-radius:6px;padding:3px 0;text-align:center;font:600 12px ui-monospace,Menlo,monospace;background:#eef2ff;color:#334;position:relative}
+.ph small{display:block;font-size:9px;color:#8090b0;font-weight:500}
+.ph.drop{opacity:.28}
+.ph.err{background:#ffe3e3;color:#c92a2a}
+.ph.ok{background:#e6fcf5;color:#087f5b}
+.ph.eve:after{content:"👁";position:absolute;top:-9px;right:-3px;font-size:10px}
+.meter{height:16px;border-radius:8px;background:linear-gradient(90deg,#2b8a3e 0%,#2b8a3e 30%,#f59f00 40%,#e03131 100%);position:relative;margin:6px 0 2px}
+.meter .needle{position:absolute;top:-4px;width:3px;height:24px;background:#111;border-radius:2px;transition:left 1.4s cubic-bezier(.2,.8,.2,1)}
+.meter .thr{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed #fff}
+.alarm{display:inline-block;background:#e03131;color:#fff;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.06em}
+.silent{display:inline-block;background:#495057;color:#fff;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.06em}
+
+header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 20px;flex-wrap:nowrap}
+.htext{min-width:0}
+.scene{flex:0 0 auto;max-width:42vw;height:auto}
+@media (max-width:900px){.scene{display:none}}
+.steps{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.steps span{font-size:12px;background:#ffffff1a;border:1px solid #ffffff2e;border-radius:999px;padding:3px 10px;color:#fff}
+.ic{vertical-align:-3px}
+.panel h2{display:flex;align-items:center;gap:7px}
+.panel h2 .ic{color:#ff7a1a}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;border-radius:10px;border:1.5px solid #e3e7f1;background:#fff;cursor:pointer;font-size:10.5px;color:#4a5578;text-align:center;line-height:1.15;transition:all .15s}
+.tile .ic{width:24px;height:24px}
+.tile:hover{border-color:#ffb37a;transform:translateY(-1px)}
+.tile.on{background:linear-gradient(160deg,#fff4ea,#ffe3cc);border-color:#ff7a1a;color:#c2410c;box-shadow:0 3px 10px #ff7a1a33}
+.tile[data-s=power] .ic{color:#f59f00}.tile[data-s=water] .ic{color:#1c7ed6}.tile[data-s=pipeline] .ic{color:#6741d9}.tile[data-s=health] .ic{color:#e03131}.tile[data-s=finance] .ic{color:#2b8a3e}
+.slider label span.lab{display:inline-flex;align-items:center;gap:6px}
+.slider label .ic{color:#5b2a86}
+.viz{display:flex;gap:2.5px;align-items:center;margin:3px 0 2px;min-height:14px;flex-wrap:wrap}
+.pip{width:7px;height:9px;border-radius:2px;background:#e6e9f2}
+.pip.on{background:linear-gradient(135deg,#ffb347,#ff6a00);box-shadow:0 0 4px #ff7a1a88}
+.lockpip{color:#ff7a1a}.lockpip.off{color:#d5dae6}
+.hopdot{width:9px;height:9px;border-radius:50%;background:#2fb344}
+.hopdot.cc{background:#ffd43b;box-shadow:0 0 0 2px #fff3bf}
+.hopline{width:12px;height:3px;background:linear-gradient(90deg,#ffb347,#ff6a00);border-radius:2px}
+.beam{height:9px;flex:1;border-radius:5px}
+.scale{display:flex;flex:1;height:10px;border-radius:5px;overflow:hidden}
+.scale i{display:block;height:100%}
+.kpi .kicon{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 14%,#fff);color:var(--acc)}
+.kpi .v{padding-right:30px}
+.donut{display:flex;align-items:center;gap:8px;margin-top:6px}
+.idle{display:flex;gap:10px;align-items:center}
+.idle svg{flex:0 0 auto}
+button.primary{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,#ff8a3d,#ff5f1f);box-shadow:0 4px 14px #ff7a1a55}
+button.primary:active{transform:translateY(1px)}
+.devrow{display:flex;gap:8px;margin:6px 0}
+.dev{flex:1;border-radius:10px;padding:8px;background:linear-gradient(160deg,#f3f0ff,#fff);border:1px solid #e5dbff;text-align:center;font-size:11px;color:#5b2a86}
+.dev .ic{width:22px;height:22px;display:block;margin:0 auto 2px}
 </style>
 </head>
 <body>
 <header>
-  <h1>Secure the Grid · QKD + PQC Network Planner</h1>
+  <div class="htext"><h1>Secure the Grid · <span class="q">QKD + PQC</span> Network Planner<span class="badge">runs on qBraid</span></h1>
   <p>Post-quantum cryptography on every link, quantum key distribution only where it pays off. Load a grid, change the assumptions, and attack the result.</p>
+  <div class="steps"><span>①&nbsp;Pick a sector</span><span>②&nbsp;Load or draw a network</span><span>③&nbsp;Tune assumptions</span><span>④&nbsp;Optimize &amp; attack</span></div></div>
+  <svg class="scene" viewBox="0 0 420 110" width="420" height="110" aria-hidden="true">
+  <defs><linearGradient id="hill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a3f7a"/><stop offset="1" stop-color="#16244d"/></linearGradient>
+  <filter id="hg"><feGaussianBlur stdDeviation="2"/></filter></defs>
+  <g fill="#fff" opacity=".7"><circle cx="30" cy="14" r="1"/><circle cx="90" cy="8" r="1.2"/><circle cx="160" cy="18" r="1"/><circle cx="250" cy="10" r="1.3"/><circle cx="330" cy="16" r="1"/><circle cx="395" cy="7" r="1.1"/></g>
+  <path d="M0 92 Q60 70 120 86 T240 82 T420 80 V110 H0Z" fill="url(#hill)"/>
+  <!-- power plant -->
+  <g transform="translate(18,52)"><rect x="0" y="22" width="44" height="22" fill="#3b4f8f"/><rect x="6" y="2" width="8" height="22" fill="#4c63a8"/><rect x="20" y="8" width="8" height="16" fill="#4c63a8"/>
+    <circle cx="10" cy="-3" r="5" fill="#c9d3f0" opacity=".5"><animate attributeName="cy" values="-2;-14" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="3s" repeatCount="indefinite"/></circle>
+    <circle cx="24" cy="3" r="4" fill="#c9d3f0" opacity=".5"><animate attributeName="cy" values="3;-10" dur="3.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="3.6s" repeatCount="indefinite"/></circle>
+    <rect x="34" y="28" width="6" height="6" fill="#ffd43b"/></g>
+  <!-- towers -->
+  <g stroke="#9fb0e0" stroke-width="1.4" fill="none">
+    <path id="wire" d="M62 62 Q100 74 138 58 Q176 72 214 56 Q252 70 290 58"/>
+    <g transform="translate(138,58)"><path d="M0 0 L-7 30 M0 0 L7 30 M-9 6 H9 M-11 12 H11 M-5 20 L5 20"/></g>
+    <g transform="translate(214,56)"><path d="M0 0 L-7 30 M0 0 L7 30 M-9 6 H9 M-11 12 H11 M-5 20 L5 20"/></g>
+  </g>
+  <circle r="3.5" fill="#ffb347" filter="url(#hg)"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#wire"/></animateMotion></circle>
+  <circle r="2" fill="#fff"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#wire"/></animateMotion></circle>
+  <!-- substation -->
+  <g transform="translate(286,58)"><rect x="0" y="12" width="30" height="20" rx="2" fill="#2f9e44"/><path d="M15 15 L9 24 H14 L12 31 L20 21 H15 L17 15Z" fill="#fff"/><path d="M-2 12 H32" stroke="#d3f9d8" stroke-width="1.2" stroke-dasharray="2 2"/></g>
+  <!-- city -->
+  <g transform="translate(326,34)" fill="#31458a"><rect x="0" y="26" width="16" height="34"/><rect x="18" y="10" width="20" height="50"/><rect x="40" y="30" width="14" height="30"/><rect x="56" y="18" width="18" height="42"/><rect x="76" y="34" width="14" height="26"/>
+    <g fill="#ffe066"><rect x="22" y="16" width="4" height="4"/><rect x="30" y="24" width="4" height="4"/><rect x="60" y="24" width="4" height="4"/><rect x="66" y="34" width="4" height="4"/><rect x="4" y="32" width="4" height="4"/><rect x="44" y="38" width="4" height="4"/></g></g>
+  <!-- shield -->
+  <g transform="translate(372,2)"><path d="M14 2l11 5v8c0 8-5.5 13-11 15-5.5-2-11-7-11-15V7z" fill="#ff7a1a" stroke="#ffe8cc" stroke-width="1.5"/><path d="M9 16l3.5 3.5L19 13" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+</svg>
 </header>
 <div class="wrap">
 <!-- LEFT: inputs -->
@@ -127,13 +235,13 @@ Use the substation's position in the image for x and y. Output only the JSON.</t
   <svg id="map" viewBox="0 0 1000 700"></svg>
   <div class="status" id="status">Load a grid and press <b>Optimize network</b>.</div>
   <div class="legend">
-    <span><i class="sw" style="background:var(--qkd);height:6px"></i>QKD + PQC</span>
-    <span><i class="sw" style="background:var(--pqc)"></i>PQC only</span>
-    <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--pqc) 0 4px,transparent 4px 7px)"></i>Too long for QKD</span>
-    <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--backup) 0 5px,transparent 5px 8px)"></i>New backup route</span>
-    <span>● <b style="color:var(--cc)" id="lgCC">control center</b></span>
-    <span>■ <b style="color:var(--tn)">trusted node</b></span>
-    <span>● <b style="color:var(--prot)">QKD every hop</b></span>
+    <span><i class="sw" style="background:linear-gradient(90deg,#ffb347,#ff6a00);height:6px;box-shadow:0 0 6px #ff7a1a"></i>QKD + PQC (photons flowing)</span>
+    <span><i class="sw" style="background:#5b8cff"></i>PQC only (width = traffic)</span>
+    <span><i class="sw" style="background:repeating-linear-gradient(90deg,#46598a 0 4px,transparent 4px 7px)"></i>Too long for QKD</span>
+    <span><i class="sw" style="background:repeating-linear-gradient(90deg,#51cf66 0 5px,transparent 5px 8px)"></i>New backup route</span>
+    <span><svg width="16" height="16"><rect width="16" height="16" rx="4" fill="#ffe066"/><use href="#ic-hub" x="1" y="1" width="14" height="14"/></svg> <b id="lgCC">control center</b></span>
+    <span><svg width="16" height="16"><rect width="16" height="16" rx="4" fill="#ff7a1a"/><use href="#ic-lock" x="2" y="2" width="12" height="12"/></svg> <b>trusted node</b></span>
+    <span><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#2fb344"/><use id="lgIcon" href="#ic-power" x="2" y="2" width="12" height="12"/></svg> <b>QKD every hop</b></span>
   </div>
 </div>
 
@@ -160,13 +268,54 @@ Use the substation's position in the image for x and y. Output only the JSON.</t
 <script>
 const PRESETS = /*PRESETS*/[];
 const EVIDENCE = /*EVIDENCE*/[];
+
+const IC = {
+ shield:'<path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ chain:'<circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/><path d="M7.2 12h2.6M14.2 12h2.6"/>',
+ fiber:'<path d="M3 12c3-5 6 5 9 0s6 5 9 0"/><circle cx="3" cy="12" r="1.4"/><circle cx="21" cy="12" r="1.4"/>',
+ gauge:'<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/><circle cx="12" cy="17" r="1.3"/>',
+ eye:'<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ spy:'<path d="M4 10h16"/><path d="M7 10l1.5-5h7L17 10"/><circle cx="8" cy="15" r="2.6"/><circle cx="16" cy="15" r="2.6"/><path d="M10.6 15h2.8"/>',
+ radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/>',
+ scissors:'<circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8.2 8.3L20 18M8.2 15.7L20 6"/>',
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ building:'<rect x="5" y="4" width="14" height="17" rx="1"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M11 21v-4h2v4"/>',
+ chip:'<rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+ atom:'<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/>',
+ sliders:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+ map:'<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ download:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',
+ play:'<path d="M7 4l13 8-13 8z"/>',
+ gpu:'<rect x="2" y="7" width="20" height="11" rx="2"/><circle cx="9" cy="12.5" r="2.6"/><circle cx="16" cy="12.5" r="2.6"/><path d="M5 18v2M19 18v2"/>',
+ power:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ water:'<path d="M12 3c4 5 6.5 8 6.5 11a6.5 6.5 0 0 1-13 0C5.5 11 8 8 12 3z"/>',
+ pipeline:'<circle cx="12" cy="12" r="6"/><path d="M12 6v12M6 12h12M2 12h4M18 12h4"/>',
+ health:'<path d="M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z"/>',
+ finance:'<path d="M3 9l9-6 9 6z"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8M3 21h18"/>',
+ sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>'
+};
+const ico = (k, size=18, cls="") => `<svg class="ic ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${IC[k]||""}</svg>`;
+
 // ---------------------------------------------------------------- sectors (same math, different labels)
 const SECTORS = {
-  power:   {name:"Electric utility", unit:"MW", what:"load", site:"substation", hub:"control center", traffic:"control traffic", note:"Value per site = load in MW (stands in for NERC CIP-002 impact)."},
-  water:   {name:"Water / wastewater utility", unit:"k people", what:"people served", site:"pump or treatment site", hub:"SCADA control center", traffic:"SCADA traffic", note:"Value per site = thousands of people served. Same fiber physics, same attacks."},
-  pipeline:{name:"Oil & gas pipeline", unit:"k bbl/day", what:"throughput", site:"compressor / valve station", hub:"pipeline control room", traffic:"control traffic", note:"Value per site = throughput it controls (thousand barrels/day)."},
-  health:  {name:"Hospital network", unit:"beds", what:"patients (beds)", site:"hospital or clinic", hub:"data center", traffic:"patient-record traffic", note:"Value per site = beds served; records must stay secret for decades."},
-  finance: {name:"Bank / exchange", unit:"$M/day", what:"transactions", site:"branch or data center", hub:"primary data center", traffic:"transaction traffic", note:"Value per site = daily transaction value; long-lived secrets make harvest-now-decrypt-later real."}};
+  power:   {name:"Electric utility", unit:"MW", what:"load", site:"substation", hub:"control center", traffic:"control traffic", note:"Value per site = load in MW (stands in for NERC CIP-002 impact).",
+            p:{K:8,T:4,H:3,db:35,loss:10,mu:25},
+            why:{K:"8 links: the budget used in the writeup", T:"4 relays: substations are fenced, staffed sites", H:"3 hops: the route EPB tested", db:"0.35 dB/km: EPB's measured aerial fiber on poles", mu:"0.25: keys secret first, but grid commands can be tapped"}},
+  water:   {name:"Water / wastewater utility", unit:"k people", what:"people served", site:"pump or treatment site", hub:"SCADA control center", traffic:"SCADA traffic", note:"Value per site = thousands of people served. Same fiber physics, same attacks.",
+            p:{K:6,T:3,H:3,db:25,loss:10,mu:50},
+            why:{K:"6 links: smaller utilities, smaller budgets", T:"3 relays: many pump sites are unstaffed", H:"3 hops: similar city-scale layout", db:"0.25 dB/km: fiber buried with pipes, closer to the 0.2 dB/km cable spec", mu:"0.50: tampering with treatment commands is the main fear, so catching taps matters more"}},
+  pipeline:{name:"Oil & gas pipeline", unit:"k bbl/day", what:"throughput", site:"compressor / valve station", hub:"pipeline control room", traffic:"control traffic", note:"Value per site = throughput it controls (thousand barrels/day).",
+            p:{K:8,T:4,H:4,db:22,loss:10,mu:60},
+            why:{K:"8 links: similar scale to a utility", T:"4 relays: stations along the line must relay", H:"4 hops: long, linear routes need longer chains", db:"0.22 dB/km: buried in the right-of-way, near the 0.2 dB/km spec", mu:"0.60: remote right-of-way is easy to reach, so tap detection weighs heavily"}},
+  health:  {name:"Hospital network", unit:"beds", what:"patients (beds)", site:"hospital or clinic", hub:"data center", traffic:"patient-record traffic", note:"Value per site = beds served; records must stay secret for decades.",
+            p:{K:6,T:2,H:2,db:30,loss:10,mu:10},
+            why:{K:"6 links: a regional health system", T:"2 relays: keys may only sit inside secured facilities", H:"2 hops: campuses are close together", db:"0.30 dB/km: leased metro fiber with many splices", mu:"0.10: records must stay secret for decades, so secrecy dominates"}},
+  finance: {name:"Bank / exchange", unit:"$M/day", what:"transactions", site:"branch or data center", hub:"primary data center", traffic:"transaction traffic", note:"Value per site = daily transaction value; long-lived secrets make harvest-now-decrypt-later real.",
+            p:{K:12,T:2,H:2,db:25,loss:10,mu:15},
+            why:{K:"12 links: larger security budgets", T:"2 relays: strict key custody, few trusted sites", H:"2 hops: data centers in one metro", db:"0.25 dB/km: carrier-grade dark fiber", mu:"0.15: secrecy first, plus some tap detection on busy links"}}};
 let SEC = SECTORS.power;
 // ---------------------------------------------------------------- state
 const S = {nodes:new Map(), edges:[], cc:[], design:null, mode:"tap", bg:null, bgOp:0.5, sel:null, linkStart:null, presetKey:null, tapped:null};
@@ -316,23 +465,64 @@ function el(tag, attrs, parent){ const x=document.createElementNS(NS,tag); for(c
 const short=s=>s.replace("CHATTANOOGA","CHA").replace("KNOXVILLE","KNX").replace("NASHVILLE","NSH").replace("HUNTSVILLE","HSV").replace("MEMPHIS","MEM").replace("ATLANTA","ATL").replace(/\b(\w)(\w+)/g,(m,a,b)=>a+b.toLowerCase()).replace(/^(Cha|Knx|Nsh|Hsv|Mem|Atl)/,m=>m.toUpperCase());
 function draw(){
   svg.innerHTML=""; const p=P(); const D=S.design;
-  if(S.bg){ const im=el("image",{href:S.bg, x:0, y:0, width:1000, height:700, preserveAspectRatio:"xMidYMid meet", opacity:S.bgOp}); }
+  const defs=el("defs",{});
+  defs.innerHTML=`<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glowS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="qkdG" x1="0" x2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ff6a00"/></linearGradient>
+    <symbol id="ic-power" viewBox="-12 -12 24 24"><path d="M1.5,-9 L-5.5,1.5 L-0.5,1.5 L-2.5,9 L5.5,-2 L0.5,-2 L2.5,-9 Z" fill="#fff"/></symbol>
+    <symbol id="ic-water" viewBox="-12 -12 24 24"><path d="M0,-9 C4,-3.5 6.5,-0.5 6.5,3 A6.5,6.5 0 0 1 -6.5,3 C-6.5,-0.5 -4,-3.5 0,-9Z" fill="#fff"/><path d="M-3,3 A3,3 0 0 0 0,6" stroke="#5b8cff" stroke-width="1.4" fill="none"/></symbol>
+    <symbol id="ic-pipeline" viewBox="-12 -12 24 24"><circle r="6.5" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M0,-6.5V6.5M-6.5,0H6.5M-4.6,-4.6L4.6,4.6M-4.6,4.6L4.6,-4.6" stroke="#fff" stroke-width="1.6"/><circle r="2" fill="#fff"/></symbol>
+    <symbol id="ic-health" viewBox="-12 -12 24 24"><path d="M-2.6,-8H2.6V-2.6H8V2.6H2.6V8H-2.6V2.6H-8V-2.6H-2.6Z" fill="#fff"/></symbol>
+    <symbol id="ic-finance" viewBox="-12 -12 24 24"><path d="M-8.5,-3 L0,-9 L8.5,-3Z" fill="#fff"/><rect x="-7" y="-2" width="2.4" height="8" fill="#fff"/><rect x="-1.2" y="-2" width="2.4" height="8" fill="#fff"/><rect x="4.6" y="-2" width="2.4" height="8" fill="#fff"/><rect x="-8.5" y="6.5" width="17" height="2.2" fill="#fff"/></symbol>
+    <symbol id="ic-hub" viewBox="-12 -12 24 24"><rect x="-7" y="-5" width="14" height="13" rx="1.5" fill="#0b1220"/><path d="M0,-5 V-10 M-3,-10 H3" stroke="#0b1220" stroke-width="1.6"/><circle cx="0" cy="-10.5" r="1.4" fill="#ff6a00"/><rect x="-5" y="-2.5" width="3" height="2.4" fill="#ffd43b"/><rect x="2" y="-2.5" width="3" height="2.4" fill="#ffd43b"/><rect x="-5" y="1.5" width="3" height="2.4" fill="#ffd43b"/><rect x="2" y="1.5" width="3" height="2.4" fill="#ffd43b"/><rect x="-1.4" y="4" width="2.8" height="4" fill="#ffd43b"/></symbol>
+    <symbol id="ic-lock" viewBox="-12 -12 24 24"><path d="M-4.2,-1 V-4 A4.2,4.2 0 0 1 4.2,-4 V-1" stroke="#fff" stroke-width="2.2" fill="none"/><rect x="-6.5" y="-1.5" width="13" height="10" rx="2" fill="#fff"/><circle cx="0" cy="2.8" r="1.6" fill="#ff7a1a"/><rect x="-0.6" y="3" width="1.2" height="3" fill="#ff7a1a"/></symbol>
+    <symbol id="ic-pylon" viewBox="-12 -12 24 24"><path d="M0,-10 L-5,10 M0,-10 L5,10 M-6.5,-5 H6.5 M-8,-1 H8 M-3.6,4 L3.6,4 M-3.6,4 L2.6,-1 M3.6,4 L-2.6,-1 M-6.5,-5 L-6.5,-3 M6.5,-5 L6.5,-3 M-8,-1 L-8,1 M8,-1 L8,1" stroke="#93a6d6" stroke-width="1.4" fill="none" stroke-linecap="round"/></symbol>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#1b2a4d" stroke-width="1"/></pattern>`;
+  el("rect",{x:0,y:0,width:1000,height:700,fill:"url(#grid)",opacity:0.55});
+  if(S.bg){ el("image",{href:S.bg, x:0, y:0, width:1000, height:700, preserveAspectRatio:"xMidYMid meet", opacity:S.bgOp}); }
   const Y=D? D.Y : new Set(); const prot=D? new Set(D.an.ev.prot):new Set(); const used=D? D.an.ev.used : new Set();
-  const gE=el("g",{}), gB=el("g",{}), gN=el("g",{}), gL=el("g",{});
+  const gE=el("g",{}), gQ=el("g",{}), gB=el("g",{}), gP=el("g",{"pointer-events":"none"}), gH=el("g",{}), gN=el("g",{}), gL=el("g",{"pointer-events":"none"}), gT=el("g",{"pointer-events":"none"});
+  const maxT = D? Math.max(1,...D.an.through) : 1;
+  const sectorKey = Object.keys(SECTORS).find(k=>SECTORS[k]===SEC) || "power";
+  if(sectorKey==="power" && S.nodes.size<=120){ const gPy=el("g",{"pointer-events":"none",opacity:0.8}); svg.insertBefore(gPy, gE);
+    S.edges.forEach(e=>{ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) return; const L=Math.hypot(b.x-a.x,b.y-a.y); const n=Math.floor(L/55);
+      for(let k=1;k<=n;k++){ const t=k/(n+1); el("use",{href:"#ic-pylon",x:a.x+(b.x-a.x)*t-8,y:a.y+(b.y-a.y)*t-12,width:16,height:16},gPy); } }); }
   S.edges.forEach((e,i)=>{ const a=S.nodes.get(e.a), b=S.nodes.get(e.b); if(!a||!b) return;
     const q=Y.has(i), feas=e.km*p.db<=p.loss+1e-9; const tapped=S.tapped===i;
-    const ln=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke: tapped? "var(--bad)" : q? "var(--qkd)":"var(--pqc)", "stroke-width": q?6:(tapped?4:1.6), "stroke-dasharray": (!feas&&!q)?"5 4":"", opacity: q||tapped?1:0.75, class:"edge"},gE);
-    const hit=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke:"transparent","stroke-width":12, class:"edge"},gE);
-    const t=el("title",{},hit); t.textContent=`${e.a} – ${e.b}: ${fmt(e.km,1)} km${q?" · QKD":""}${feas?"":" · too long for QKD"}`;
+    if(q){ el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"url(#qkdG)","stroke-width":7,filter:"url(#glow)","stroke-linecap":"round"},gQ);
+           el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#fff3d6","stroke-width":1.6,"stroke-dasharray":"3 9",class:"flow",opacity:0.9},gQ);
+           // photons travelling along the QKD link
+           for(let k=0;k<2;k++){ const c=el("circle",{r:2.6,fill:"#fff",filter:"url(#glowS)"},gP); const dur=(1.6+e.km/12).toFixed(2);
+             c.innerHTML=`<animateMotion dur="${dur}s" begin="${(k*dur/2).toFixed(2)}s" repeatCount="indefinite" path="M${a.x},${a.y} L${b.x},${b.y}"/>`; } }
+    else { const w = D? 1+3*Math.sqrt(D.an.through[i]/maxT) : 1.6;
+           el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke: feas? "#5b8cff":"#46598a", "stroke-width": w, "stroke-dasharray": feas?"":"5 5", opacity: feas?0.6:0.55, "stroke-linecap":"round"},gE); }
+    if(tapped){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; const caught=q;
+      el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke: caught?"#ff4d4f":"#adb5bd","stroke-width":caught?9:5,opacity:0.55,filter:"url(#glow)",class:caught?"blink":""},gT);
+      el("circle",{cx:mx,cy:my,r:6,fill:"none",stroke:caught?"#ff4d4f":"#ced4da","stroke-width":2.5,class:"pulse"},gT);
+      el("circle",{cx:mx,cy:my,r:6,fill:"none",stroke:caught?"#ff4d4f":"#ced4da","stroke-width":2.5,class:"pulse",style:"animation-delay:.55s"},gT);
+      const t=el("text",{x:mx,y:my+6,"text-anchor":"middle","font-size":18},gT); t.textContent="🕵️";
+      const tag=el("g",{transform:`translate(${mx+14},${my-28})`},gT);
+      el("rect",{x:0,y:0,rx:5,width:caught?62:84,height:20,fill:caught?"#e03131":"#495057"},tag);
+      const tt=el("text",{x:caught?31:42,y:14,"text-anchor":"middle","font-size":11,"font-weight":800,fill:"#fff","letter-spacing":".06em"},tag); tt.textContent=caught?"ALARM":"UNSEEN TAP";
+      if(caught) tag.setAttribute("class","blink"); }
+    const hit=el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke:"transparent","stroke-width":14, class:"edge"},gH);
+    const t=el("title",{},hit); t.textContent=`${e.a} – ${e.b}: ${fmt(e.km,1)} km${q?" · QKD":""}${feas?"":" · too long for QKD"}${D?` · ${fmt(D.an.through[i])} ${SEC.unit} crosses it`:""}`;
     hit.addEventListener("click",ev=>{ev.stopPropagation(); onEdge(i);}); });
-  if(D) for(const [u,v] of D.an.cut.added){ const a=S.nodes.get(u), b=S.nodes.get(v); if(a&&b) el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"var(--backup)","stroke-width":2.2,"stroke-dasharray":"7 4"},gB); }
+  if(D) for(const [u,v] of D.an.cut.added){ const a=S.nodes.get(u), b=S.nodes.get(v); if(a&&b) el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#51cf66","stroke-width":2.4,"stroke-dasharray":"8 5",filter:"url(#glowS)",class:"flow"},gB); }
   for(const [id,n] of S.nodes){ const isCC=S.cc.includes(id), isT=used.has(id), isP=prot.has(id);
-    const r=Math.max(5, Math.min(14, 4+Math.sqrt(n.mw||0)));
-    const fill= isCC? "var(--cc)" : isT? "var(--tn)" : isP? "var(--prot)" : "#adb5bd";
+    const r=Math.max(7.5, Math.min(15, 6+Math.sqrt(n.mw||0)*0.9));
     const g=el("g",{class:"node", transform:`translate(${n.x},${n.y})`},gN);
-    if(isT) el("rect",{x:-r,y:-r,width:2*r,height:2*r,fill,stroke:"#fff","stroke-width":1.5},g); else el("circle",{r: isCC? r+2 : r, fill, stroke: S.sel===id||S.linkStart===id? "var(--bad)":"#fff","stroke-width": S.sel===id||S.linkStart===id? 3:1.5},g);
+    const selRing = S.sel===id||S.linkStart===id;
+    if(isCC){ el("circle",{r:r+8,fill:"none",stroke:"#ffd43b","stroke-width":2,opacity:0.85,filter:"url(#glowS)"},g);
+              el("rect",{x:-r-3,y:-r-3,width:2*r+6,height:2*r+6,rx:7,fill:"#ffe066",stroke:"#fff3bf","stroke-width":2},g);
+              el("use",{href:"#ic-hub",x:-r-1,y:-r-1,width:2*r+2,height:2*r+2},g); }
+    else if(isT){ el("rect",{x:-r-1,y:-r-1,width:2*r+2,height:2*r+2,rx:5,fill:"#ff7a1a",stroke:"#ffe8cc","stroke-width":1.6,filter:"url(#glowS)"},g);
+              el("use",{href:"#ic-lock",x:-r+1,y:-r+1,width:2*r-2,height:2*r-2},g); }
+    else { el("circle",{r, fill: isP? "#2fb344" : "#4a5a82", stroke: isP? "#d3f9d8":"#8ea0cc","stroke-width": 1.6, filter: isP?"url(#glowS)":""},g);
+           el("use",{href:`#ic-${sectorKey}`,x:-r*0.78,y:-r*0.78,width:r*1.56,height:r*1.56, opacity: isP?1:0.85},g); }
+    if(selRing) el("circle",{r:r+6,fill:"none",stroke:"#ff4d4f","stroke-width":2.5},g);
     const t=el("title",{},g); t.textContent=`${id}\n${fmt(n.mw,1)} ${SEC.unit}${n.kv&&SEC===SECTORS.power?` · ${n.kv} kV`:""}${isCC?"\n"+SEC.hub:""}${isT?"\ntrusted node":""}${isP&&!isCC?"\nQKD on every hop":""}`;
-    if(isCC||isT||isP||S.nodes.size<=40){ const tx=el("text",{x:n.x, y:n.y-r-4, "text-anchor":"middle","font-size": isCC?12:10,"font-weight":isCC?700:400, fill:"#333","paint-order":"stroke",stroke:"#fff","stroke-width":3},gL); tx.textContent=short(id); }
+    if(isCC||isT||isP||S.nodes.size<=40){ const tx=el("text",{x:n.x, y:n.y-r-(isCC?12:5), "text-anchor":"middle","font-size": isCC?12.5:10,"font-weight":isCC?800:500, fill: isCC?"#ffe066":"#dbe4ff","paint-order":"stroke",stroke:"#0b1220","stroke-width":3.5},gL); tx.textContent=short(id); }
     g.addEventListener("mousedown",ev=>onNodeDown(ev,id)); }
 }
 
@@ -346,7 +536,17 @@ function showResults(){
             [`${fmt(100*a.tapShare)}%`, "of random taps land on QKD fiber (by length)"],
             [`${fmt(a.worstTN)} ${SEC.unit}`, "exposed if the worst trusted node is compromised"],
             [`${fmt(cut.worstBefore)} → ${fmt(cut.worstAfter)} ${SEC.unit}`, `worst single fiber cut, with ${cut.added.length} new backup route${cut.added.length===1?"":"s"}`]];
-  $("kpis").innerHTML=kp.map(([v,l])=>`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  const pct=(x,y)=>Math.max(0,Math.min(100,100*x/(y||1)));
+  const cards=[
+    {acc:"#2f9e44", k:"shield", donut:pct(a.mwProt,a.mwAll), v:kp[0][0], l:kp[0][1], bars:[]},
+    {acc:"#ff7a1a", k:"link", v:kp[1][0], l:kp[1][1], bars:[[pct(D.Y.size,Math.max(D.Y.size,+$("K").max)),""]]},
+    {acc:"#e03131", k:"spy", v:kp[2][0], l:"worst undetected wiretap", bars:[[100,"PQC only "+fmt(a.worstPQC),true],[pct(a.worst,a.worstPQC),"this design "+fmt(a.worst)]]},
+    {acc:"#5b2a86", k:"radar", v:kp[3][0], l:kp[3][1], bars:[[100*a.tapShare,""]]},
+    {acc:"#f08c00", k:"lock", v:kp[4][0], l:kp[4][1], bars:[[pct(a.worstTN,a.mwAll),""]]},
+    {acc:"#1c7ed6", k:"scissors", v:kp[5][0], l:kp[5][1], bars:[[100,"before "+fmt(cut.worstBefore),true],[pct(cut.worstAfter,Math.max(1,cut.worstBefore)),"after "+fmt(cut.worstAfter)]]}];
+  const donut=(p,c)=>{ const R=15, C=2*Math.PI*R; return `<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="${R}" fill="none" stroke="#e9edf5" stroke-width="6"/><circle cx="20" cy="20" r="${R}" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C*p/100} ${C}" transform="rotate(-90 20 20)"/><text x="20" y="24" text-anchor="middle" font-size="10" font-weight="700" fill="${c}">${Math.round(p)}%</text></svg>`; };
+  $("kpis").innerHTML=cards.map(c=>`<div class="kpi" style="--acc:${c.acc}"><span class="kicon">${ico(c.k,17)}</span><div class="v">${c.v}</div><div class="l">${c.l}</div>${c.donut!==undefined?`<div class="donut">${donut(c.donut,c.acc)}<span class="mini">of all ${SEC.what}</span></div>`:""}${c.bars.map(([w,t,g])=>`${t?`<div class="mini"><span>${t}</span></div>`:""}<div class="bar ${g?"ghost":""}"><i style="width:0%" data-w="${w}"></i></div>`).join("")}</div>`).join("");
+  requestAnimationFrame(()=>document.querySelectorAll("#kpis .bar i").forEach(x=>x.style.width=x.dataset.w+"%"));
   const red = a.worstPQC>0 ? 100*(1-a.worst/a.worstPQC) : 0; let html="";
   html+=`<div class="callout ${red>=30?"good":""}">The worst single wiretap reads <b>${fmt(red)}% less</b> ${SEC.what} undetected than PQC alone.</div>`;
   if(!a.ev.ccOK) html+=`<div class="callout bad">The two ${SEC.hub}s could not be joined by QKD with these limits. Raise the budget, trusted nodes or hop limit.</div>`;
@@ -366,20 +566,35 @@ function optimize(){
   S.design={Y,an,M,exactGap}; S.tapped=null;
   $("solveNote").textContent=`Solved in ${fmt(ms)} ms · ${M.feasible.size} of ${S.edges.length} links short enough for QKD · ${M.paths.size} substations reachable by a QKD chain.`;
   $("status").innerHTML=`Optimized: QKD on <b>${Y.size}</b> links. Click a link to tap it.`;
-  $("attackOut").innerHTML="Click any link on the map to tap it, or press <b>Random attack</b>.";
+  $("attackOut").innerHTML=IDLE_ATTACK;
   draw(); showResults(); }
 function onEdge(i){
   if(S.mode==="del"){ S.edges.splice(i,1); S.edited=true; S.design=null; draw(); showResults(); return; }
   if(S.mode==="tap" || S.mode==="move"){ tap(i); return; }
   const e=S.edges[i]; S.sel="edge:"+i; showEdit(); }
+const IDLE_ATTACK=`<div class="idle"><svg width="84" height="54" viewBox="0 0 84 54"><path d="M2 40 Q20 30 42 40 T82 40" stroke="#ff7a1a" stroke-width="4" fill="none" stroke-linecap="round"/><circle r="3" fill="#fff" stroke="#ff7a1a"><animateMotion dur="2s" repeatCount="indefinite" path="M2 40 Q20 30 42 40 T82 40"/></circle><g transform="translate(30,2)" fill="#1d2330"><path d="M2 12h20"/><rect x="2" y="10" width="20" height="3" rx="1.5"/><path d="M6 10 L8 3 H16 L18 10Z"/><circle cx="7" cy="18" r="4" fill="none" stroke="#1d2330" stroke-width="2"/><circle cx="17" cy="18" r="4" fill="none" stroke="#1d2330" stroke-width="2"/></g><path d="M42 26 V36" stroke="#e03131" stroke-width="2" stroke-dasharray="2 2"/></svg><div class="note">Click any link on the map to tap it, or press <b>Random attack</b>. QKD links raise an alarm; PQC-only links don't.</div></div>`;
+function bb84Strip(caught){
+  // 12 rounds like the qBraid circuits: bases +/x, sifted rounds kept, Eve's wrong-basis guesses cause errors
+  let h=`<div class="bb84">`; let err=0, kept=0; const R=12; let seed=(S.tapped||1)*97+3; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  for(let k=0;k<R;k++){ const ab=rnd()<.5, bb=rnd()<.5, bit=rnd()<.5?1:0, keep=ab===bb; const eveWrong=caught && rnd()<.5; const flip=keep && eveWrong && rnd()<.5;
+    if(keep){ kept++; if(flip) err++; }
+    h+=`<div class="ph ${!keep?"drop":flip?"err":"ok"} ${caught?"eve":""}" title="${keep?"sifted round":"bases differ: discarded"}">${ab?"×":"+"}<small>${keep?(flip?1-bit:bit):"–"}</small></div>`; }
+  return h+`</div><div class="mini"><span>Alice's basis (+ or ×) and the bit Bob read · grey = discarded, red = error</span></div>`; }
+function meter(q, label){ const pos=Math.min(100,q/0.5*100); return `<div class="mini"><span>QBER ${label}</span><span><b>${(q*100).toFixed(1)}%</b></span></div><div class="meter"><span class="thr" style="left:${0.11/0.5*100}%"></span><span class="needle" style="left:0%" data-l="${pos}"></span></div><div class="mini"><span>0%</span><span>11% abort line</span><span>50%</span></div>`; }
 function tap(i){
   S.tapped=i; const e=S.edges[i]; const D=S.design; let msg;
   if(!D){ msg=`Tapped ${e.a} – ${e.b}. Run the optimizer first to score it.`; }
   else { const q=D.Y.has(i); const mw=D.an.through[i]; const subs=[...D.an.R].filter(([s,r])=>r.E.includes(i)).map(([s])=>s);
-    msg = q ? `<div class="callout good"><b>Caught.</b> ${e.a} – ${e.b} has QKD: the tap raises the BB84 error rate (QBER) and the alarm fires. ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} stays protected; the link drops to PQC keys until it is cleared.</div>`
-            : `<div class="callout bad"><b>Not caught by QKD.</b> ${e.a} – ${e.b} is PQC only, so ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} (${subs.length} ${SEC.site}${subs.length===1?"":"s"}) crosses a tap with no quantum alarm. PQC keeps it unreadable today; only classical fiber monitoring can flag the tap.</div>`;
+    const meas = EVIDENCE.filter(r=>/tap every round/.test(r.attack)); const pick = meas.length? meas[Math.floor(Math.random()*meas.length)] : null;
+    const quiet = EVIDENCE.find(r=>/Forte/.test(r.device)) || {result:"0.004"};
+    msg = q ? `<div class="callout good"><span class="alarm">ALARM</span> <b>Caught.</b> ${e.a} – ${e.b} has QKD: the tap disturbs the photons, the error rate jumps and the alarm fires. ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} stays protected; the link falls back to PQC keys until it is cleared.</div>`
+              + bb84Strip(true) + meter(pick? parseFloat(pick.result) : 0.25, pick? `measured with this attack on ${pick.device} via qBraid` : "expected under a full tap")
+              + `<p class="note">Quiet link baseline: ${(parseFloat(quiet.result)*100).toFixed(1)}% on IonQ Forte 1 (Step 1).</p>`
+            : `<div class="callout bad"><span class="silent">UNSEEN</span> <b>Not caught by QKD.</b> ${e.a} – ${e.b} is PQC only, so ${fmt(mw)} ${SEC.unit} of ${SEC.traffic} (${subs.length} ${SEC.site}${subs.length===1?"":"s"}) crosses a tap with no quantum alarm. PQC keeps it unreadable today; only classical fiber monitoring can flag the tap.</div>`
+              + `<p class="note">Fix options: add this link to the QKD budget, or put classical fiber monitoring (OTDR / vibration sensing) on it. In 3d, fusing that monitor with the QBER alarm caught 84% of small taps.</p>`;
     msg += `<p class="note">${fmt(e.km,1)} km link${e.km*D.M.p.db>D.M.p.loss?" (too long for QKD at these settings)":""}.</p>`; }
-  $("attackOut").innerHTML=msg; draw(); }
+  $("attackOut").innerHTML=msg; draw();
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll("#attackOut .needle").forEach(n=>n.style.left=n.dataset.l+"%"),30)); }
 function randomTap(){ const tot=S.edges.reduce((s,e)=>s+e.km,0); let r=Math.random()*tot; for(let i=0;i<S.edges.length;i++){ r-=S.edges[i].km; if(r<=0){ tap(i); return; } } }
 function loadNet(obj, key){
   S.nodes=new Map(); obj.nodes.forEach((n,k)=>S.nodes.set(String(n.id),{id:String(n.id), mw:+n.mw||0, kv:+n.kv||0, x:n.x??null, y:n.y??null}));
@@ -442,12 +657,46 @@ $("exportDesign").onclick=()=>{ const D=S.design; if(!D){ $("status").innerHTML=
     nodes:[...S.nodes.values()].map(n=>({id:n.id,mw:n.mw,kv:n.kv})), edges:S.edges};
   const blob=new Blob([JSON.stringify(out,null,1)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="grid_design.json"; a.click(); };
 // evidence table
-$("evidence").innerHTML="<tr><th>Device</th><th>Attack</th><th>QBER</th><th>Job</th></tr>"+EVIDENCE.map(r=>`<tr><td>${r.device}</td><td>${r.attack}</td><td>${r.result}</td><td><code title="${r.job}">${r.job.includes('qjob-')? '…'+r.job.slice(-10) : r.job}</code></td></tr>`).join("");
+$("evidence").innerHTML="<tr><th>Device</th><th>Attack</th><th>QBER</th><th>Job</th></tr>"+EVIDENCE.map(r=>`<tr><td>${/Forte|IonQ/.test(r.device)?ico("atom",13):ico("chip",13)} ${r.device}</td><td>${r.attack}</td><td>${r.result}</td><td><code title="${r.job}">${r.job.includes('qjob-')? '…'+r.job.slice(-10) : r.job}</code></td></tr>`).join("");
+// ---------------------------------------------------------------- decorations
+const H2I={"Sector":"map","Network":"building","Assumptions":"sliders","Results":"chart","Attack test":"spy","Run on qBraid":"atom"};
+document.querySelectorAll(".panel h2").forEach(h=>{ const k=Object.keys(H2I).find(t=>h.textContent.includes(t)); if(k) h.innerHTML=ico(H2I[k],16)+h.innerHTML; });
+$("run").innerHTML=ico("sparkle",18)+"Optimize network";
+$("exportDesign").innerHTML=ico("download",15)+" Download design JSON";
+$("randTap").innerHTML="🕵️ Random attack";
+// sector tiles
+const tiles=document.createElement("div"); tiles.className="tiles";
+Object.entries(SECTORS).forEach(([k,v])=>{ const t=document.createElement("div"); t.className="tile"; t.dataset.s=k; t.innerHTML=ico(k,24)+`<span>${{power:"Power",water:"Water",pipeline:"Pipeline",health:"Hospital",finance:"Bank"}[k]}</span>`;
+  t.onclick=()=>{ $("sectorSel").value=k; $("sectorSel").dispatchEvent(new Event("change")); }; tiles.appendChild(t); });
+$("sectorSel").before(tiles); $("sectorSel").style.display="none";
+const markTiles=()=>document.querySelectorAll(".tile").forEach(t=>t.classList.toggle("on",t.dataset.s===$("sectorSel").value));
+$("sectorSel").addEventListener("change",markTiles); markTiles();
+// slider icons + mini visuals
+const SI={K:"link",T:"lock",H:"chain",db:"fiber",loss:"gauge",mu:"eye"};
+for(const k in SI){ const lab=$(k).previousElementSibling; const txt=lab.firstChild; const sp=document.createElement("span"); sp.className="lab"; sp.innerHTML=ico(SI[k],15)+txt.textContent; lab.replaceChild(sp,txt);
+  const v=document.createElement("div"); v.className="viz"; v.id="viz-"+k; $(k).after(v); }
+function viz(){ const p=P();
+  $("viz-K").innerHTML=Array.from({length:+$("K").max},(_,i)=>`<i class="pip ${i<p.K?"on":""}"></i>`).join("");
+  $("viz-T").innerHTML=Array.from({length:+$("T").max},(_,i)=>`<span class="lockpip ${i<p.T?"":"off"}">${ico("lock",13)}</span>`).join("");
+  $("viz-H").innerHTML=`<i class="hopdot cc"></i>`+Array.from({length:p.H},(_,i)=>`<i class="hopline"></i><i class="hopdot"></i>`).join("")+`<span class="mini" style="margin-left:6px">${Math.max(0,p.H-1)} relay${p.H-1===1?"":"s"} max on a chain</span>`;
+  const reach=p.loss/p.db; $("viz-db").innerHTML=`<i class="beam" style="background:linear-gradient(90deg,#ffb347 0%,#ff6a00 ${Math.min(100,reach/60*100)}%,#e9edf5 ${Math.min(100,reach/60*100)}%)"></i><span class="mini" style="margin-left:6px">QKD reach ≈ ${Math.round(reach)} km</span>`;
+  $("viz-loss").innerHTML=`<i class="beam" style="background:linear-gradient(90deg,#2fb344 0%,#2fb344 ${p.loss/20*100}%,#e9edf5 ${p.loss/20*100}%)"></i><span class="mini" style="margin-left:6px">${(100*Math.pow(10,-p.loss/10)).toFixed(1)}% of photons survive</span>`;
+  $("viz-mu").innerHTML=`<span class="mini">🔒 secrecy</span><span class="scale" style="margin:0 6px"><i style="width:${100/(1+p.mu)}%;background:#2fb344"></i><i style="width:${100*p.mu/(1+p.mu)}%;background:#5b2a86"></i></span><span class="mini">👁 detection</span>`; }
+["K","T","H","db","loss","mu"].forEach(k=>$(k).addEventListener("input",viz)); viz();
+// qBraid device strip
+const dv=document.createElement("div"); dv.className="devrow";
+dv.innerHTML=[["atom","IonQ Forte","real QPU"],["chip","Quantinuum H2","emulator"],["gpu","GPU sim","whole design"],["sparkle","qBraid AI","image → grid"]].map(([k,a,b])=>`<div class="dev">${ico(k,22)}<b>${a}</b><br>${b}</div>`).join("");
+$("exportDesign").parentElement.before(dv);
+$("attackOut").innerHTML=IDLE_ATTACK;
 // sector switcher
 Object.entries(SECTORS).forEach(([k,v])=>{ const o=document.createElement("option"); o.value=k; o.textContent=v.name; $("sectorSel").appendChild(o); });
-function applySector(){ SEC=SECTORS[$("sectorSel").value]; $("sectorNote").textContent=SEC.note;
-  $("addNodeBtn").textContent="+ "+SEC.site.split(" ")[0].replace(/^./,c=>c.toUpperCase()); $("ccBtn").textContent=SEC.hub.replace(/^./,c=>c.toUpperCase()); $("lgCC").textContent=SEC.hub;
-  draw(); showResults(); if(S.tapped!==null) tap(S.tapped); }
+function applySector(setParams=true){ SEC=SECTORS[$("sectorSel").value];
+  if(setParams){ for(const k in SEC.p){ $(k).value=SEC.p[k]; $(k+"V").textContent=lab[k](SEC.p[k]); } if(typeof viz==="function") viz(); }
+  const names={K:"QKD links",T:"Trusted nodes",H:"Longest chain",db:"Fiber loss",mu:"Tap-detection weight"};
+  $("sectorNote").innerHTML=SEC.note+`<details open style="margin-top:6px"><summary>Starting assumptions for this sector</summary><table>${Object.keys(names).map(k=>`<tr><td><b>${names[k]}</b></td><td>${SEC.why[k]}</td></tr>`).join("")}</table><p class="note">Illustrative starting points, not measured values (except EPB's fiber loss). The QKD hardware limit stays at 10 dB. Move the sliders to test your own.</p></details>`;
+  $("addNodeBtn").textContent="+ "+SEC.site.split(" ")[0].replace(/^./,c=>c.toUpperCase()); $("ccBtn").textContent=SEC.hub.replace(/^./,c=>c.toUpperCase()); $("lgCC").textContent=SEC.hub; $("lgIcon").setAttribute("href","#ic-"+$("sectorSel").value);
+  if(setParams && S.nodes.size) optimize(); else { draw(); showResults(); }
+  if(S.tapped!==null && S.design) tap(S.tapped); }
 $("sectorSel").onchange=applySector;
 // ---------------------------------------------------------------- qBraid AI Gateway: grid image -> network
 const GW="https://api-v2.qbraid.com/api/v1/ai"; let MODELS=[];
@@ -483,7 +732,7 @@ $("qbRead").onclick=async()=>{ const key=$("qbKey").value.trim(), model=$("qbMod
     optimize();
   }catch(e){ $("qbMsg").innerHTML=`qBraid AI call failed (${e.message}). Use <code>3i_grid_image_to_design.ipynb</code> in qBraid Lab instead.`; } };
 // start
-$("presetSel").value=PRESETS[0]?.key; $("presetSel").onchange(); applySector();
+$("presetSel").value=PRESETS[0]?.key; $("presetSel").onchange(); applySector(false);
 </script>
 </body>
 </html>
